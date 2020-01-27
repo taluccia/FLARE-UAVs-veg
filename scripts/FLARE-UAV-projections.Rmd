@@ -298,9 +298,24 @@ plot(aln_f6_ee) # the plot function lets you view the maps
 plot(aln_f6_pt_ee, add=TRUE)
 ```
 
+## Flight 15
+
+```{r}
+plot(cyn_f15_ee) # the plot function lets you view the maps
+plot(cyn_f15_pt_ee, add=TRUE)
+```
+
+## Flight 16
+
+```{r}
+plot(cyn_f16_ee) # the plot function lets you view the maps
+plot(cyn_f16_pt_ee, add=TRUE)
+```
+
 ## Flight 17
 
 ```{r}
 plot(cyn_f17_ee) # the plot function lets you view the maps
 plot(cyn_f17_pt_ee, add=TRUE)
 ```
+
