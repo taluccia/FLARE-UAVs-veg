@@ -1,0 +1,213 @@
+---
+title: "FLARE-UAV-veg"
+author: "Anna Talucci"
+date: "1/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r, include=FALSE}
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(raster) # deals with rasters
+library(landsat) # processes landsat images
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(SDMTools) #Species distribution model tools for patch metrics
+library(dplyr)
+library(latticeExtra)
+```
+
+```{r}
+gps = readOGR("../data/shapefiles/siberia_gps.shp", "siberia_gps") 
+```
+```{r}
+plot_locations <-
+  read.csv("../data/gcp_coordinates.csv")
+```
+
+```{r}
+plot_locations
+```
+```{r}
+plot_locations1 = na.omit(plot_locations)
+```
+
+
+
+```{r}
+plot_locations1
+```
+
+```{r}
+plot.coords <- SpatialPointsDataFrame(plot_locations1[,5:6],plot_locations1,
+                                      proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot.coords
+```
+```{r}
+labels <- layer(sp.text(coordinates(plot.coords), txt = plot.coords$flight, pos = 1))
+```
+
+```{r}
+plot(plot.coords) 
+```
+```{r}
+plot <- spplot(plot.coords, zcol = "flight")
+```
+
+```{r}
+ plot_labels= plot + labels
+```
+
+```{r}
+str(plot_locations)
+```
+
+
+
+```{r}
+str(gps)
+structure(gps)
+```
+
+# Points for individual flights
+
+```{r}
+f3 = plot_locations1 %>% group_by(flight) %>% filter(flight == 3) 
+
+```
+
+```{r}
+ans_f3 = SpatialPointsDataFrame(f3[,5:6], f3,
+                                      proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+
+# Raster data
+
+```{r}
+aln_f3 = raster("../data/ortho_stereo/ALN_TR1_FL003.tif")
+```
+
+```{r}
+aln_f3
+```
+
+```{r}
+extent(aln_f3)
+```
+
+
+```{r}
+projection(aln_f3)
+
+```
+
+```{r}
+aln_f6 = raster("../data/ortho_stereo/ALN_TR3_FL006.tif")
+```
+
+
+```{r}
+aln_f6
+```
+
+```{r}
+extent(aln_f6)
+```
+
+
+```{r}
+projection(aln_f6)
+
+```
+
+```{r}
+cyn_f17 = raster("../data/ortho_stereo/CYN_TR2_FL017.tif")
+```
+
+
+```{r}
+cyn_f17
+```
+
+```{r}
+extent(cyn_f17)
+```
+## Equal Area projection for russia
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+
+
+```{r}
+newproj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+
+```{r}
+aln_f3_ee <- projectRaster(aln_f3, crs=newproj)
+```
+
+```{r}
+aln_f6_ee <- projectRaster(aln_f6, crs=newproj)
+```
+
+```{r}
+cyn_f17_ee <- projectRaster(cyn_f17, crs=newproj)
+```
+
+
+####################
+
+```{r}
+plots_wgs84 <- spTransform(plot.coords, CRS("+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
+
+
+```
+
+```{r}
+plots_ee <- spTransform(plot.coords, CRS(newproj))
+
+
+```
+
+
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+plot(aln_f3) # the plot function lets you view the maps
+plot(plots_wgs84, add=TRUE)
+```
+
+
+```{r}
+plot(aln_f3_ee) # the plot function lets you view the maps
+plot(plots_ee, add=TRUE)
+```
+
+
+
+
+
+```{r}
+plot(aln_f6_ee) # the plot function lets you view the maps
+plot(plots_ee, add=TRUE)
+```
+
+```{r}
+plot(cyn_f17_ee) # the plot function lets you view the maps
+plot(plots_ee, add=TRUE)
+```
