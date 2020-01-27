@@ -9,8 +9,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Overview
 
+Equal Area projection for russia
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+newproj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Packages
 
 ```{r, include=FALSE}
 library(sp) # spatial data
@@ -39,12 +49,6 @@ plot_locations
 plot_locations1 = na.omit(plot_locations)
 ```
 
-
-
-```{r}
-plot_locations1
-```
-
 ```{r}
 plot.coords <- SpatialPointsDataFrame(plot_locations1[,5:6],plot_locations1,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
@@ -53,24 +57,7 @@ plot.coords <- SpatialPointsDataFrame(plot_locations1[,5:6],plot_locations1,
 ```{r}
 plot.coords
 ```
-```{r}
-labels <- layer(sp.text(coordinates(plot.coords), txt = plot.coords$flight, pos = 1))
-```
 
-```{r}
-plot(plot.coords) 
-```
-```{r}
-plot <- spplot(plot.coords, zcol = "flight")
-```
-
-```{r}
- plot_labels= plot + labels
-```
-
-```{r}
-str(plot_locations)
-```
 
 
 
@@ -87,10 +74,29 @@ f3 = plot_locations1 %>% group_by(flight) %>% filter(flight == 3)
 ```
 
 ```{r}
-ans_f3 = SpatialPointsDataFrame(f3[,5:6], f3,
+aln_f3 = SpatialPointsDataFrame(f3[,5:6], f3,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
+```{r}
+f6 = plot_locations1 %>% group_by(flight) %>% filter(flight == 6) 
+
+```
+
+```{r}
+aln_f6 = SpatialPointsDataFrame(f6[,5:6], f6,
+                                      proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+f17 = plot_locations1 %>% group_by(flight) %>% filter(flight == 17) 
+
+```
+
+```{r}
+cyn_f17 = SpatialPointsDataFrame(f6[,5:6], f6,
+                                      proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
 
 # Raster data
 
@@ -143,6 +149,8 @@ cyn_f17
 ```{r}
 extent(cyn_f17)
 ```
+
+
 ## Equal Area projection for russia
 https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 
@@ -185,7 +193,7 @@ plots_ee <- spTransform(plot.coords, CRS(newproj))
 
 
 
-
+# Plot UAV and GPS data
 
 ```{r eval=FALSE, include=FALSE}
 plot(aln_f3) # the plot function lets you view the maps
