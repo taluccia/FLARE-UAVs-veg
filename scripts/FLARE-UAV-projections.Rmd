@@ -112,6 +112,7 @@ aln_f6_pt = SpatialPointsDataFrame(f6[,5:6], f6,
 aln_f6_pt_ee = spTransform(aln_f6_pt, CRS(newproj))
 ```
 
+
 ## Flight 17
 
 ```{r}
@@ -120,7 +121,7 @@ f17 = plot_locations1 %>% group_by(flight) %>% filter(flight == 17)
 ```
 
 ```{r}
-cyn_f17_pt = SpatialPointsDataFrame(f6[,5:6], f6,
+cyn_f17_pt = SpatialPointsDataFrame(f17[,5:6], f17,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
@@ -222,5 +223,5 @@ plot(aln_f6_pt_ee, add=TRUE)
 
 ```{r}
 plot(cyn_f17_ee) # the plot function lets you view the maps
-plot(cyn_pt_ee, add=TRUE)
+plot(cyn_f17_pt_ee, add=TRUE)
 ```
