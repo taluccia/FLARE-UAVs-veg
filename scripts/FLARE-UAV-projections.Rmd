@@ -54,19 +54,33 @@ plot.coords <- SpatialPointsDataFrame(plot_locations1[,5:6],plot_locations1,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
-```{r}
-plot.coords
-```
-
-
-
 
 ```{r}
-str(gps)
-structure(gps)
+plots_wgs84 <- spTransform(plot.coords, CRS("+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
+
+
 ```
 
 # Points for individual flights
+
+Subset gps data points by individual flight numbers
+## CYN
+
+```{r}
+cyn = plot_locations1 %>% group_by(site) %>% filter(site == "CYN") 
+
+```
+
+```{r}
+cyn_pt = SpatialPointsDataFrame(cyn[,5:6], cyn,
+                                      proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+cyn_pt_ee = spTransform(cyn_pt, CRS(newproj))
+```
+
+## Flight 3
 
 ```{r}
 f3 = plot_locations1 %>% group_by(flight) %>% filter(flight == 3) 
@@ -74,9 +88,15 @@ f3 = plot_locations1 %>% group_by(flight) %>% filter(flight == 3)
 ```
 
 ```{r}
-aln_f3 = SpatialPointsDataFrame(f3[,5:6], f3,
+aln_f3_pt = SpatialPointsDataFrame(f3[,5:6], f3,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
+
+```{r}
+aln_f3_pt_ee = spTransform(aln_f3_pt, CRS(newproj))
+```
+
+## Flight 6
 
 ```{r}
 f6 = plot_locations1 %>% group_by(flight) %>% filter(flight == 6) 
@@ -84,9 +104,15 @@ f6 = plot_locations1 %>% group_by(flight) %>% filter(flight == 6)
 ```
 
 ```{r}
-aln_f6 = SpatialPointsDataFrame(f6[,5:6], f6,
+aln_f6_pt = SpatialPointsDataFrame(f6[,5:6], f6,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
+
+```{r}
+aln_f6_pt_ee = spTransform(aln_f6_pt, CRS(newproj))
+```
+
+## Flight 17
 
 ```{r}
 f17 = plot_locations1 %>% group_by(flight) %>% filter(flight == 17) 
@@ -94,11 +120,17 @@ f17 = plot_locations1 %>% group_by(flight) %>% filter(flight == 17)
 ```
 
 ```{r}
-cyn_f17 = SpatialPointsDataFrame(f6[,5:6], f6,
+cyn_f17_pt = SpatialPointsDataFrame(f6[,5:6], f6,
                                       proj4string = CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
+```{r}
+cyn_f17_pt_ee = spTransform(cyn_f17_pt, CRS(newproj))
+```
+
 # Raster data
+
+## Flight 3
 
 ```{r}
 aln_f3 = raster("../data/ortho_stereo/ALN_TR1_FL003.tif")
@@ -117,6 +149,12 @@ extent(aln_f3)
 projection(aln_f3)
 
 ```
+
+```{r}
+aln_f3_ee <- projectRaster(aln_f3, crs=newproj)
+```
+
+## Flight 6
 
 ```{r}
 aln_f6 = raster("../data/ortho_stereo/ALN_TR3_FL006.tif")
@@ -138,6 +176,12 @@ projection(aln_f6)
 ```
 
 ```{r}
+aln_f6_ee <- projectRaster(aln_f6, crs=newproj)
+```
+
+## Flight 17
+
+```{r}
 cyn_f17 = raster("../data/ortho_stereo/CYN_TR2_FL017.tif")
 ```
 
@@ -150,72 +194,33 @@ cyn_f17
 extent(cyn_f17)
 ```
 
-
-## Equal Area projection for russia
-https://gis.stackexchange.com/questions/264093/projection-for-russia-map
-
-+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
-
-
-
-```{r}
-newproj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
-```
-
-
-```{r}
-aln_f3_ee <- projectRaster(aln_f3, crs=newproj)
-```
-
-```{r}
-aln_f6_ee <- projectRaster(aln_f6, crs=newproj)
-```
-
 ```{r}
 cyn_f17_ee <- projectRaster(cyn_f17, crs=newproj)
 ```
 
-
-####################
-
 ```{r}
-plots_wgs84 <- spTransform(plot.coords, CRS("+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
-
-
+cyn_f17_ee
 ```
-
-```{r}
-plots_ee <- spTransform(plot.coords, CRS(newproj))
-
-
-```
-
-
-
 
 # Plot UAV and GPS data
 
-```{r eval=FALSE, include=FALSE}
-plot(aln_f3) # the plot function lets you view the maps
-plot(plots_wgs84, add=TRUE)
-```
-
+## Flight 3
 
 ```{r}
 plot(aln_f3_ee) # the plot function lets you view the maps
-plot(plots_ee, add=TRUE)
+plot(aln_f3_pt_ee, add=TRUE)
 ```
 
-
-
-
+## Flight 6
 
 ```{r}
 plot(aln_f6_ee) # the plot function lets you view the maps
-plot(plots_ee, add=TRUE)
+plot(aln_f6_pt_ee, add=TRUE)
 ```
+
+## Flight 17
 
 ```{r}
 plot(cyn_f17_ee) # the plot function lets you view the maps
-plot(plots_ee, add=TRUE)
+plot(cyn_pt_ee, add=TRUE)
 ```
