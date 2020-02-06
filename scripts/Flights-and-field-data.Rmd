@@ -1,0 +1,198 @@
+---
+title: "Flights and field data"
+author: "Anna Talucci"
+date: "2/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(raster) # deals with rasters
+library(landsat) # processes landsat images
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(SDMTools) #Species distribution model tools for patch metrics
+library(dplyr)
+library(latticeExtra)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 "
+```
+
+
+# Field data
+
+```{r}
+field_data = read.csv("../data/field/site_info_2018-2019.csv")
+```
+
+
+```{r}
+head(field_data)
+```
+
+```{r}
+field_data
+```
+
+```{r}
+field_data_ch = field_data %>% group_by(year) %>% filter(region == "Cherskiy")
+
+```
+
+
+```{r}
+field_data_ch
+```
+
+```{r}
+site_CN_2001 = field_data_ch %>% group_by(site) %>% filter(site == "CN")
+
+site_CN_2001
+```
+
+```{r}
+site_ANS_2003 = field_data_ch %>% group_by(site) %>% filter(site == "ANS")
+
+site_ANS_2003
+```
+
+```{r}
+site_alnus_1984 = field_data_ch %>% group_by(site) %>% filter(site == "Alnus")
+
+site_alnus_1984
+```
+
+```{r}
+ans_2003_pt <- SpatialPointsDataFrame(site_ANS_2003[,15:16],site_ANS_2003, proj4string = CRS(wgs_proj))
+```
+
+```{r}
+cn_2001_pt <- SpatialPointsDataFrame(site_CN_2001[,15:16],site_CN_2001, proj4string = CRS(wgs_proj))
+```
+
+```{r}
+alnus_1984_pt <- SpatialPointsDataFrame(site_alnus_1984[,15:16],site_alnus_1984, proj4string = CRS(wgs_proj))
+```
+
+```{r}
+plot(cn_2001_pt)
+```
+```{r}
+plot(ans_2003_pt)
+```
+
+```{r}
+plot(alnus_1984_pt)
+```
+
+```{r}
+ans_2003_ee <- spTransform(ans_2003_pt, CRS(ee_russia))
+```
+
+```{r}
+cn_2001_ee <- spTransform(cn_2001_pt, CRS(ee_russia))
+```
+
+```{r}
+alnus_1984_ee <- spTransform(alnus_1984_pt, CRS(ee_russia))
+```
+
+# RGB rasters
+
+```{r}
+cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+
+```
+
+# Multispectral Raster Data
+```{r}
+alnus_f08_multi = raster("../data/multispectral/RU_ALN_TR1_FL008M/RU_ALN_TR1_FL008M_transparent_mosaic_green.tif")
+```
+
+```{r}
+alnus_f08_multi
+```
+
+```{r}
+plot(alnus_f08_multi) # the plot function lets you view the maps
+plot(alnus_1984_ee, add=TRUE)
+```
+
+
+```{r}
+cn_f16_multi = raster("../data/multispectral/RU_CYN_TR1_FL016B/RU_CYN_TR1_FL016B_transparent_mosaic_green.tif")
+```
+
+```{r}
+cn_f16_multi
+```
+
+```{r}
+plot(cn_f16_multi) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
+
+
+```{r}
+cn_f17_multi = raster("../data/multispectral/RU_CYN_TR2_FL017B/RU_CYN_TR2_FL017B_transparent_mosaic_green.tif")
+```
+
+```{r}
+cn_f17_multi
+```
+
+```{r}
+plot(cn_f17_multi) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
+
+```{r}
+cn_f20_multi = raster("../data/multispectral/RU_CYN_TR1_FL020M/RU_CYN_TR1_FL020M_transparent_mosaic_green.tif")
+```
+
+```{r}
+cn_f20_multi
+```
+
+```{r}
+plot(cn_f20_multi) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
+
+
+# RGB rasters
+
+```{r}
+cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+```
+
+
+```{r}
+plot(cn_f17) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
