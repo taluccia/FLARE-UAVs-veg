@@ -1,0 +1,72 @@
+---
+title: "Resample for equal resolution"
+author: "Anna Talucci"
+date: "2/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(raster) # deals with rasters
+library(landsat) # processes landsat images
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(SDMTools) #Species distribution model tools for patch metrics
+library(dplyr)
+library(latticeExtra)
+```
+
+
+# RGB rasters
+
+Stack rasters so that all data is resampled
+
+```{r}
+alnus_tr1_f07 = stack("../data/rgb/ALN_TR1_FL007.tif")
+ans_tr2_f04 = stack("../data/rgb/ALN_TR2_FL004.tif")
+ans_tr3_f06 = stack("../data/rgb/ALN_TR3_FL006.tif")
+brp_tr1_f09 = stack("../data/rgb/BRP_TR1_FL009.tif")
+brp_tr2_f12 = stack("../data/rgb/BRP_TR2_FL012.tif")
+cn_tr2_f17 = stack("../data/rgb/CYN_TR2_FL017.tif")
+cn_tr1_f15 = stack("../data/rgb/CYN_TR1_FL015.tif")
+```
+
+View raster meta data
+```{r}
+alnus_tr1_f07
+ans_tr2_f04
+ans_tr3_f06
+brp_tr1_f09
+brp_tr2_f12
+cn_tr2_f17
+cn_tr1_f15 
+```
+
+```{r}
+alnus_f8 <- list.files(path="../data/multispectral/RU_ALN_TR1_FL008M", pattern =".tif$", full.names=TRUE)
+cn_f17 <- list.files(path="../data/multispectral/RU_CYN_TR2_FL017B", pattern =".tif$", full.names=TRUE)
+cn_f20 <- list.files(path="../data/multispectral/RU_CYN_TR1_FL020M", pattern =".tif$", full.names=TRUE)
+```
+
+```{r}
+alnus_f08_multi = stack(alnus_f8)
+cn_f17_multi = stack(cn_f17)
+cn_f20_multi = stack(cn_f20)
+```
+
+
+```{r}
+alnus_f08_multi
+cn_f17_multi 
+cn_f20_multi 
+```
+
+
+```{r}
+
+```
