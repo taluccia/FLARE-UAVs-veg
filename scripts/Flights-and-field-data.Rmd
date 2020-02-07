@@ -146,7 +146,6 @@ cn_tr2_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
 cn_tr1_f15 = raster("../data/rgb/CYN_TR1_FL015.tif")
 ```
 
-
 ```{r}
 alnus_tr1_f07
 brp_tr2_f12
@@ -154,6 +153,22 @@ cn_tr1_f16
 cn_tr2_f17
 cn_tr1_f15 
 ```
+
+```{r}
+ans_tr2_f04 = raster("../data/rgb/ALN_TR2_FL004.tif")
+ans_tr2_f05 = raster("../data/rgb/ALN_TR2_FL005.tif")
+ans_tr3_f06 = raster("../data/rgb/ALN_TR3_FL006.tif")
+brp_tr1_f09 = raster("../data/rgb/BRP_TR1_FL009.tif")
+
+```
+
+```{r}
+ans_tr2_f04
+ans_tr3_f06
+brp_tr1_f09
+```
+
+
 
 # Multispectral Raster Data
 ```{r}
@@ -217,7 +232,9 @@ plot(alnus_1984_ee, add=TRUE)
 ```
 
 
-# CN 2001
+
+
+## CN 2001
 
 * Flight 16 multispectral (Transect 1)
 * Flight 17 multispectral (transect 2)
@@ -226,9 +243,9 @@ plot(alnus_1984_ee, add=TRUE)
 * Flight 17 RGB (Transect 2)
 * Flight 15 RGB (transect 1)
 
-## Flight 16 and 20 (Transect 1)
+### Flight 16 and 20 (Transect 1)
 
-### RGB
+#### RGB
 
 
 ```{r}
@@ -251,7 +268,7 @@ plot(cn_2001_ee, add=TRUE)
 
 One field site missed by flight for RGB
 
-### Multi
+#### Multi
 ```{r}
 plot(cn_f16_multi) # the plot function lets you view the maps
 plot(cn_2001_ee, add=TRUE)
@@ -266,15 +283,15 @@ plot(cn_2001_ee, add=TRUE)
 
 
 Flight 20 multispectral covers all field plots, 
-## Flight 17 (transect 2)
+### Flight 17 (transect 2)
 
-### RGB and Field
+#### RGB and Field
 ```{r}
 plot(cn_tr2_f17) # the plot function lets you view the maps
 plot(cn_2001_ee, add=TRUE)
 ```
 
-### Multi and Field
+#### Multi and Field
 ```{r}
 plot(cn_f17_multi) # the plot function lets you view the maps
 plot(cn_2001_ee, add=TRUE)
@@ -286,13 +303,38 @@ plot(cn_tr2_f17, add=TRUE)
 plot(cn_2001_ee, add=TRUE)
 ```
 
-
-## Flight 12
+## BP 1983 (field; (1985 elena))
+### Flight 12
 
 ### RGB
 ```{r}
 plot(brp_tr2_f12)
 plot(bp_1983_ee, add=TRUE)
+```
+
+
+```{r}
+plot(brp_tr1_f09 )
+plot(bp_1983_ee, add=TRUE)
+```
+
+# ANS 2003
+## RGB only 
+
+```{r}
+
+plot(ans_tr2_f04)
+plot(ans_2003_ee, add=TRUE)
+```
+
+```{r}
+plot(ans_tr2_f05)
+plot(ans_2003_ee, add=TRUE)
+```
+
+```{r}
+plot(ans_tr3_f06)
+plot(ans_2003_ee, add=TRUE)
 ```
 
 # Notes to self for process
