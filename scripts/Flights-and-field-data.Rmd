@@ -84,6 +84,14 @@ site_alnus_1984 = field_data_ch %>% group_by(site) %>% filter(site == "Alnus")
 site_alnus_1984
 ```
 
+
+```{r}
+site_bp_1983 = field_data_ch %>% group_by(site) %>% filter(site == "BP")
+
+site_bp_1983
+```
+
+
 ```{r}
 ans_2003_pt <- SpatialPointsDataFrame(site_ANS_2003[,15:16],site_ANS_2003, proj4string = CRS(wgs_proj))
 ```
@@ -94,6 +102,10 @@ cn_2001_pt <- SpatialPointsDataFrame(site_CN_2001[,15:16],site_CN_2001, proj4str
 
 ```{r}
 alnus_1984_pt <- SpatialPointsDataFrame(site_alnus_1984[,15:16],site_alnus_1984, proj4string = CRS(wgs_proj))
+```
+
+```{r}
+bp_1983_pt <- SpatialPointsDataFrame(site_bp_1983[,15:16],site_bp_1983, proj4string = CRS(wgs_proj))
 ```
 
 ```{r}
@@ -122,11 +134,19 @@ alnus_1984_ee <- spTransform(alnus_1984_pt, CRS(ee_russia))
 # RGB rasters
 
 ```{r}
-cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
-cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
-cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
-cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
+alnus_tr1_f07 = raster("../data/rgb/ALN_TR1_FL007.tif")
+brp_tr2_f12 = raster("../data/rgb/BRP_TR2_FL012.tif")
+cn_tr1_f16 = raster("../data/rgb/CYN_TR1_FL016.tif")
+cn_tr2_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
 
+```
+
+
+```{r}
+alnus_tr1_f07
+brp_tr2_f12
+cn_tr1_f16
+cn_tr2_f17
 ```
 
 # Multispectral Raster Data
@@ -139,24 +159,12 @@ alnus_f08_multi
 ```
 
 ```{r}
-plot(alnus_f08_multi) # the plot function lets you view the maps
-plot(alnus_1984_ee, add=TRUE)
-```
-
-
-```{r}
 cn_f16_multi = raster("../data/multispectral/RU_CYN_TR1_FL016B/RU_CYN_TR1_FL016B_transparent_mosaic_green.tif")
 ```
 
 ```{r}
 cn_f16_multi
 ```
-
-```{r}
-plot(cn_f16_multi) # the plot function lets you view the maps
-plot(cn_2001_ee, add=TRUE)
-```
-
 
 ```{r}
 cn_f17_multi = raster("../data/multispectral/RU_CYN_TR2_FL017B/RU_CYN_TR2_FL017B_transparent_mosaic_green.tif")
@@ -167,11 +175,6 @@ cn_f17_multi
 ```
 
 ```{r}
-plot(cn_f17_multi) # the plot function lets you view the maps
-plot(cn_2001_ee, add=TRUE)
-```
-
-```{r}
 cn_f20_multi = raster("../data/multispectral/RU_CYN_TR1_FL020M/RU_CYN_TR1_FL020M_transparent_mosaic_green.tif")
 ```
 
@@ -179,20 +182,83 @@ cn_f20_multi = raster("../data/multispectral/RU_CYN_TR1_FL020M/RU_CYN_TR1_FL020M
 cn_f20_multi
 ```
 
+# Plots
+
+## Aluns 1984 
+Flight 8 - Multispectral
+Flight 7 - RGB
+FIeld Points from Transect 1
+
+All seem to alighn!
+
+```{r}
+plot(alnus_f08_multi) # the plot function lets you view the maps
+plot(alnus_1984_ee, add=TRUE)
+```
+
+```{r}
+
+plot(alnus_tr1_f07)
+plot(alnus_1984_ee, add=TRUE)
+```
+
+```{r}
+plot(alnus_f08_multi) # the plot function lets you view the maps
+plot(alnus_tr1_f07, add=TRUE)
+plot(alnus_1984_ee, add=TRUE)
+```
+
+
+# CN 2001
+
+* Flight 16 multispectral (Transect 1)
+* Flight 17 multispectral (transect 2)
+* Flight 20 multispectral (transect 1)
+* Flight 16 RGB (Transect 1)
+* Flight 17 RGB (Transect 2)
+
+## Flight 16 and 20 (Transect 1)
+
+### RGB
+```{r}
+plot(cn_tr1_f16)
+plot(cn_2001_ee, add=TRUE)
+```
+
+### Multi
+```{r}
+plot(cn_f16_multi) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
+
 ```{r}
 plot(cn_f20_multi) # the plot function lets you view the maps
 plot(cn_2001_ee, add=TRUE)
 ```
 
+## Flight 17 (transect 2)
 
-# RGB rasters
-
+### RGB and Field
 ```{r}
-cn_f17 = raster("../data/rgb/CYN_TR2_FL017.tif")
-```
-
-
-```{r}
-plot(cn_f17) # the plot function lets you view the maps
+plot(cn_tr2_f17) # the plot function lets you view the maps
 plot(cn_2001_ee, add=TRUE)
 ```
+
+### Multi and Field
+```{r}
+plot(cn_f17_multi) # the plot function lets you view the maps
+plot(cn_2001_ee, add=TRUE)
+```
+
+```{r}
+plot(cn_f17_multi)
+plot(cn_tr2_f17, add=TRUE)
+plot(cn_2001_ee, add=TRUE)
+```
+
+
+
+
+
+
+
