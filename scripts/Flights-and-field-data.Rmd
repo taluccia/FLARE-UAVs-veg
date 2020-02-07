@@ -1,5 +1,5 @@
 ---
-title: "Flights and field data"
+title: "Flights and field data exploration"
 author: "Anna Talucci"
 date: "2/6/2020"
 output: html_document
@@ -212,7 +212,7 @@ Flight 8 - Multispectral
 Flight 7 - RGB
 FIeld Points from Transect 1
 
-All seem to alighn!
+All seem to align!
 
 ```{r}
 plot(alnus_f08_multi) # the plot function lets you view the maps
@@ -336,6 +336,10 @@ plot(ans_2003_ee, add=TRUE)
 plot(ans_tr3_f06)
 plot(ans_2003_ee, add=TRUE)
 ```
+
+
+
+
 
 # Notes to self for process
 
