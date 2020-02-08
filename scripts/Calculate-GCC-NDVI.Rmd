@@ -78,6 +78,16 @@ brp_tr2_f12_gcc <- calc(brp_tr2_f12, f_gcc)
 cn_tr2_f17_gcc <- calc(cn_tr1_f15, f_gcc)
 ```
 
+# Write GCC to file
+```{r}
+writeRaster(alnus_tr1_f07_gcc, filename="../output/gcc/alnus_tr1_f07_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(ans_tr2_f04_gcc, filename="../outputs/gcc/ans_tr2_f04_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(ans_tr3_f06_gcc, filename="../outputs/gcc/ans_tr3_f06_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(brp_tr1_f09_gcc, filename="../outputs/gcc/brp_tr1_f09_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(brp_tr2_f12_gcc, filename="../outputs/gcc/brp_tr2_f12_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(cn_tr2_f17_gcc, filename="../outputs/gcc/brp_tr2_f12_gcc", format="GTiff", overwrite=TRUE)
+```
+
 
 
 ```{r}
@@ -151,6 +161,14 @@ alnus_f08_NDVI <- calc(alnus_f08_nir_red, f_NDVI)
 cn_f17_NDVI <- calc(cn_f17_nir_red, f_NDVI)
 cn_f20_NDVI <- calc(cn_f20_nir_red, f_NDVI)
 ```
+
+## Write to file
+```{r}
+writeRaster(alnus_f08_NDVI, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f17_NDVI, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f20_NDVI, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
+```
+
 
 ```{r}
 plot(alnus_f08_NDVI)
