@@ -58,7 +58,51 @@ plot(f1b)
 gcc <- f1b[[2]]/(f1b[[1]]+f1b[[2]]+f1b[[3]])
 plot(gcc)
 ```
+```{r}
+alnus_tr1_f07@layers
+```
 
+gcc = G /(R+G+B)
+```{r}
+f_gcc <- function(x) {
+  (x[,2])/(x[,1]+x[,2]+x[,3])
+}
+```
+
+```{r}
+alnus_tr1_f07_gcc <- calc(alnus_tr1_f07, f_gcc)
+ans_tr2_f04_gcc <- calc(ans_tr2_f04, f_gcc)
+ans_tr3_f06_gcc <- calc(ans_tr3_f06, f_gcc)
+brp_tr1_f09_gcc <- calc(brp_tr1_f09, f_gcc)
+brp_tr2_f12_gcc <- calc(brp_tr2_f12, f_gcc)
+cn_tr2_f17_gcc <- calc(cn_tr1_f15, f_gcc)
+```
+
+
+
+```{r}
+plot(alnus_tr1_f07_gcc)
+```
+
+```{r}
+plot(ans_tr2_f04_gcc)
+```
+
+```{r}
+plot(ans_tr3_f06_gcc)
+```
+
+```{r}
+plot(brp_tr1_f09_gcc)
+```
+
+```{r}
+plot(brp_tr2_f12_gcc)
+```
+
+```{r}
+plot(cn_tr2_f17_gcc)
+```
 
 # Multispectral Data
 ```{r}
@@ -99,6 +143,8 @@ f_NDVI <- function(x) {
   (x[,1]-x[,2])/(x[,1]+x[,2])
 }
 ```
+
+### Calculate NDVI
 
 ```{r}
 alnus_f08_NDVI <- calc(alnus_f08_nir_red, f_NDVI)
