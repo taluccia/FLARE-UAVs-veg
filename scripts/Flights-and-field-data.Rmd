@@ -14,10 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sp) # spatial data
 library(rgdal) # geospatial data
 library(raster) # deals with rasters
-library(landsat) # processes landsat images
+
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
-library(SDMTools) #Species distribution model tools for patch metrics
+library(tidyr)
 library(dplyr)
 library(latticeExtra)
 ```
@@ -52,17 +52,15 @@ field_data = read.csv("../data/field/site_info_2018-2019.csv")
 head(field_data)
 ```
 
-```{r}
-field_data
-```
 
+## 
 ```{r}
 field_data_ch = field_data %>% group_by(year) %>% filter(region == "Cherskiy")
 
 ```
 
 
-```{r}
+```{r include=FALSE}
 field_data_ch
 ```
 
@@ -338,8 +336,106 @@ plot(ans_2003_ee, add=TRUE)
 ```
 
 
+# Subset field data by transect
+
+## Create a unique ID for each point
+```{r}
+field_data2 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  select(ID, longitude, latitude, elevation, month:photopoint_files)
+field_data2
+```
+
+## ANS_tr2
+
+```{r}
+fd_ans_tr2 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr2
+```
+
+```{r}
+fd_coords = cbind(fd_ans_tr2$longitude, fd_ans_tr2$latitude)
+fd_ans_tr2_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_ans_tr2)
+```
+
+## ANS_tr3
+```{r}
+fd_ans_tr3 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_ans_tr3
+```
+
+```{r}
+fd_coords = cbind(fd_ans_tr3$longitude, fd_ans_tr3$latitude)
+fd_ans_tr3_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_ans_tr3)
+```
+
+## alnus_tr1
+```{r}
+fd_alnus_tr1 = field_data2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_alnus_tr1
+```
+
+```{r}
+fd_coords = cbind(fd_alnus_tr1$longitude, fd_alnus_tr1$latitude)
+fd_alnus_tr1_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_alnus_tr1)
+```
 
 
+## BP_tr1
+
+```{r}
+fd_bp_tr1 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr1
+```
+
+```{r}
+fd_coords = cbind(fd_bp_tr1$longitude, fd_bp_tr1$latitude)
+fd_bp_tr1_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_bp_tr1)
+```
+
+## BP_tr2
+```{r}
+fd_bp_tr2 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_bp_tr2
+```
+
+```{r}
+fd_coords = cbind(fd_bp_tr1$longitude, fd_bp_tr1$latitude)
+fd_bp_tr1_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_bp_tr1)
+```
+## CN_tr1
+```{r}
+fd_cn_tr1 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr1
+```
+
+```{r}
+fd_coords = cbind(fd_ch_tr1$longitude, fd_cn_tr1$latitude)
+fd_cn_tr1_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_cn_tr1)
+```
+
+
+## CN_tr2
+```{r}
+fd_cn_tr2 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr1
+```
+
+```{r}
+fd_coords = cbind(fd_cn_tr2$longitude, fd_cn_tr2$latitude)
+fd_cn_tr2_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_cn_tr2)
+```
+
+
+## CN_tr3
+```{r}
+fd_cn_tr3 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 3)
+fd_cn_tr3
+```
+
+```{r}
+fd_coords = cbind(fd_cn_tr3$longitude, fd_cn_tr3$latitude)
+fd_cn_tr3_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_cn_tr3)
+```
 
 # Notes to self for process
 
@@ -351,7 +447,7 @@ plot(ans_2003_ee, add=TRUE)
 
 
 # Elena's code for gcc
-```{r}
+```{r eval=FALSE, include=FALSE}
 ########## Green Chromatic Index ###########
 
 getwd()
