@@ -1,0 +1,113 @@
+---
+title: "GCC and Field Data"
+author: "Anna Talucci"
+date: "2/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+- Evaluated the relationship between GCC and distance from the unburned edge 
+
+# Packages
+```{r, include=FALSE}
+library(sp) 
+library(rgdal) 
+library(raster) 
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(ggplot2)
+```
+
+
+# RGB DATA
+
+
+
+alnus_tr1_f07
+ans_tr2_f04
+ans_tr3_f06
+brp_tr1_f09
+brp_tr2_f12
+cn_tr2_f17
+cn_tr1_f15 
+
+
+# GCC rasters
+
+```{r}
+alnus_tr1_f07 = raster("../data/gcc/alnus_tr1_f07_gcc.tif")
+ans_tr2_f04 = raster("../data/gcc/ans_tr2_f04_gcc.tif")
+ans_tr3_f06 = raster("../data/gcc/ans_tr3_f06_gcc.tif")
+brp_tr1_f09 = raster("../data//gcc/brp_tr1_f09_gcc.tif")
+brp_tr2_f12 = raster("../data/gcc/brp_tr2_f12_gcc.tif")
+cn_tr2_f17 = raster("../data/gcc/cn_tr2_f17_gcc.tif")
+cn_tr1_f15 = raster("../data/gcc/cn_tr1_f15_gcc.tif")
+```
+
+
+# Field points and buffers
+hs2001 = readOGR("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001")
+
+## Point Data
+
+Points
+```{r}
+alnus_tr1_pt = readOGR("../data/field-spatial/point/alnus_tr1_ee_pt.shp", "alnus_tr1_ee_pt")
+ans_tr2_pt = readOGR("../data/field-spatial/point/ans_tr2_ee_pt.shp", "ans_tr2_ee_pt") 
+ans_tr3_pt = readOGR("../data/field-spatial/point/ans_tr3_ee_pt.shp", "ans_tr3_ee_pt") 
+
+brp_tr1_pt = readOGR("../data/field-spatial/point/bp_tr1_ee_pt.shp", "bp_tr1_ee_pt") 
+brp_tr2_pt = readOGR("../data/field-spatial/point/bp_tr2_ee_pt.shp", "bp_tr2_ee_pt") 
+cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
+cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_pt") 
+ 
+```
+
+```{r}
+head(alnus_tr1_pt)
+```
+
+## Extract Mean GCC for each field plot location
+extract(rasterA,points, buffer=150, fun=mean)
+```{r}
+
+extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=10, fun=mean, df=TRUE )
+extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=10, fun=mean )
+extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=10, fun=mean )
+
+extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=10, fun=mean )
+
+extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=10, fun=mean )
+
+
+extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=10, fun=mean )
+extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10, fun=mean )
+```
+
+
+```{r}
+extract_alnus_tr1$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1) = c('ID', 'alnus_tr1_f07_gcc', 'plot_id')
+extract_alnus_tr1
+```
+
+
+
+#####
+Buffers ( don't need this?)
+```{r}
+fd_ans_tr2_10m = readOGR("../data/field-data/buffer/ans_tr2_ee_10m.shp", "ans_tr2_ee_10m") 
+fd_ans_tr3_10m = readOGR("../data/field-data/buffer/ans_tr3_ee_10m.shp", "ans_tr3_ee_10m") 
+fd_alnus_tr1_10m = readOGR("../data/field-data/buffer/alnus_tr1_ee_10m.shp", "alnus_tr1_ee_10m") 
+fd_brp_tr1_10m = readOGR("../data/field-data/buffer/bp_tr1_ee_10m.shp", "bp_tr1_ee_10m") 
+fd_brp_tr2_10m = readOGR("../data/field-data/buffer/bp_tr2_ee_10m.shp", "bp_tr2_ee_10m") 
+fd_cn_tr1_10m = readOGR("../data/field-data/buffer/cn_tr1_ee_10m.shp", "cn_tr1_ee_10m") 
+fd_cn_tr2_10m = readOGR("../data/field-data/buffer/cn_tr2_ee_10m.shp", "cn_tr2_ee_10m") 
+
+```
