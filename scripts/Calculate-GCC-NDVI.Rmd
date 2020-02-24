@@ -14,10 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sp) # spatial data
 library(rgdal) # geospatial data
 library(raster) # deals with rasters
-
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
-
 library(dplyr)
 library(latticeExtra)
 ```
@@ -25,7 +23,7 @@ library(latticeExtra)
 
 # RGB rasters
 
-Stack rasters so that all data is resampled
+Stack rasters for gcc calculation
 
 ```{r}
 alnus_tr1_f07 = stack("../data/rgb/ALN_TR1_FL007.tif")
@@ -49,7 +47,7 @@ cn_tr1_f15
 ```
 
 
-```{r}
+Elena's code
 ## masking to elimate unwanted values 
 f1b <- mask(f1[[1:3]],f1[[4]],maskvalue=0)
 plot(f1b)
@@ -57,7 +55,7 @@ plot(f1b)
 ## calculating gcc
 gcc <- f1b[[2]]/(f1b[[1]]+f1b[[2]]+f1b[[3]])
 plot(gcc)
-```
+
 ```{r}
 alnus_tr1_f07@layers
 ```
@@ -69,27 +67,36 @@ f_gcc <- function(x) {
 }
 ```
 
+alnus_tr1_f07
+ans_tr2_f04
+ans_tr3_f06
+brp_tr1_f09
+brp_tr2_f12
+cn_tr2_f17
+cn_tr1_f15 
 ```{r}
 alnus_tr1_f07_gcc <- calc(alnus_tr1_f07, f_gcc)
 ans_tr2_f04_gcc <- calc(ans_tr2_f04, f_gcc)
 ans_tr3_f06_gcc <- calc(ans_tr3_f06, f_gcc)
 brp_tr1_f09_gcc <- calc(brp_tr1_f09, f_gcc)
 brp_tr2_f12_gcc <- calc(brp_tr2_f12, f_gcc)
-cn_tr2_f17_gcc <- calc(cn_tr1_f15, f_gcc)
+cn_tr2_f17_gcc <- calc(cn_tr2_f17, f_gcc)
+cn_tr1_f15_gcc <- calc(cn_tr1_f15, f_gcc)
 ```
 
 # Write GCC to file
-```{r}
-writeRaster(alnus_tr1_f07_gcc, filename="../output/gcc/alnus_tr1_f07_gcc", format="GTiff", overwrite=TRUE)
+```{r eval=FALSE, include=FALSE}
+writeRaster(alnus_tr1_f07_gcc, filename="../outputs/gcc/alnus_tr1_f07_gcc", format="GTiff", overwrite=TRUE)
 writeRaster(ans_tr2_f04_gcc, filename="../outputs/gcc/ans_tr2_f04_gcc", format="GTiff", overwrite=TRUE)
 writeRaster(ans_tr3_f06_gcc, filename="../outputs/gcc/ans_tr3_f06_gcc", format="GTiff", overwrite=TRUE)
 writeRaster(brp_tr1_f09_gcc, filename="../outputs/gcc/brp_tr1_f09_gcc", format="GTiff", overwrite=TRUE)
 writeRaster(brp_tr2_f12_gcc, filename="../outputs/gcc/brp_tr2_f12_gcc", format="GTiff", overwrite=TRUE)
-writeRaster(cn_tr2_f17_gcc, filename="../outputs/gcc/brp_tr2_f12_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(cn_tr2_f17_gcc, filename="../outputs/gcc/cn_tr2_f17_gcc", format="GTiff", overwrite=TRUE)
+writeRaster(cn_tr1_f15_gcc, filename="../outputs/gcc/cn_tr1_f15_gcc", format="GTiff", overwrite=TRUE)
 ```
 
 
-
+# Plot GCC images
 ```{r}
 plot(alnus_tr1_f07_gcc)
 ```
@@ -138,7 +145,8 @@ cn_f20_multi
 ```{r}
 alnus_f08_multi@layers
 ```
- 
+
+## Select bands to calculated NDVI 
  (nir-red) / (nir+red)
 ```{r}
 alnus_f08_nir_red <- alnus_f08_multi[[c(5, 7)]]
@@ -163,7 +171,7 @@ cn_f20_NDVI <- calc(cn_f20_nir_red, f_NDVI)
 ```
 
 ## Write to file
-```{r}
+```{r eval=FALSE, include=FALSE}
 writeRaster(alnus_f08_NDVI, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
 writeRaster(cn_f17_NDVI, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
 writeRaster(cn_f20_NDVI, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
