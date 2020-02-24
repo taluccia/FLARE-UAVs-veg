@@ -14,12 +14,13 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sp) # spatial data
 library(rgdal) # geospatial data
 library(raster) # deals with rasters
-
+library(ggplot2)
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
 library(tidyr)
 library(dplyr)
 library(latticeExtra)
+library(sf)
 ```
 
 # Projections
@@ -355,6 +356,19 @@ fd_ans_tr2
 ```{r}
 fd_coords = cbind(fd_ans_tr2$longitude, fd_ans_tr2$latitude)
 fd_ans_tr2_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_ans_tr2)
+```
+
+```{r}
+head(fd_ans_tr2_pt)
+```
+```{r}
+fd_ans_tr2_pt_sf = st_as_sf(fd_ans_tr2_pt)
+```
+
+```{r}
+ggplot() +
+  geom_sf(data=fd_ans_tr2_pt_sf) +
+  geom_text(data = fd_ans_tr2_pt_sf, aes(x = longitude, y=latitude, label = ID), size = 1)
 ```
 
 ## ANS_tr3
