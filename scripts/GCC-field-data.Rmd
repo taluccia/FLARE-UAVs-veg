@@ -73,41 +73,64 @@ cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_p
 head(alnus_tr1_pt)
 ```
 
-## Extract Mean GCC for each field plot location
+## Extract Mean GCC for each field plot location with 10 m buffer
 extract(rasterA,points, buffer=150, fun=mean)
 ```{r}
 
 extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=10, fun=mean, df=TRUE )
-extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=10, fun=mean )
-extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=10, fun=mean )
+extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=10, fun=mean, df=TRUE )
+extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=10, fun=mean,  df=TRUE )
 
-extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=10, fun=mean )
+extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=10, fun=mean, df=TRUE )
 
-extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=10, fun=mean )
+extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=10, fun=mean,  df=TRUE )
 
 
-extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=10, fun=mean )
-extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10, fun=mean )
+extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=10, fun=mean,  df=TRUE )
+extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10, fun=mean,  df=TRUE )
 ```
 
 
 ```{r}
 extract_alnus_tr1$plot_id = alnus_tr1_pt$ID
-names(extract_alnus_tr1) = c('ID', 'alnus_tr1_f07_gcc', 'plot_id')
+names(extract_alnus_tr1) = c('ID', 'mean_gcc', 'plot_id')
 extract_alnus_tr1
 ```
 
-
-
-#####
-Buffers ( don't need this?)
 ```{r}
-fd_ans_tr2_10m = readOGR("../data/field-data/buffer/ans_tr2_ee_10m.shp", "ans_tr2_ee_10m") 
-fd_ans_tr3_10m = readOGR("../data/field-data/buffer/ans_tr3_ee_10m.shp", "ans_tr3_ee_10m") 
-fd_alnus_tr1_10m = readOGR("../data/field-data/buffer/alnus_tr1_ee_10m.shp", "alnus_tr1_ee_10m") 
-fd_brp_tr1_10m = readOGR("../data/field-data/buffer/bp_tr1_ee_10m.shp", "bp_tr1_ee_10m") 
-fd_brp_tr2_10m = readOGR("../data/field-data/buffer/bp_tr2_ee_10m.shp", "bp_tr2_ee_10m") 
-fd_cn_tr1_10m = readOGR("../data/field-data/buffer/cn_tr1_ee_10m.shp", "cn_tr1_ee_10m") 
-fd_cn_tr2_10m = readOGR("../data/field-data/buffer/cn_tr2_ee_10m.shp", "cn_tr2_ee_10m") 
-
+extract_ans_tr2$plot_id = ans_tr2_pt$ID
+names(extract_ans_tr2) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr2
 ```
+
+```{r}
+extract_ans_tr3$plot_id = ans_tr3_pt$ID
+names(extract_ans_tr3) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr3
+```
+
+
+```{r}
+extract_brp_tr1$plot_id = brp_tr1_pt$ID
+names(extract_brp_tr1) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr1
+```
+
+```{r}
+extract_brp_tr2$plot_id = brp_tr2_pt$ID
+names(extract_brp_tr2) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr2
+```
+
+```{r}
+extract_cn_tr1$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1
+```
+
+```{r}
+extract_cn_tr2$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2
+```
+
