@@ -1,0 +1,364 @@
+---
+title: "UntitledField data sort and buffer"
+author: "Anna Talucci"
+date: "2/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, include=FALSE}
+library(sp) # spatial data
+library(rgdal) # geospatial data
+library(raster) # deals with rasters
+library(ggplot2)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(tidyr)
+library(dplyr)
+library(latticeExtra)
+library(sf)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 "
+```
+
+
+# Field data
+
+```{r}
+field_data = read.csv("../data/field/site_info_2018-2019.csv")
+```
+
+
+```{r}
+head(field_data)
+```
+
+# Subset field data by transect
+
+## Create a unique ID for each point
+```{r}
+field_data2 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  select(ID, longitude, latitude, elevation, month:photopoint_files)
+field_data2
+```
+
+## ANS_tr2
+
+Sort and filter field data transects
+```{r}
+fd_ans_tr2 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr2
+```
+
+
+Create spatial points data frame with attributes
+Define Lat/Long
+```{r}
+coords_ans_tr2 = cbind(fd_ans_tr2$longitude, fd_ans_tr2$latitude)
+
+fd_ans_tr2_pt <- SpatialPointsDataFrame(coords_ans_tr2, proj4string = CRS(wgs_proj), data = fd_ans_tr2)
+```
+
+Transform to Equal area projection
+```{r}
+fd_ans_tr2_ee <- spTransform(fd_ans_tr2_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_ans_tr2_ee_10m = gBuffer(fd_ans_tr2_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_ans_tr2_ee_sf = st_as_sf(fd_ans_tr2_ee)
+fd_ans_tr2_ee_10m_sf = st_as_sf(fd_ans_tr2_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_ans_tr2_ee_10m_sf, "../outputs/field-data/fd_ans_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_ans_tr2_ee_sf, "../outputs/field-data/fd_ans_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+Plot with ggplot and labels
+```{r}
+ggplot() +
+  geom_sf(data=fd_ans_tr2_pt_sf) +
+  geom_text(data = fd_ans_tr2_pt_sf, aes(x = longitude, y=latitude, label = ID), size = 1)
+```
+
+## ANS_tr3
+Sort and filter field data transects
+```{r}
+fd_ans_tr3 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_ans_tr3
+```
+
+
+Create spatial points data frame with attributes
+```{r}
+coords_ans_tr3 = cbind(fd_ans_tr3$longitude, fd_ans_tr3$latitude)
+fd_ans_tr3_pt <- SpatialPointsDataFrame(coords_ans_tr3, proj4string = CRS(wgs_proj), data = fd_ans_tr3)
+```
+
+Transform to Equal area projection
+```{r}
+fd_ans_tr3_ee <- spTransform(fd_ans_tr3_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_ans_tr3_ee_10m = gBuffer(fd_ans_tr3_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_ans_tr3_ee_sf = st_as_sf(fd_ans_tr3_ee )
+fd_ans_tr3_ee_10m_sf = st_as_sf(fd_ans_tr3_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_ans_tr3_ee_10m_sf, "../outputs/field-data/fd_ans_tr3_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_ans_tr3_ee_sf, "../outputs/field-data/fd_ans_tr3_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+
+## alnus_tr1
+
+Sort and filter field data transects
+```{r}
+fd_alnus_tr1 = field_data2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_alnus_tr1
+```
+
+Sort and filter field data transects
+```{r}
+coords_alnus_tr1 = cbind(fd_alnus_tr1$longitude, fd_alnus_tr1$latitude)
+fd_alnus_tr1_pt <- SpatialPointsDataFrame(coords_alnus_tr1, proj4string = CRS(wgs_proj), data = fd_alnus_tr1)
+```
+
+Transform to Equal area projection
+```{r}
+fd_alnus_tr1_ee <- spTransform(fd_alnus_tr1_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_alnus_tr1_ee_10m = gBuffer(fd_alnus_tr1_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_alnus_tr1_ee_sf = st_as_sf(fd_alnus_tr1_ee )
+fd_alnus_tr1_ee_10m_sf = st_as_sf(fd_alnus_tr1_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_alnus_tr1_ee_10m_sf, "../outputs/field-data/fd_alnus_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_alnus_tr1_ee_sf, "../outputs/field-data/fd_alnus_tr1_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+## BP_tr1
+
+Sort and filter field data transects
+```{r}
+fd_bp_tr1 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr1
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_bp_tr1 = cbind(fd_bp_tr1$longitude, fd_bp_tr1$latitude)
+fd_bp_tr1_pt <- SpatialPointsDataFrame(coords_bp_tr1, proj4string = CRS(wgs_proj), data = fd_bp_tr1)
+```
+
+Transform to Equal area projection
+```{r}
+fd_bp_tr1_ee <- spTransform(fd_bp_tr1_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_bp_tr1_ee_10m = gBuffer(fd_bp_tr1_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_bp_tr1_ee_sf = st_as_sf(fd_bp_tr1_ee)
+fd_bp_tr1_ee_10m_sf = st_as_sf(fd_bp_tr1_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_bp_tr1_ee_10m_sf, "../outputs/field-data/fd_bp_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_bp_tr1_ee_sf, "../outputs/field-data/fd_bp_tr1_ee_sf.shp", driver="ESRI Shapefile") 
+```
+
+
+
+## BP_tr2
+
+Sort and filter field data transects
+```{r}
+fd_bp_tr2 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_bp_tr2
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_bp_tr2 = cbind(fd_bp_tr2$longitude, fd_bp_tr2$latitude)
+fd_bp_tr2_pt <- SpatialPointsDataFrame(coords_bp_tr2 , proj4string = CRS(wgs_proj), data = fd_bp_tr1)
+```
+
+Transform to Equal area projection
+```{r}
+fd_bp_tr2_ee <- spTransform(fd_bp_tr2_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_bp_tr2_ee_10m = gBuffer(fd_bp_tr2_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_bp_tr2_ee_sf = st_as_sf(fd_bp_tr2_ee)
+fd_bp_tr2_ee_10m_sf = st_as_sf(fd_bp_tr2_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_bp_tr2_ee_10m_sf, "../outputs/field-data/fd_bp_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_bp_tr2_ee_sf, "../outputs/field-data/fd_bp_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+## CN_tr1
+Sort and filter field data transects
+```{r}
+fd_cn_tr1 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr1
+```
+
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coord_cn_tr1 = cbind(fd_ch_tr1$longitude, fd_cn_tr1$latitude)
+fd_cn_tr1_pt <- SpatialPointsDataFrame(coord_cn_tr1, proj4string = CRS(wgs_proj), data = fd_cn_tr1)
+```
+
+Transform to Equal area projection
+```{r}
+fd_cn_tr1_ee <- spTransform(fd_cn_tr1_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_cn_tr1_ee_10m = gBuffer(fd_cn_tr1_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_cn_tr1_ee_sf = st_as_sf(fd_cn_tr1_ee)
+fd_cn_tr1_ee_10m_sf = st_as_sf(fd_cn_tr1_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_cn_tr1_ee_10m_sf, "../outputs/field-data/fd_cn_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr1_ee_sf, "../outputs/field-data/fd_cn_tr1_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+
+## CN_tr2
+Sort and filter field data transects
+```{r}
+fd_cn_tr2 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr2
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_cn_tr2 = cbind(fd_cn_tr2$longitude, fd_cn_tr2$latitude)
+fd_cn_tr2_pt <- SpatialPointsDataFrame(coords_cn_tr2, proj4string = CRS(wgs_proj), data = fd_cn_tr2)
+```
+
+Transform to Equal area projection
+```{r}
+fd_cn_tr2_ee <- spTransform(fd_cn_tr2_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_cn_tr2_ee_10m = gBuffer(fd_cn_tr2_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_cn_tr2_ee_sf = st_as_sf(fd_cn_tr2_ee)
+fd_cn_tr2_ee_10m_sf = st_as_sf(fd_cn_tr2_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_cn_tr2_ee_10m_sf , "../outputs/field-data/fd_cn_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/fd_cn_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+```
+
+## CN_tr3
+Sort and filter field data transects
+```{r}
+fd_cn_tr3 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 3)
+fd_cn_tr3
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_cn_tr3 = cbind(fd_cn_tr3$longitude, fd_cn_tr3$latitude)
+fd_cn_tr3_pt <- SpatialPointsDataFrame(coords_cn_tr3, proj4string = CRS(wgs_proj), data = fd_cn_tr3)
+```
+
+Transform to Equal area projection
+```{r}
+fd_cn_tr3_ee <- spTransform(fd_cn_tr3_pt, CRS(ee_russia))
+```
+
+Generate a spatial buffer
+```{r}
+fd_cn_tr3_ee_10m = gBuffer(fd_cn_tr3_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
+```
+
+Transform from sp to sf
+```{r}
+fd_cn_tr3_ee_sf = st_as_sf(fd_cn_tr3_ee)
+fd_cn_tr3_ee_10m_sf = st_as_sf(fd_cn_tr3_ee_10m)
+```
+
+Write to shape file
+```{r}
+st_write(fd_cn_tr3_ee_10m_sf , "../outputs/field-data/fd_cn_tr3_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/fd_cn_tr2_ee_sf.shp", driver="ESRI Shapefile") 
+```
