@@ -96,11 +96,7 @@ fd_ans_tr2_ee_sf = st_as_sf(fd_ans_tr2_ee)
 fd_ans_tr2_ee_10m_sf = st_as_sf(fd_ans_tr2_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_ans_tr2_ee_10m_sf, "../outputs/field-data/fd_ans_tr2_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_ans_tr2_ee_sf, "../outputs/field-data/fd_ans_tr2_ee_pt.shp", driver="ESRI Shapefile") 
-```
+
 
 Plot with ggplot and labels
 ```{r}
@@ -139,11 +135,8 @@ fd_ans_tr3_ee_sf = st_as_sf(fd_ans_tr3_ee )
 fd_ans_tr3_ee_10m_sf = st_as_sf(fd_ans_tr3_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_ans_tr3_ee_10m_sf, "../outputs/field-data/fd_ans_tr3_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_ans_tr3_ee_sf, "../outputs/field-data/fd_ans_tr3_ee_pt.shp", driver="ESRI Shapefile") 
-```
+
+
 
 
 ## alnus_tr1
@@ -176,11 +169,7 @@ fd_alnus_tr1_ee_sf = st_as_sf(fd_alnus_tr1_ee )
 fd_alnus_tr1_ee_10m_sf = st_as_sf(fd_alnus_tr1_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_alnus_tr1_ee_10m_sf, "../outputs/field-data/fd_alnus_tr1_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_alnus_tr1_ee_sf, "../outputs/field-data/fd_alnus_tr1_ee_pt.shp", driver="ESRI Shapefile") 
-```
+
 
 ## BP_tr1
 
@@ -212,11 +201,7 @@ fd_bp_tr1_ee_sf = st_as_sf(fd_bp_tr1_ee)
 fd_bp_tr1_ee_10m_sf = st_as_sf(fd_bp_tr1_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_bp_tr1_ee_10m_sf, "../outputs/field-data/fd_bp_tr1_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_bp_tr1_ee_sf, "../outputs/field-data/fd_bp_tr1_ee_sf.shp", driver="ESRI Shapefile") 
-```
+
 
 
 
@@ -250,11 +235,7 @@ fd_bp_tr2_ee_sf = st_as_sf(fd_bp_tr2_ee)
 fd_bp_tr2_ee_10m_sf = st_as_sf(fd_bp_tr2_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_bp_tr2_ee_10m_sf, "../outputs/field-data/fd_bp_tr2_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_bp_tr2_ee_sf, "../outputs/field-data/fd_bp_tr2_ee_pt.shp", driver="ESRI Shapefile") 
-```
+
 
 ## CN_tr1
 Sort and filter field data transects
@@ -286,11 +267,7 @@ fd_cn_tr1_ee_sf = st_as_sf(fd_cn_tr1_ee)
 fd_cn_tr1_ee_10m_sf = st_as_sf(fd_cn_tr1_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_cn_tr1_ee_10m_sf, "../outputs/field-data/fd_cn_tr1_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_cn_tr1_ee_sf, "../outputs/field-data/fd_cn_tr1_ee_pt.shp", driver="ESRI Shapefile") 
-```
+
 
 
 ## CN_tr2
@@ -322,11 +299,6 @@ fd_cn_tr2_ee_sf = st_as_sf(fd_cn_tr2_ee)
 fd_cn_tr2_ee_10m_sf = st_as_sf(fd_cn_tr2_ee_10m)
 ```
 
-Write to shape file
-```{r}
-st_write(fd_cn_tr2_ee_10m_sf , "../outputs/field-data/fd_cn_tr2_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/fd_cn_tr2_ee_pt.shp", driver="ESRI Shapefile") 
-```
 
 ## CN_tr3
 Sort and filter field data transects
@@ -357,8 +329,29 @@ fd_cn_tr3_ee_sf = st_as_sf(fd_cn_tr3_ee)
 fd_cn_tr3_ee_10m_sf = st_as_sf(fd_cn_tr3_ee_10m)
 ```
 
-Write to shape file
+## Write to shape file
+
+Points
 ```{r}
-st_write(fd_cn_tr3_ee_10m_sf , "../outputs/field-data/fd_cn_tr3_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/fd_cn_tr2_ee_sf.shp", driver="ESRI Shapefile") 
+st_write(fd_ans_tr2_ee_sf, "../outputs/field-data/point/ans_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_ans_tr3_ee_sf, "../outputs/field-data/point/ans_tr3_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_alnus_tr1_ee_sf, "../outputs/field-data/point/alnus_tr1_ee_pt.shp", driver="ESRI Shapefile")
+st_write(fd_bp_tr1_ee_sf, "../outputs/field-data/point/bp_tr1_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_bp_tr2_ee_sf, "../outputs/field-data/point/bp_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr1_ee_sf, "../outputs/field-data/point/cn_tr1_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/point/cn_tr2_ee_pt.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr3_ee_sf, "../outputs/field-data/point/cn_tr3_ee_pt.shp", driver="ESRI Shapefile") 
 ```
+
+Buffers
+```{r}
+st_write(fd_ans_tr2_ee_10m_sf, "../outputs/field-data/buffer/ans_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_ans_tr3_ee_10m_sf, "../outputs/field-data/buffer/ans_tr3_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_alnus_tr1_ee_10m_sf, "../outputs/field-data/buffer/alnus_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_bp_tr1_ee_10m_sf, "../outputs/field-data/buffer/bp_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_bp_tr2_ee_10m_sf, "../outputs/field-data/buffer/bp_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr1_ee_10m_sf, "../outputs/field-data/buffer/cn_tr1_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr2_ee_10m_sf , "../outputs/field-data/buffer/cn_tr2_ee_10m.shp", driver="ESRI Shapefile") 
+st_write(fd_cn_tr3_ee_10m_sf , "../outputs/field-data/buffer/cn_tr3_ee_10m.shp", driver="ESRI Shapefile") 
+```
+
