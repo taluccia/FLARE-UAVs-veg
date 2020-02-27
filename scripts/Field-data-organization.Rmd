@@ -1,0 +1,47 @@
+---
+title: "Extract Field Data"
+author: "Anna Talucci"
+date: "2/27/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+# Field data
+
+```{r}
+site_info = read.csv("../data/field/site_info_2018-2019.csv")
+```
+
+
+
+
+```{r}
+site_CN_2001 = site_info %>% group_by(site) %>% filter(site == "CN")
+
+site_CN_2001
+```
+
+```{r}
+site_ANS_2003 = site_info %>% group_by(site) %>% filter(site == "ANS")
+
+site_ANS_2003
+```
+
+```{r}
+site_alnus_1984 = site_info %>% group_by(site) %>% filter(site == "Alnus")
+
+site_alnus_1984
+```
+
+
+```{r}
+site_bp_1983 = site_info %>% group_by(site) %>% filter(site == "BP")
+
+site_bp_1983
+```
