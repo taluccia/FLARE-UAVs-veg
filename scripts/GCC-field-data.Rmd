@@ -75,19 +75,22 @@ head(alnus_tr1_pt)
 
 ## Extract Mean GCC for each field plot location with 10 m buffer
 extract(rasterA,points, buffer=150, fun=mean)
+
+- Plot size for field data collection was variable from 4-10m radius plots
+- apply 4m buffer
 ```{r}
 
-extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=10, fun=mean, df=TRUE )
-extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=10, fun=mean, df=TRUE )
-extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=10, fun=mean,  df=TRUE )
+extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=4, fun=mean, df=TRUE )
+extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=4, fun=mean, df=TRUE )
+extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=4, fun=mean,  df=TRUE )
 
-extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=10, fun=mean, df=TRUE )
+extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=4, fun=mean, df=TRUE )
 
-extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=10, fun=mean,  df=TRUE )
+extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=4, fun=mean,  df=TRUE )
 
 
-extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=10, fun=mean,  df=TRUE )
-extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10, fun=mean,  df=TRUE )
+extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=4, fun=mean,  df=TRUE )
+extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=4, fun=mean,  df=TRUE )
 ```
 
 
