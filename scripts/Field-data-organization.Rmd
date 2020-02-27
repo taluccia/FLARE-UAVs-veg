@@ -12,36 +12,157 @@ knitr::opts_chunk$set(echo = TRUE)
 # Overview
 
 
-# Field data
+alnus_tr1_f07
+ans_tr2_f04
+ans_tr3_f06
+brp_tr1_f09
+brp_tr2_f12
+cn_tr2_f17
+cn_tr1_f15 
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+# Site info
 
 ```{r}
 site_info = read.csv("../data/field/site_info_2018-2019.csv")
 ```
 
 
-
-
 ```{r}
-site_CN_2001 = site_info %>% group_by(site) %>% filter(site == "CN")
+head(site_info)
+```
 
-site_CN_2001
+# Subset field data by transect
+
+## Create a unique ID for each point
+```{r}
+site_info2 = site_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  select(ID, longitude, latitude, elevation, month:photopoint_files)
+site_info2
+```
+
+Site info by transect
+```{r}
+fd_alnus_tr1 = site_info2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_ans_tr2 = site_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr3 = site_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_bp_tr1 = site_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr2 = site_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr1 = site_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr2 = site_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
 ```
 
 ```{r}
-site_ANS_2003 = site_info %>% group_by(site) %>% filter(site == "ANS")
+ans_12 = rbind(fd_ans_tr2 , fd_ans_tr3)
+brp_12 = rbind( fd_bp_tr1, fd_bp_tr2)
+cn_12 = rbind(fd_cn_tr1, fd_cn_tr2)
+alnus_ans = rbind(fd_alnus_tr1, ans_12)
+brp_cn = rbind(brp_12, cn_12)
+site_info_drones = rbind(alnus_ans, brp_cn)
+site_info_drones
+```
 
-site_ANS_2003
+
+# Tree Info
+
+```{r}
+tree_info = read.csv("../data/field/tree_survey_2018-2019.csv")
+```
+
+
+```{r}
+head(tree_info)
+```
+
+# Subset field data by transect
+
+## Create a unique ID for each point
+and select the columns needed to agregate to plot level
+```{r}
+tree_info2 = tree_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  select(ID, region:plot, diameter_cm, live, radius, area_sampled_m2)
+tree_info2
+```
+
+
+```{r}
+fd_alnus_tr1 = tree_info2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_ans_tr2 = tree_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr3 = tree_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_bp_tr1 = tree_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr2 = tree_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr1 = tree_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr2 = tree_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
 ```
 
 ```{r}
-site_alnus_1984 = site_info %>% group_by(site) %>% filter(site == "Alnus")
-
-site_alnus_1984
+ans_12 = rbind(fd_ans_tr2 , fd_ans_tr3)
+brp_12 = rbind( fd_bp_tr1, fd_bp_tr2)
+cn_12 = rbind(fd_cn_tr1, fd_cn_tr2)
+alnus_ans = rbind(fd_alnus_tr1, ans_12)
+brp_cn = rbind(brp_12, cn_12)
+tree_info_drones = rbind(alnus_ans, brp_cn)
+tree_info_drones
 ```
+
+## Aggregate tree info to plot info
+Summarise tree info to plot
+  - Convert diamter to basal area (BA = 0.005454*DBH^2)
+  - Total basal area
+  - count of live stems
+  - count of dead stems
 
 
 ```{r}
-site_bp_1983 = site_info %>% group_by(site) %>% filter(site == "BP")
-
-site_bp_1983
+tree_info_drones1 = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*0.00007854))
 ```
+
+
+
+```{r}
+ba = tree_info_drones1 %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(total_ba = sum(total_ba)) 
+  
+```
+
+```{r}
+tree_info_drones1 %>%
+    group_by(ID, site, transect, plot, live) %>%
+    summarise(n = n()) %>%
+    mutate(stems = sum(n)) %>%
+    spread(live, n, fill = 0)
+```
+
+
+# Note after summarization, last grouping variable is dropped
+# This dataset now grouped by plot
+# That makes it easy to add another column,
+    # which is total number of stems per plot via summing
+stem3 %>%
+    group_by(plot, killed.by) %>%
+    summarise(n = n()) %>%
+    mutate(stems = sum(n))
+
+# Save for further manipulation
+sumdat = stem3 %>%
+    group_by(plot, killed.by) %>%
+    summarise(n = n()) %>%
+    mutate(stems = sum(n))
+
+```
+
+
+
+
+
+
+```{r}
+write.csv(site_info_drones,"../outputs/field_subset/site_info_uav.csv", row.names = FALSE)
+```
+
