@@ -44,9 +44,10 @@ head(site_info)
 ## Create a unique ID for each point
 ```{r}
 site_info2 = site_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  select(ID, longitude, latitude, elevation, month:photopoint_files)
+  dplyr::select(ID, longitude, latitude, elevation, month:photopoint_files)
 site_info2
 ```
+
 
 Site info by transect
 ```{r}
@@ -69,6 +70,9 @@ site_info_drones = rbind(alnus_ans, brp_cn)
 site_info_drones
 ```
 
+```{r}
+length(unique(site_info_drones$ID))
+```
 
 ```{r eval=FALSE, include=FALSE}
 write.csv(site_info_drones,"../outputs/field_subset/site_info_uav.csv", row.names = FALSE)

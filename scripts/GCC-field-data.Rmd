@@ -27,6 +27,7 @@ library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 ```
 
 
@@ -169,7 +170,7 @@ cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
 alnus_ans = rbind(extract_alnus_tr1, ans_bind)
 brp_cn = rbind(brp_bind, cn_bind)
 gcc_1m = rbind(alnus_ans, brp_cn)
-gcc_1m = gcc_1m %>% select(plot_id, mean_gcc_1m) %>% rename(ID = plot_id)
+gcc_1m = gcc_1m %>% dplyr::select(plot_id, mean_gcc_1m) %>% rename(ID = plot_id)
 gcc_1m
 ```
 
@@ -245,7 +246,7 @@ cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
 alnus_ans_3m = rbind(extract_alnus_tr1_3m, ans_bind_3m)
 brp_cn_3m = rbind(brp_bind_3m, cn_bind_3m)
 gcc_3m = rbind(alnus_ans_3m, brp_cn_3m)
-gcc_3m = gcc_3m %>% select(plot_id, mean_gcc_3m) %>% rename(ID = plot_id)
+gcc_3m = gcc_3m %>% dplyr::select(plot_id, mean_gcc_3m) %>% rename(ID = plot_id)
 gcc_3m
 ```
 
@@ -321,11 +322,29 @@ cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
 alnus_ans_qm = rbind(extract_alnus_tr1_qm, ans_bind_qm)
 brp_cn_qm = rbind(brp_bind_qm, cn_bind_qm)
 gcc_qm = rbind(alnus_ans_qm, brp_cn_qm)
-gcc_qm = gcc_qm %>% select(plot_id, mean_gcc_25cm) %>% rename(ID = plot_id)
+gcc_qm = gcc_qm %>% dplyr::select(plot_id, mean_gcc_25cm) %>% rename(ID = plot_id)
 gcc_qm
 ```
 
 ```{r}
 write.csv(gcc_qm,"../outputs/extracted_data/gcc_25cm.csv", row.names = FALSE)
+```
+
+```{r}
+length(unique(gcc_1m$ID))
+length(unique(gcc_3m$ID))
+length(unique(gcc_qm$ID))
+```
+
+
+```{r}
+data.frame(unique(gcc_1m$ID))
+data.frame(unique(gcc_3m$ID))
+data.frame(unique(gcc_qm$ID))
+```
+
+```{r}
+testing = merge(gcc_1m, gcc_3m, by="ID")
+testing
 ```
 

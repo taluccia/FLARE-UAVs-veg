@@ -59,7 +59,7 @@ head(field_data)
 ## Create a unique ID for each point
 ```{r}
 field_data2 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  select(ID, longitude, latitude, elevation, month:photopoint_files)
+  dplyr::select(ID, longitude, latitude, elevation, month:photopoint_files)
 field_data2
 ```
 
