@@ -89,7 +89,14 @@ extract_cn_tr2
 ```
 
 extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+
 ```{r}
+ndvi_1m = bind_rows(extract_alnus_tr1, extract_cn_tr1, extract_cn_tr2) %>% dplyr::select(plot_id, mean_ndvi_1m) %>% rename(ID = plot_id)
+length(unique(ndvi_1m$ID))
+ndvi_1m
+```
+
+```{r eval=FALSE, include=FALSE}
 cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
 ndvi_1m = rbind(extract_alnus_tr1, cn_bind)
 
@@ -134,6 +141,12 @@ extract_cn_tr2_3m
 
 
 ```{r}
+ndvi_3m = bind_rows(extract_alnus_tr1_3m, extract_cn_tr1_3m, extract_cn_tr2_3m) %>% dplyr::select(plot_id, mean_ndvi_3m) %>% rename(ID = plot_id)
+length(unique(ndvi_3m$ID))
+ndvi_3m
+```
+
+```{r eval=FALSE, include=FALSE}
 cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
 ndvi_3m = rbind(extract_alnus_tr1_3m, cn_bind_3m)
 
@@ -179,6 +192,13 @@ extract_cn_tr2_qm
 
 
 ```{r}
+ndvi_qm = bind_rows(extract_alnus_tr1_qm, extract_cn_tr1_qm, extract_cn_tr2_qm) %>% dplyr::select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
+length(unique(ndvi_qm$ID))
+ndvi_qm
+```
+
+
+```{r eval=FALSE, include=FALSE}
 cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
 ndvi_qm = rbind(extract_alnus_tr1_qm, cn_bind_qm)
 ndvi_qm = ndvi_qm %>% select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
@@ -189,3 +209,16 @@ ndvi_qm
 write.csv(ndvi_qm,"../outputs/extracted_data/ndvi_25cm.csv", row.names = FALSE)
 ```
 
+# Combine ndvi data
+
+```{r}
+ndvi_merge1 = merge(ndvi_1m, ndvi_3m,  by= "ID")
+ndvi_merge1
+ndvi = merge(ndvi_merge1, ndvi_qm,  by="ID")
+ndvi
+```
+
+
+```{r}
+write.csv(ndvi,"../outputs/extracted_data/ndvi_all.csv", row.names = FALSE)
+```
