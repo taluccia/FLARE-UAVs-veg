@@ -164,6 +164,12 @@ extract_cn_tr2
 ```
 extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
 ```{r}
+gcc_1m = bind_rows(extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2) %>% dplyr::select(plot_id, mean_gcc_1m) %>% rename(ID = plot_id)
+length(unique(gcc_3m$ID))
+gcc_1m
+```
+
+```{r eval=FALSE, include=FALSE}
 ans_bind = rbind(extract_ans_tr2, extract_ans_tr3)
 brp_bind = rbind( extract_brp_tr1, extract_brp_tr2)
 cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
@@ -174,7 +180,7 @@ gcc_1m = gcc_1m %>% dplyr::select(plot_id, mean_gcc_1m) %>% rename(ID = plot_id)
 gcc_1m
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 write.csv(gcc_1m,"../outputs/extracted_data/gcc_1m.csv", row.names = FALSE)
 ```
 
@@ -239,7 +245,15 @@ names(extract_cn_tr2_3m) = c('ID', 'mean_gcc_3m', 'plot_id')
 extract_cn_tr2_3m
 ```
 extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+
 ```{r}
+gcc_3m = bind_rows(extract_alnus_tr1_3m, extract_ans_tr2_3m, extract_ans_tr3_3m, extract_brp_tr1_3m, extract_brp_tr2_3m, extract_cn_tr1_3m, extract_cn_tr2_3m) %>% dplyr::select(plot_id, mean_gcc_3m) %>% rename(ID = plot_id)
+length(unique(gcc_3m$ID))
+gcc_3m
+```
+
+
+```{r eval=FALSE, include=FALSE}
 ans_bind_3m = rbind(extract_ans_tr2_3m, extract_ans_tr3_3m)
 brp_bind_3m = rbind( extract_brp_tr1_3m, extract_brp_tr2_3m)
 cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
@@ -315,14 +329,29 @@ names(extract_cn_tr2_qm) = c('ID', 'mean_gcc_25cm', 'plot_id')
 extract_cn_tr2_qm
 ```
 extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+
+
+
+
+
 ```{r}
+gcc_qm = bind_rows(extract_alnus_tr1_qm, extract_ans_tr2_qm, extract_ans_tr3_qm, extract_brp_tr1_qm, extract_brp_tr2_qm, extract_cn_tr1_qm, extract_cn_tr2_qm) %>% dplyr::select(plot_id, mean_gcc_25cm) %>% rename(ID = plot_id)
+length(unique(gcc$ID))
+gcc_qm
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
 ans_bind_qm = rbind(extract_ans_tr2_qm, extract_ans_tr3_qm)
 brp_bind_qm = rbind( extract_brp_tr1_qm, extract_brp_tr2_qm)
 cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
 alnus_ans_qm = rbind(extract_alnus_tr1_qm, ans_bind_qm)
 brp_cn_qm = rbind(brp_bind_qm, cn_bind_qm)
-gcc_qm = rbind(alnus_ans_qm, brp_cn_qm)
-gcc_qm = gcc_qm %>% dplyr::select(plot_id, mean_gcc_25cm) %>% rename(ID = plot_id)
+gcc_qm1 = rbind(alnus_ans_qm, brp_cn_qm)
+gcc_qm1
+length(unique(gcc_qm1$plot_id))
+gcc_qm = gcc_qm1 %>% dplyr::select(plot_id, mean_gcc_25cm) %>% rename(ID = plot_id)
 gcc_qm
 ```
 
@@ -330,21 +359,17 @@ gcc_qm
 write.csv(gcc_qm,"../outputs/extracted_data/gcc_25cm.csv", row.names = FALSE)
 ```
 
+
+# COmbine gcc data
+
 ```{r}
-length(unique(gcc_1m$ID))
-length(unique(gcc_3m$ID))
-length(unique(gcc_qm$ID))
+gcc_merge1 = merge(gcc_1m, gcc_3m,  by= "ID")
+gcc_merge1
+gcc = merge(gcc_merge1, gcc_qm,  by="ID")
+gcc
 ```
 
 
 ```{r}
-data.frame(unique(gcc_1m$ID))
-data.frame(unique(gcc_3m$ID))
-data.frame(unique(gcc_qm$ID))
+write.csv(gcc,"../outputs/extracted_data/gcc_all.csv", row.names = FALSE)
 ```
-
-```{r}
-testing = merge(gcc_1m, gcc_3m, by="ID")
-testing
-```
-
