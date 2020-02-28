@@ -123,24 +123,26 @@ tree_info_drones1 = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*
 ```
 
 ```{r}
-plot = tree_info_drones1 %>%
+size_plot = tree_info_drones1 %>%
     group_by(ID, site, transect, plot) %>%
     summarise(area_sampled_m2 = median(area_sampled_m2)) 
-  
+
+size_plot  
 ```
 
 ```{r}
 radius = tree_info_drones1 %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(radius = median(radius)) 
-  
+    summarise(radius = median(radius))
+
+radius  
 ```
 
 ```{r}
 ba = tree_info_drones1 %>%
     group_by(ID, site, transect, plot) %>%
     summarise(total_ba = sum(total_ba)) 
-  
+ba  
 ```
 
 ```{r}
@@ -149,20 +151,28 @@ stems = tree_info_drones1 %>%
     summarise(n = n()) %>%
     mutate(stems = sum(n)) %>%
     spread(live, n, fill = 0)
+stems
+```
+
+```{r}
+plot_radius = merge(size_plot, radius,  by=c("ID","site", "transect", "plot"))
+plot_radius
+```
+
+```{r}
+stems_ba = merge(stems,  ba,  by=c("ID","site", "transect", "plot"))
+stems_ba
 ```
 
 
 ```{r}
-tree_info_uav = merge(stems,  ba,  by=c("ID","site", "transect", "plot"))
+tree_info_uav = merge(plot_radius,  stems_ba,  by=c("ID","site", "transect", "plot"))
 tree_info_uav
 ```
 
 
 
-
-
-
 ```{r}
-write.csv(tree_plot,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
+write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
 ```
 
