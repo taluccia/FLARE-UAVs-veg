@@ -70,6 +70,10 @@ site_info_drones
 ```
 
 
+```{r eval=FALSE, include=FALSE}
+write.csv(site_info_drones,"../outputs/field_subset/site_info_uav.csv", row.names = FALSE)
+```
+
 # Tree Info
 
 ```{r}
@@ -174,7 +178,7 @@ tree_info_uav
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
 ```
 
@@ -306,7 +310,7 @@ shrub_info_uav = merge3 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x",
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 write.csv(shrub_info_uav,"../outputs/field_subset/shrub_info_uav.csv", row.names = FALSE)
 ```
 

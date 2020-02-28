@@ -66,12 +66,10 @@ Points
 alnus_tr1_pt = readOGR("../data/field-spatial/point/alnus_tr1_ee_pt.shp", "alnus_tr1_ee_pt")
 ans_tr2_pt = readOGR("../data/field-spatial/point/ans_tr2_ee_pt.shp", "ans_tr2_ee_pt") 
 ans_tr3_pt = readOGR("../data/field-spatial/point/ans_tr3_ee_pt.shp", "ans_tr3_ee_pt") 
-
 brp_tr1_pt = readOGR("../data/field-spatial/point/bp_tr1_ee_pt.shp", "bp_tr1_ee_pt") 
 brp_tr2_pt = readOGR("../data/field-spatial/point/bp_tr2_ee_pt.shp", "bp_tr2_ee_pt") 
 cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
 cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_pt") 
- 
 ```
 
 ```{r}
@@ -80,7 +78,8 @@ head(alnus_tr1_pt)
 
 
 
-## GCC as  function of distance from edge
+## 1m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
 extract(rasterA,points, buffer=150, fun=mean)
 
 - Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
@@ -154,7 +153,157 @@ gcc_1m = rbind(alnus_ans, brp_cn)
 gcc_1m
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 write.csv(gcc_1m,"../outputs/extracted_data/gcc_1m.csv", row.names = FALSE)
+```
+
+## 3m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_3m = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=3, fun=mean, df=TRUE )
+extract_ans_tr2_3m = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=3, fun=mean, df=TRUE )
+extract_ans_tr3_3m = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=3, fun=mean,  df=TRUE )
+extract_brp_tr1_3m = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=3, fun=mean, df=TRUE )
+extract_brp_tr2_3m = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=3, fun=mean,  df=TRUE )
+extract_cn_tr1_3m = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=3, fun=mean,  df=TRUE )
+extract_cn_tr2_3m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=3, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_3m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_alnus_tr1_3m
+```
+
+```{r}
+extract_ans_tr2_3m$plot_id = ans_tr2_pt$ID
+names(extract_ans_tr2_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr2_3m
+```
+
+```{r}
+extract_ans_tr3_3m$plot_id = ans_tr3_pt$ID
+names(extract_ans_tr3_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr3_3m
+```
+
+
+```{r}
+extract_brp_tr1_3m$plot_id = brp_tr1_pt$ID
+names(extract_brp_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr1_3m
+```
+
+```{r}
+extract_brp_tr2_3m$plot_id = brp_tr2_pt$ID
+names(extract_brp_tr2_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr2_3m
+```
+
+```{r}
+extract_cn_tr1_3m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1_3m
+```
+
+```{r}
+extract_cn_tr2_3m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2_3m
+```
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+```{r}
+ans_bind_3m = rbind(extract_ans_tr2_3m, extract_ans_tr3_3m)
+brp_bind_3m = rbind( extract_brp_tr1_3m, extract_brp_tr2_3m)
+cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
+alnus_ans_3m = rbind(extract_alnus_tr1_3m, ans_bind_3m)
+brp_cn_3m = rbind(brp_bind_3m, cn_bind_3m)
+gcc_3m = rbind(alnus_ans_3m, brp_cn_3m)
+gcc_3m
+```
+
+```{r}
+write.csv(gcc_3m,"../outputs/extracted_data/gcc_3m.csv", row.names = FALSE)
+```
+
+## .25m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_qm = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=.25, fun=mean, df=TRUE )
+extract_ans_tr2_qm = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=.25, fun=mean, df=TRUE )
+extract_ans_tr3_qm = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_brp_tr1_qm = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=.25, fun=mean, df=TRUE )
+extract_brp_tr2_qm = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_cn_tr1_qm = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_cn_tr2_qm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.25, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_qm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_alnus_tr1_qm
+```
+
+```{r}
+extract_ans_tr2_qm$plot_id = ans_tr2_pt$ID
+names(extract_ans_tr2_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr2_qm
+```
+
+```{r}
+extract_ans_tr3_qm$plot_id = ans_tr3_pt$ID
+names(extract_ans_tr3_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_ans_tr3_qm
+```
+
+
+```{r}
+extract_brp_tr1_qm$plot_id = brp_tr1_pt$ID
+names(extract_brp_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr1_qm
+```
+
+```{r}
+extract_brp_tr2_qm$plot_id = brp_tr2_pt$ID
+names(extract_brp_tr2_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_brp_tr2_qm
+```
+
+```{r}
+extract_cn_tr1_qm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1_qm
+```
+
+```{r}
+extract_cn_tr2_qm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2_qm
+```
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+```{r}
+ans_bind_qm = rbind(extract_ans_tr2_qm, extract_ans_tr3_qm)
+brp_bind_qm = rbind( extract_brp_tr1_qm, extract_brp_tr2_qm)
+cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
+alnus_ans_qm = rbind(extract_alnus_tr1_qm, ans_bind_qm)
+brp_cn_qm = rbind(brp_bind_qm, cn_bind_qm)
+gcc_qm = rbind(alnus_ans_qm, brp_cn_qm)
+gcc_qm
+```
+
+```{r}
+write.csv(gcc_qm,"../outputs/extracted_data/gcc_25cm.csv", row.names = FALSE)
 ```
 
