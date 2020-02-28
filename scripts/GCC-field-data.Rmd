@@ -13,6 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - Evaluated the relationship between GCC and distance from the unburned edge 
 
+
+
+- Plot size for field data collection was variable from 4-10m radius plots
+- apply 4m buffer
+
 # Packages
 ```{r, include=FALSE}
 library(sp) 
@@ -73,24 +78,26 @@ cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_p
 head(alnus_tr1_pt)
 ```
 
-## Extract Mean GCC for each field plot location with 10 m buffer
+
+
+## GCC as  function of distance from edge
 extract(rasterA,points, buffer=150, fun=mean)
 
-- Plot size for field data collection was variable from 4-10m radius plots
-- apply 4m buffer
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
 ```{r}
 
-extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=4, fun=mean, df=TRUE )
-extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=4, fun=mean, df=TRUE )
-extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=4, fun=mean,  df=TRUE )
+extract_alnus_tr1 = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=1, fun=mean, df=TRUE )
+extract_ans_tr2 = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=1, fun=mean, df=TRUE )
+extract_ans_tr3 = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=1, fun=mean,  df=TRUE )
 
-extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=4, fun=mean, df=TRUE )
+extract_brp_tr1 = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=1, fun=mean, df=TRUE )
 
-extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=4, fun=mean,  df=TRUE )
+extract_brp_tr2 = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=1, fun=mean,  df=TRUE )
 
 
-extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=4, fun=mean,  df=TRUE )
-extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=4, fun=mean,  df=TRUE )
+extract_cn_tr1 = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=1, fun=mean,  df=TRUE )
+extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=1, fun=mean,  df=TRUE )
 ```
 
 
@@ -135,5 +142,19 @@ extract_cn_tr1
 extract_cn_tr2$plot_id = cn_tr2_pt$ID
 names(extract_cn_tr2) = c('ID', 'mean_gcc', 'plot_id')
 extract_cn_tr2
+```
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+```{r}
+ans_bind = rbind(extract_ans_tr2, extract_ans_tr3)
+brp_bind = rbind( extract_brp_tr1, extract_brp_tr2)
+cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
+alnus_ans = rbind(extract_alnus_tr1, ans_bind)
+brp_cn = rbind(brp_bind, cn_bind)
+gcc_1m = rbind(alnus_ans, brp_cn)
+gcc_1m
+```
+
+```{r}
+write.csv(gcc_1m,"../outputs/extracted_data/gcc_1m.csv", row.names = FALSE)
 ```
 
