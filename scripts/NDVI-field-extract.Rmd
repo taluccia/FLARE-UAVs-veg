@@ -1,0 +1,188 @@
+---
+title: "NDVI-field-extract"
+author: "Anna Talucci"
+date: "2/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+- Extract NDVI values
+
+
+
+- Plot size for field data collection was variable from 4-10m radius plots
+- apply 4m buffer
+
+# Packages
+```{r, include=FALSE}
+library(sp) 
+library(rgdal) 
+library(raster) 
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(ggplot2)
+```
+
+
+# NVDI DATA
+
+
+
+alnus_tr1_f08
+cn_tr2_f17
+cn_tr1_f20 
+
+
+# NDVI rasters
+
+```{r}
+alnus_tr1_f08 = raster("../data/ndvi/alnus_f08_NDVI.tif")
+cn_tr2_f17 = raster("../data/gcc/cn_f17_NDVI.tif")
+cn_tr1_f20 = raster("../data/gcc/cn_f20_NDVI.tif")
+```
+
+
+# Field point data
+
+```{r}
+alnus_tr1_pt = readOGR("../data/field-spatial/point/alnus_tr1_ee_pt.shp", "alnus_tr1_ee_pt")
+cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
+cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_pt") 
+```
+
+
+## 1m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+extract_alnus_tr1 = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=1, fun=mean, df=TRUE )
+extract_cn_tr1 = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=1, fun=mean,  df=TRUE )
+extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=1, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1) = c('ID', 'mean_gcc', 'plot_id')
+extract_alnus_tr1
+```
+
+```{r}
+extract_cn_tr1$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1
+```
+
+```{r}
+extract_cn_tr2$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2
+```
+
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+```{r}
+cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
+ndvi_1m = rbind(extract_alnus_tr1, cn_bind)
+
+ndvi_1m
+```
+
+```{r}
+write.csv(ndvi_1m,"../outputs/extracted_data/ndvi_1m.csv", row.names = FALSE)
+```
+
+## 3m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_3m = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=3, fun=mean, df=TRUE )
+extract_cn_tr1_3m = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=3, fun=mean,  df=TRUE )
+extract_cn_tr2_3m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=3, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_3m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_alnus_tr1_3m
+```
+
+```{r}
+extract_cn_tr1_3m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1_3m
+```
+
+```{r}
+extract_cn_tr2_3m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_3m) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2_3m
+```
+
+
+```{r}
+cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
+ndvi_3m = rbind(extract_alnus_tr1_3m, cn_bind_3m)
+ndvi_3m
+```
+
+```{r}
+write.csv(ndvi_3m,"../outputs/extracted_data/ndvi_3m.csv", row.names = FALSE)
+```
+
+## .25m - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_qm = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=.25, fun=mean, df=TRUE )
+extract_cn_tr1_qm = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_cn_tr2_qm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.25, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_qm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_alnus_tr1_qm
+```
+
+```{r}
+extract_cn_tr1_qm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr1_qm
+```
+
+```{r}
+extract_cn_tr2_qm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_qm) = c('ID', 'mean_gcc', 'plot_id')
+extract_cn_tr2_qm
+```
+
+
+```{r}
+cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
+ndvi_qm = rbind(extract_alnus_tr1_qm, cn_bind_qm)
+ndvi_qm
+```
+
+```{r}
+write.csv(ndvi_qm,"../outputs/extracted_data/ndvi_25cm.csv", row.names = FALSE)
+```
+

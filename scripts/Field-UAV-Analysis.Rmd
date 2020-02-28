@@ -1,0 +1,49 @@
+---
+title: "Field and UAv Data Analysis"
+author: "Anna Talucci"
+date: "2/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+
+# Field Data
+```{r}
+sites = read.csv("../data/field_subset/site_info_uav.csv")
+shrubs = read.csv("../data/field_subset/shrub_info_uav.csv")
+trees = read.csv("../data/field_subset/tree_info_uav.csv")
+```
+
+
+
+
+
+## Plot sizes
+```{r}
+shrubs %>% group_by(site, transect) %>% 
+  summarise(min(area_sampled_m2))
+```
+
+```{r}
+shrubs %>% group_by(site, transect) %>% 
+  summarise(max(area_sampled_m2))
+```
+
+```{r}
+trees %>% group_by(site, transect) %>% 
+  summarise(min(radius))
+```
+
+```{r}
+trees %>% group_by(site, transect) %>% 
+  summarise(max(radius))
+```
