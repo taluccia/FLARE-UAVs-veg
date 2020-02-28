@@ -43,8 +43,8 @@ cn_tr1_f20
 
 ```{r}
 alnus_tr1_f08 = raster("../data/ndvi/alnus_f08_NDVI.tif")
-cn_tr2_f17 = raster("../data/gcc/cn_f17_NDVI.tif")
-cn_tr1_f20 = raster("../data/gcc/cn_f20_NDVI.tif")
+cn_tr2_f17 = raster("../data/ndvi/cn_f17_NDVI.tif")
+cn_tr1_f20 = raster("../data/ndvi/cn_f20_NDVI.tif")
 ```
 
 
