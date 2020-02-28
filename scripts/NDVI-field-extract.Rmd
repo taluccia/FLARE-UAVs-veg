@@ -72,19 +72,19 @@ extract_cn_tr2 = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=1, fun=mean,  df=
 
 ```{r}
 extract_alnus_tr1$plot_id = alnus_tr1_pt$ID
-names(extract_alnus_tr1) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_alnus_tr1) = c('ID', 'mean_ndvi_1m', 'plot_id')
 extract_alnus_tr1
 ```
 
 ```{r}
 extract_cn_tr1$plot_id = cn_tr1_pt$ID
-names(extract_cn_tr1) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr1) = c('ID', 'mean_ndvi_1m', 'plot_id')
 extract_cn_tr1
 ```
 
 ```{r}
 extract_cn_tr2$plot_id = cn_tr2_pt$ID
-names(extract_cn_tr2) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr2) = c('ID', 'mean_ndvi_1m', 'plot_id')
 extract_cn_tr2
 ```
 
@@ -93,7 +93,7 @@ extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_br
 cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
 ndvi_1m = rbind(extract_alnus_tr1, cn_bind)
 
-ndvi_1m
+ndvi_1m = ndvi_1m %>% select(plot_id, mean_ndvi_1m) %>% rename(ID = plot_id)
 ```
 
 ```{r}
@@ -116,19 +116,19 @@ extract_cn_tr2_3m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=3, fun=mean,  
 
 ```{r}
 extract_alnus_tr1_3m$plot_id = alnus_tr1_pt$ID
-names(extract_alnus_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_alnus_tr1_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
 extract_alnus_tr1_3m
 ```
 
 ```{r}
 extract_cn_tr1_3m$plot_id = cn_tr1_pt$ID
-names(extract_cn_tr1_3m) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr1_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
 extract_cn_tr1_3m
 ```
 
 ```{r}
 extract_cn_tr2_3m$plot_id = cn_tr2_pt$ID
-names(extract_cn_tr2_3m) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr2_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
 extract_cn_tr2_3m
 ```
 
@@ -136,6 +136,8 @@ extract_cn_tr2_3m
 ```{r}
 cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
 ndvi_3m = rbind(extract_alnus_tr1_3m, cn_bind_3m)
+
+ndvi_3m = ndvi_3m %>% select(plot_id, mean_ndvi_3m) %>% rename(ID = plot_id)
 ndvi_3m
 ```
 
@@ -159,19 +161,19 @@ extract_cn_tr2_qm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.25, fun=mean,
 
 ```{r}
 extract_alnus_tr1_qm$plot_id = alnus_tr1_pt$ID
-names(extract_alnus_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_alnus_tr1_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
 extract_alnus_tr1_qm
 ```
 
 ```{r}
 extract_cn_tr1_qm$plot_id = cn_tr1_pt$ID
-names(extract_cn_tr1_qm) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr1_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
 extract_cn_tr1_qm
 ```
 
 ```{r}
 extract_cn_tr2_qm$plot_id = cn_tr2_pt$ID
-names(extract_cn_tr2_qm) = c('ID', 'mean_gcc', 'plot_id')
+names(extract_cn_tr2_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
 extract_cn_tr2_qm
 ```
 
@@ -179,6 +181,7 @@ extract_cn_tr2_qm
 ```{r}
 cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
 ndvi_qm = rbind(extract_alnus_tr1_qm, cn_bind_qm)
+ndvi_qm = ndvi_qm %>% select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
 ndvi_qm
 ```
 
