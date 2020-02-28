@@ -216,7 +216,7 @@ fd_bp_tr2
 Define coordinates and generate spatial point data frame with attributes
 ```{r}
 coords_bp_tr2 = cbind(fd_bp_tr2$longitude, fd_bp_tr2$latitude)
-fd_bp_tr2_pt <- SpatialPointsDataFrame(coords_bp_tr2 , proj4string = CRS(wgs_proj), data = fd_bp_tr1)
+fd_bp_tr2_pt <- SpatialPointsDataFrame(coords_bp_tr2 , proj4string = CRS(wgs_proj), data = fd_bp_tr2)
 ```
 
 Transform to Equal area projection
