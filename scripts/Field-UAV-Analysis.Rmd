@@ -23,11 +23,12 @@ shrubs = read.csv("../data/field_subset/shrub_info_uav.csv")
 trees = read.csv("../data/field_subset/tree_info_uav.csv")
 ```
 
+```{r}
+sites
+```
 
+## field Plot sizes
 
-
-
-## Plot sizes
 ```{r}
 shrubs %>% group_by(site, transect) %>% 
   summarise(min(area_sampled_m2))
@@ -47,3 +48,38 @@ trees %>% group_by(site, transect) %>%
 trees %>% group_by(site, transect) %>% 
   summarise(max(radius))
 ```
+
+# UAV Data
+
+```{r}
+gcc_1m = read.csv("../data/extracted_data/gcc_1m.csv")
+gcc_3m = read.csv("../data/extracted_data/gcc_3m.csv")
+gcc_25cm = read.csv("../data/extracted_data/gcc_25cm.csv")
+ndvi_1m = read.csv("../data/extracted_data/ndvi_1m.csv")
+ndvi_3m = read.csv("../data/extracted_data/ndvi_3m.csv")
+ndvi_25cm = read.csv("../data/extracted_data/ndvi_25cm.csv")
+```
+
+```{r}
+gcc_1m
+```
+
+```{r}
+gcc_3m
+```
+
+```{r}
+gcc_25cm
+```
+
+## Combine GCC data
+
+```{r}
+gcc_merge1 = merge(gcc_1m, gcc_3m,  by="ID")
+gcc_merge1
+gcc = merge(gcc_merge1, gcc_25cm,  by="ID")
+gcc
+```
+
+
+# Combine Field and UAV
