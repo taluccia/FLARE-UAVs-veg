@@ -20,6 +20,8 @@ brp_tr2_f12
 cn_tr2_f17
 cn_tr1_f15 
 
+
+Total Basla area in meteres squared
 # Pakcages
 ```{r}
 library(tidyr)
@@ -174,5 +176,137 @@ tree_info_uav
 
 ```{r}
 write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
+```
+
+
+# Shrub Info
+
+```{r}
+shrub_info = read.csv("../data/field/shrubs_2018-2019.csv")
+```
+
+```{r}
+summary(shrub_info)
+```
+
+```{r}
+head(shrub_info)
+```
+
+# Subset field data by transect
+
+## Create a unique ID for each point
+and select the columns needed to agregate to plot level
+```{r}
+shrub_info2 = shrub_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  select(ID, region:plot, plot_width:basal_diameter_cm)
+shrub_info2
+```
+
+
+```{r}
+fd_alnus_tr1 = shrub_info2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_ans_tr2 = shrub_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr3 = shrub_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_bp_tr1 = shrub_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr2 = shrub_info2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr1 = shrub_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr2 = shrub_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
+```
+
+```{r}
+ans_12 = rbind(fd_ans_tr2 , fd_ans_tr3)
+brp_12 = rbind( fd_bp_tr1, fd_bp_tr2)
+cn_12 = rbind(fd_cn_tr1, fd_cn_tr2)
+alnus_ans = rbind(fd_alnus_tr1, ans_12)
+brp_cn = rbind(brp_12, cn_12)
+shrub_info_drones = rbind(alnus_ans, brp_cn)
+shrub_info_drones
+```
+
+## Aggregate tree info to plot info
+Summarise tree info to plot
+  - Convert diamter to basal area (BA = 0.005454*DBH^2)
+  - Total basal area
+  - count of live stems
+  - count of dead stems
+
+
+```{r}
+shrub_info_drones1 = dplyr::mutate(shrub_info_drones, total_ba = ((basal_diameter_cm^2)*0.00007854))
+shrub_info_drones1
+```
+
+
+```{r}
+shrub_info_drones2 = dplyr::mutate(shrub_info_drones1, area_plot_m2 = (plot_width*plot_length)) 
+
+shrub_info_drones2 
+```
+
+```{r}
+plot_area = shrub_info_drones2  %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(area_sampled_m2 = median(area_plot_m2))
+
+plot_area  
+```
+```{r}
+total_ba = shrub_info_drones2  %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(total_ba = sum(total_ba))
+
+total_ba  
+```
+
+```{r}
+ba = shrub_info_drones2 %>%
+    group_by(ID, site, transect, plot, species) %>%
+    summarise(total_ba = sum(total_ba)) %>%
+    spread(species, total_ba, fill = 0)
+ba  
+```
+
+```{r}
+species = shrub_info_drones2 %>%
+    group_by(ID, site, transect, plot, species) %>%
+    summarise(n = n()) %>%
+    mutate(shrubs = sum(n)) %>%
+    spread(species, n, fill = 0)
+species
+```
+
+
+
+
+### combine
+```{r}
+merge1 = merge(plot_area, total_ba,  by=c("ID","site", "transect", "plot"))
+merge1
+```
+
+```{r}
+merge2 = merge(species,  ba,  by=c("ID","site", "transect", "plot"))
+merge2
+```
+
+
+```{r}
+merge3 = merge(merge1,  merge2,  by=c("ID","site", "transect", "plot"))
+merge3
+```
+
+```{r}
+names(merge3)
+```
+
+```{r}
+shrub_info_uav = merge3 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x", bevi_ct = "Betula divaricata.x", bena_ct = "Betula nana ssp. exilis.x", betu_ct = "Betula spp..x", salix_ct = "Salix spp..x", alnus_ba = "Alnus spp..y", bevi_ba = "Betula divaricata.y", bena_ba = "Betula nana ssp. exilis.y", betu_ba = "Betula spp..y", salix_ba = "Salix spp..y")
+```
+
+
+
+```{r}
+write.csv(shrub_info_uav,"../outputs/field_subset/shrub_info_uav.csv", row.names = FALSE)
 ```
 
