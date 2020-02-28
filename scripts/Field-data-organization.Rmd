@@ -122,7 +122,19 @@ Summarise tree info to plot
 tree_info_drones1 = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*0.00007854))
 ```
 
+```{r}
+plot = tree_info_drones1 %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(area_sampled_m2 = median(area_sampled_m2)) 
+  
+```
 
+```{r}
+radius = tree_info_drones1 %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(radius = median(radius)) 
+  
+```
 
 ```{r}
 ba = tree_info_drones1 %>%
@@ -132,7 +144,7 @@ ba = tree_info_drones1 %>%
 ```
 
 ```{r}
-tree_info_drones1 %>%
+stems = tree_info_drones1 %>%
     group_by(ID, site, transect, plot, live) %>%
     summarise(n = n()) %>%
     mutate(stems = sum(n)) %>%
@@ -140,21 +152,9 @@ tree_info_drones1 %>%
 ```
 
 
-# Note after summarization, last grouping variable is dropped
-# This dataset now grouped by plot
-# That makes it easy to add another column,
-    # which is total number of stems per plot via summing
-stem3 %>%
-    group_by(plot, killed.by) %>%
-    summarise(n = n()) %>%
-    mutate(stems = sum(n))
-
-# Save for further manipulation
-sumdat = stem3 %>%
-    group_by(plot, killed.by) %>%
-    summarise(n = n()) %>%
-    mutate(stems = sum(n))
-
+```{r}
+tree_info_uav = merge(stems,  ba,  by=c("ID","site", "transect", "plot"))
+tree_info_uav
 ```
 
 
@@ -163,6 +163,6 @@ sumdat = stem3 %>%
 
 
 ```{r}
-write.csv(site_info_drones,"../outputs/field_subset/site_info_uav.csv", row.names = FALSE)
+write.csv(tree_plot,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
 ```
 
