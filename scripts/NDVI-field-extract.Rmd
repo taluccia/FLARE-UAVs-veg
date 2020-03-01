@@ -209,12 +209,108 @@ ndvi_qm
 write.csv(ndvi_qm,"../outputs/extracted_data/ndvi_25cm.csv", row.names = FALSE)
 ```
 
+
+## Tree - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_tree = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_cn_tr1_tree = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=cn_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr2_tree = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=cn_tr2_pt$radius, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_tree$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_alnus_tr1_tree
+```
+
+```{r}
+extract_cn_tr1_tree$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_cn_tr1_tree
+```
+
+```{r}
+extract_cn_tr2_tree$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_cn_tr2_tree
+```
+
+
+```{r}
+ndvi_tree = bind_rows(extract_alnus_tr1_tree, extract_cn_tr1_tree, extract_cn_tr2_tree) %>% dplyr::select(plot_id, mean_ndvi_tree) %>% rename(ID = plot_id)
+length(unique(ndvi_tree$ID))
+ndvi_tree
+```
+
+
+
+```{r}
+write.csv(ndvi_tree,"../outputs/extracted_data/ndvi_tree.csv", row.names = FALSE)
+```
+
+
+## shrub - extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+
+```{r}
+
+extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=alnus_tr1_pt$plt_lng, fun=mean, df=TRUE )
+extract_cn_tr1_shrub = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=cn_tr1_pt$plt_lng, fun=mean,  df=TRUE )
+extract_cn_tr2_shrub = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=cn_tr2_pt$plt_lng, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_shrub$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_alnus_tr1_shrub
+```
+
+```{r}
+extract_cn_tr1_shrub$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_cn_tr1_shrub
+```
+
+```{r}
+extract_cn_tr2_shrub$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_cn_tr2_shrub
+```
+
+
+```{r}
+ndvi_shrub = bind_rows(extract_alnus_tr1_shrub, extract_cn_tr1_shrub, extract_cn_tr2_shrub) %>% dplyr::select(plot_id, mean_ndvi_shrub) %>% rename(ID = plot_id)
+length(unique(ndvi_shrub$ID))
+ndvi_shrub
+```
+
+
+
+```{r}
+write.csv(ndvi_shrub,"../outputs/extracted_data/ndvi_shrub.csv", row.names = FALSE)
+```
+
+
+
+
 # Combine ndvi data
 
 ```{r}
 ndvi_merge1 = merge(ndvi_1m, ndvi_3m,  by= "ID")
-ndvi_merge1
-ndvi = merge(ndvi_merge1, ndvi_qm,  by="ID")
+ndvi_merge2 = merge(ndvi_merge1, ndvi_qm, by="ID")
+ndvi_merge3 = merge(ndvi_tree, ndvi_shrub,  by="ID")
+ndvi = merge(ndvi_merge2, ndvi_merge3,  by="ID")
 ndvi
 ```
 

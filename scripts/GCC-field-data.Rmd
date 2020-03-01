@@ -371,12 +371,12 @@ names(alnus_tr1_pt)
 ```{r}
 
 extract_alnus_tr1_tree = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_ans_tr2_tree = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_ans_tr3_tree = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_brp_tr1_tree = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_brp_tr2_tree = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_cn_tr1_tree = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_cn_tr2_tree = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_ans_tr2_tree = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=ans_tr2_pt$radius, fun=mean, df=TRUE )
+extract_ans_tr3_tree = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=ans_tr3_pt$radius, fun=mean,  df=TRUE )
+extract_brp_tr1_tree = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=brp_tr1_pt$radius, fun=mean, df=TRUE )
+extract_brp_tr2_tree = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=brp_tr2_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr1_tree = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=cn_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr2_tree = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=cn_tr2_pt$radius, fun=mean,  df=TRUE )
 ```
 
 
@@ -441,14 +441,18 @@ write.csv(gcc_tree,"../outputs/extracted_data/gcc_tree.csv", row.names = FALSE)
 
 ## Shrub -variable plot size extract mean pixel values
 ```{r}
+head(ans_tr2_pt)
+```
 
-extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_ans_tr2_shrub = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_ans_tr3_shrub = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_brp_tr1_shrub = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
-extract_brp_tr2_shrub = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_cn_tr1_shrub = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
-extract_cn_tr2_shrub = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+```{r}
+
+extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=alnus_tr1_pt$plt_lng, fun=mean, df=TRUE )
+extract_ans_tr2_shrub = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=ans_tr2_pt$plt_lng, fun=mean, df=TRUE )
+extract_ans_tr3_shrub = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=ans_tr3_pt$plt_lng, fun=mean,  df=TRUE )
+extract_brp_tr1_shrub = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=brp_tr1_pt$plt_lng, fun=mean, df=TRUE )
+extract_brp_tr2_shrub = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=brp_tr2_pt$plt_lng, fun=mean,  df=TRUE )
+extract_cn_tr1_shrub = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=cn_tr1_pt$plt_lng, fun=mean,  df=TRUE )
+extract_cn_tr2_shrub = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=cn_tr2_pt$plt_lng, fun=mean,  df=TRUE )
 ```
 
 
