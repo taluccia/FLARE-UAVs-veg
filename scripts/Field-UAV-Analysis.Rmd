@@ -94,12 +94,18 @@ sites_gcc = merge(sites_subset, gcc, by="ID")
 sites_gcc
 ```
 
+```{r}
+burn_year = sites_gcc %>% dplyr::select(ID, burn_year)
+burn_year
+```
 
 
 
 ```{r}
-trees_gcc = merge(trees_subset, gcc, by="ID")
-trees_gcc
+merge1 = merge(trees_subset, gcc, by="ID")
+merge2 = merge(burn_year, merge1, by="ID")
+tree_gcc = merge2 %>% mutate(prop_live = live/stems)
+tree_gcc
 ```
 
 ```{r}
@@ -318,6 +324,129 @@ mod4_graph1
 
 ```{r}
 mod4_graph = ggplot(data = mod4_graph1, aes(x = burn_year, y = response, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=(NULL), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+
+mod4_graph  
+```
+
+
+
+
+## Model: GCC as a function of proportion of Live trees + burn year
+fit10 = glm.nb(seedling.ct ~ prop.canopy + prop.opencone + prop.cone.ct + offset(log(seedling.area)), data = fire2)
+```{r}
+mod5 = glm(mean_gcc_tree ~ prop_live + burn_year + offset(log(radius)), data = tree_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod5.res = simulateResiduals(fittedModel = mod5, n = 500)
+mod5.res$scaledResiduals
+mod5.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod5.res)
+```
+
+```{r}
+testDispersion(mod5.res)
+```
+
+### Sumamry
+```{r}
+summary(mod5)
+```
+
+### Graph
+
+```{r}
+(mod5_graph = data.frame(summary(lsmeans(mod5, ~ prop_live + burn_year + offset(log(radius))),type = "response")))
+```
+
+```{r}
+
+names(mod5_graph)[4:8] = c("response", "se", "df", "lcl", "ucl")
+mod5_graph1 = data.frame(mod5_graph)
+mod5_graph1
+
+```
+
+
+
+```{r}
+mod5_graph = ggplot(data = mod5_graph1, aes(x = burn_year, y = response, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=(NULL), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+
+mod4_graph  
+```
+
+## Model: GCC as a function of proportion of Live trees 
+fit10 = glm.nb(seedling.ct ~ prop.canopy + prop.opencone + prop.cone.ct + offset(log(seedling.area)), data = fire2)
+```{r}
+mod6 = glm(mean_gcc_tree ~ prop_live + offset(log(radius)), data = tree_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod6.res = simulateResiduals(fittedModel = mod6, n = 500)
+mod6.res$scaledResiduals
+mod6.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod6.res)
+```
+
+```{r}
+testDispersion(mod5.res)
+```
+
+### Sumamry
+```{r}
+summary(mod5)
+```
+
+### Graph
+
+```{r}
+(mod5_graph = data.frame(summary(lsmeans(mod5, ~ prop_live + burn_year + offset(log(radius))),type = "response")))
+```
+
+```{r}
+
+names(mod5_graph)[4:8] = c("response", "se", "df", "lcl", "ucl")
+mod5_graph1 = data.frame(mod5_graph)
+mod5_graph1
+
+```
+
+
+
+```{r}
+mod5_graph = ggplot(data = mod5_graph1, aes(x = burn_year, y = response, color = burn_unburn) ) + 
    geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
 geom_point(size = 3, position = position_dodge(width = .75)) + 
   labs(x=(NULL), y= "Mean GCC") +

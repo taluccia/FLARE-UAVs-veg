@@ -359,13 +359,167 @@ gcc_qm
 write.csv(gcc_qm,"../outputs/extracted_data/gcc_25cm.csv", row.names = FALSE)
 ```
 
+## Trees -variable plot size extract mean pixel values
+Use 1m buffer for GCC as  function of distance from edge
+extract(rasterA,points, buffer=150, fun=mean)
+
+- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+```{r}
+names(alnus_tr1_pt)
+```
+
+```{r}
+
+extract_alnus_tr1_tree = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_ans_tr2_tree = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_ans_tr3_tree = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_brp_tr1_tree = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_brp_tr2_tree = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr1_tree = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr2_tree = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_tree$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_alnus_tr1_tree
+```
+
+```{r}
+extract_ans_tr2_tree$plot_id = ans_tr2_pt$ID
+names(extract_ans_tr2_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_ans_tr2_tree
+```
+
+```{r}
+extract_ans_tr3_tree$plot_id = ans_tr3_pt$ID
+names(extract_ans_tr3_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_ans_tr3_tree
+```
+
+
+```{r}
+extract_brp_tr1_tree$plot_id = brp_tr1_pt$ID
+names(extract_brp_tr1_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_brp_tr1_tree
+```
+
+```{r}
+extract_brp_tr2_tree$plot_id = brp_tr2_pt$ID
+names(extract_brp_tr2_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_brp_tr2_tree
+```
+
+```{r}
+extract_cn_tr1_tree$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_cn_tr1_tree
+```
+
+```{r}
+extract_cn_tr2_tree$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_tree) = c('ID', 'mean_gcc_tree', 'plot_id')
+extract_cn_tr2_tree
+```
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+
+
+
+
+
+```{r}
+gcc_tree = bind_rows(extract_alnus_tr1_tree, extract_ans_tr2_tree, extract_ans_tr3_tree, extract_brp_tr1_tree, extract_brp_tr2_tree, extract_cn_tr1_tree, extract_cn_tr2_tree) %>% dplyr::select(plot_id, mean_gcc_tree) %>% rename(ID = plot_id)
+length(unique(gcc_tree$ID))
+gcc_tree
+```
+
+
+```{r}
+write.csv(gcc_tree,"../outputs/extracted_data/gcc_tree.csv", row.names = FALSE)
+```
+
+## Shrub -variable plot size extract mean pixel values
+```{r}
+
+extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_ans_tr2_shrub = raster::extract(ans_tr2_f04, ans_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_ans_tr3_shrub = raster::extract(ans_tr3_f06, ans_tr3_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_brp_tr1_shrub = raster::extract(brp_tr1_f09, brp_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE )
+extract_brp_tr2_shrub = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr1_shrub = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+extract_cn_tr2_shrub = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=alnus_tr1_pt$radius, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_shrub$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_alnus_tr1_shrub
+```
+
+```{r}
+extract_ans_tr2_shrub$plot_id = ans_tr2_pt$ID
+names(extract_ans_tr2_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_ans_tr2_shrub
+```
+
+```{r}
+extract_ans_tr3_shrub$plot_id = ans_tr3_pt$ID
+names(extract_ans_tr3_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_ans_tr3_shrub
+```
+
+
+```{r}
+extract_brp_tr1_shrub$plot_id = brp_tr1_pt$ID
+names(extract_brp_tr1_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_brp_tr1_shrub
+```
+
+```{r}
+extract_brp_tr2_shrub$plot_id = brp_tr2_pt$ID
+names(extract_brp_tr2_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_brp_tr2_shrub
+```
+
+```{r}
+extract_cn_tr1_shrub$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_cn_tr1_shrub
+```
+
+```{r}
+extract_cn_tr2_shrub$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_shrub) = c('ID', 'mean_gcc_shrub', 'plot_id')
+extract_cn_tr2_shrub
+```
+extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
+
+
+
+
+
+```{r}
+gcc_shrub = bind_rows(extract_alnus_tr1_shrub, extract_ans_tr2_shrub, extract_ans_tr3_shrub, extract_brp_tr1_shrub, extract_brp_tr2_shrub, extract_cn_tr1_shrub, extract_cn_tr2_shrub) %>% dplyr::select(plot_id, mean_gcc_shrub) %>% rename(ID = plot_id)
+length(unique(gcc_shrub$ID))
+gcc_shrub
+```
+
+
+```{r}
+write.csv(gcc_shrub,"../outputs/extracted_data/gcc_shrub.csv", row.names = FALSE)
+```
+
 
 # COmbine gcc data
 
 ```{r}
 gcc_merge1 = merge(gcc_1m, gcc_3m,  by= "ID")
 gcc_merge1
-gcc = merge(gcc_merge1, gcc_qm,  by="ID")
+gcc_merge2 = merge(gcc_merge1, gcc_qm,  by="ID")
+gcc_merge3 = merge(gcc_tree, gcc_shrub, by="ID")
+gcc = merge(gcc_merge2, gcc_merge3, by="ID")
 gcc
 ```
 

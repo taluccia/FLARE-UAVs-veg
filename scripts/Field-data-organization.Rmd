@@ -95,7 +95,7 @@ head(tree_info)
 and select the columns needed to agregate to plot level
 ```{r}
 tree_info2 = tree_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  select(ID, region:plot, diameter_cm, live, radius, area_sampled_m2)
+  dplyr::select(ID, region:plot, diameter_cm, live, radius, area_sampled_m2)
 tree_info2
 ```
 
@@ -186,6 +186,13 @@ tree_info_uav
 write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
 ```
 
+```{r}
+tree_radius = tree_info_uav %>% dplyr::select(ID, area_sampled_m2:radius)
+```
+
+```{r eval=FALSE, include=FALSE}
+write.csv(tree_radius,"../outputs/field_subset/tree_radius.csv", row.names = FALSE)
+```
 
 # Shrub Info
 
@@ -207,7 +214,7 @@ head(shrub_info)
 and select the columns needed to agregate to plot level
 ```{r}
 shrub_info2 = shrub_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  select(ID, region:plot, plot_width:basal_diameter_cm)
+ dplyr:: select(ID, region:plot, plot_width:basal_diameter_cm)
 shrub_info2
 ```
 
@@ -252,6 +259,21 @@ shrub_info_drones2 = dplyr::mutate(shrub_info_drones1, area_plot_m2 = (plot_widt
 shrub_info_drones2 
 ```
 
+```{r}
+width_plot = shrub_info_drones2 %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(plot_width = median(plot_width)) 
+
+width_plot  
+```
+
+```{r}
+length_plot = shrub_info_drones2 %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(plot_length = median(plot_length)) 
+
+length_plot  
+```
 ```{r}
 plot_area = shrub_info_drones2  %>%
     group_by(ID, site, transect, plot) %>%
@@ -298,10 +320,18 @@ merge2 = merge(species,  ba,  by=c("ID","site", "transect", "plot"))
 merge2
 ```
 
+```{r}
+merge3 = merge(width_plot, length_plot, by=c("ID","site", "transect", "plot"))
+```
+
 
 ```{r}
-merge3 = merge(merge1,  merge2,  by=c("ID","site", "transect", "plot"))
-merge3
+merge4 = merge(merge1,  merge2,  by=c("ID","site", "transect", "plot"))
+merge4
+```
+```{r}
+merge5 = merge(merge4,  merge3,  by=c("ID","site", "transect", "plot"))
+merge5
 ```
 
 ```{r}
@@ -309,7 +339,7 @@ names(merge3)
 ```
 
 ```{r}
-shrub_info_uav = merge3 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x", bevi_ct = "Betula divaricata.x", bena_ct = "Betula nana ssp. exilis.x", betu_ct = "Betula spp..x", salix_ct = "Salix spp..x", alnus_ba = "Alnus spp..y", bevi_ba = "Betula divaricata.y", bena_ba = "Betula nana ssp. exilis.y", betu_ba = "Betula spp..y", salix_ba = "Salix spp..y")
+shrub_info_uav = merge5 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x", bevi_ct = "Betula divaricata.x", bena_ct = "Betula nana ssp. exilis.x", betu_ct = "Betula spp..x", salix_ct = "Salix spp..x", alnus_ba = "Alnus spp..y", bevi_ba = "Betula divaricata.y", bena_ba = "Betula nana ssp. exilis.y", betu_ba = "Betula spp..y", salix_ba = "Salix spp..y")
 ```
 
 
@@ -318,3 +348,11 @@ shrub_info_uav = merge3 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x",
 write.csv(shrub_info_uav,"../outputs/field_subset/shrub_info_uav.csv", row.names = FALSE)
 ```
 
+```{r}
+shrub_plot_size = shrub_info_uav %>% dplyr::select(ID, area_sampled_m2, plot_width, plot_length)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(shrub_plot_size,"../outputs/field_subset/shrub_plot_size.csv", row.names = FALSE)
+```

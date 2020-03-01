@@ -47,6 +47,8 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +d
 
 ```{r}
 field_data = read.csv("../data/field/site_info_2018-2019.csv")
+tree_data = read.csv("../data/field_subset/tree_radius.csv")
+shrub_data = read.csv("../data/field_subset/shrub_plot_size.csv")
 ```
 
 
@@ -54,20 +56,37 @@ field_data = read.csv("../data/field/site_info_2018-2019.csv")
 head(field_data)
 ```
 
+```{r}
+head(tree_data)
+```
+
+```{r}
+head(shrub_data)
+```
 # Subset field data by transect
 
 ## Create a unique ID for each point
 ```{r}
-field_data2 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  dplyr::select(ID, longitude, latitude, elevation, month:photopoint_files)
-field_data2
+field_data3 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
+  dplyr::select(ID, longitude:elevation, region:plot, slope:aspect)
+field_data3
 ```
+
+```{r}
+merge1 = merge(field_data2, shrub_data, by="ID")
+merge2 = merge(merge1, tree_data, by="ID")
+
+field_data3 = merge2 %>% rename(shrub_area = area_sampled_m2.x, area_tree = area_sampled_m2.y)
+field_data3
+```
+
+
 
 ## ANS_tr2
 
 Sort and filter field data transects
 ```{r}
-fd_ans_tr2 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
+fd_ans_tr2 = field_data3 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
 fd_ans_tr2
 ```
 
@@ -99,7 +118,7 @@ fd_ans_tr2_ee_10m_sf = st_as_sf(fd_ans_tr2_ee_10m)
 
 
 Plot with ggplot and labels
-```{r}
+```{r eval=FALSE, include=FALSE}
 ggplot() +
   geom_sf(data=fd_ans_tr2_pt_sf) +
   geom_text(data = fd_ans_tr2_pt_sf, aes(x = longitude, y=latitude, label = ID), size = 1)
@@ -108,7 +127,7 @@ ggplot() +
 ## ANS_tr3
 Sort and filter field data transects
 ```{r}
-fd_ans_tr3 = field_data2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
+fd_ans_tr3 = field_data3 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 3)
 fd_ans_tr3
 ```
 
@@ -143,7 +162,7 @@ fd_ans_tr3_ee_10m_sf = st_as_sf(fd_ans_tr3_ee_10m)
 
 Sort and filter field data transects
 ```{r}
-fd_alnus_tr1 = field_data2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
+fd_alnus_tr1 = field_data3 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
 fd_alnus_tr1
 ```
 
@@ -175,7 +194,7 @@ fd_alnus_tr1_ee_10m_sf = st_as_sf(fd_alnus_tr1_ee_10m)
 
 Sort and filter field data transects
 ```{r}
-fd_bp_tr1 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
+fd_bp_tr1 = field_data3 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 1)
 fd_bp_tr1
 ```
 
@@ -209,7 +228,7 @@ fd_bp_tr1_ee_10m_sf = st_as_sf(fd_bp_tr1_ee_10m)
 
 Sort and filter field data transects
 ```{r}
-fd_bp_tr2 = field_data2 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
+fd_bp_tr2 = field_data3 %>% group_by(site) %>% filter(site=='BP') %>% group_by(transect) %>% filter(transect == 2)
 fd_bp_tr2
 ```
 
@@ -240,14 +259,14 @@ fd_bp_tr2_ee_10m_sf = st_as_sf(fd_bp_tr2_ee_10m)
 ## CN_tr1
 Sort and filter field data transects
 ```{r}
-fd_cn_tr1 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
+fd_cn_tr1 = field_data3 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 1)
 fd_cn_tr1
 ```
 
 
 Define coordinates and generate spatial point data frame with attributes
 ```{r}
-coord_cn_tr1 = cbind(fd_ch_tr1$longitude, fd_cn_tr1$latitude)
+coord_cn_tr1 = cbind(fd_cn_tr1$longitude, fd_cn_tr1$latitude)
 fd_cn_tr1_pt <- SpatialPointsDataFrame(coord_cn_tr1, proj4string = CRS(wgs_proj), data = fd_cn_tr1)
 ```
 
@@ -273,7 +292,7 @@ fd_cn_tr1_ee_10m_sf = st_as_sf(fd_cn_tr1_ee_10m)
 ## CN_tr2
 Sort and filter field data transects
 ```{r}
-fd_cn_tr2 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
+fd_cn_tr2 = field_data3 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
 fd_cn_tr2
 ```
 
@@ -300,34 +319,7 @@ fd_cn_tr2_ee_10m_sf = st_as_sf(fd_cn_tr2_ee_10m)
 ```
 
 
-## CN_tr3
-Sort and filter field data transects
-```{r}
-fd_cn_tr3 = field_data2 %>% group_by(region) %>% filter(region == "Cherskiy") %>% group_by(site) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 3)
-fd_cn_tr3
-```
 
-Define coordinates and generate spatial point data frame with attributes
-```{r}
-coords_cn_tr3 = cbind(fd_cn_tr3$longitude, fd_cn_tr3$latitude)
-fd_cn_tr3_pt <- SpatialPointsDataFrame(coords_cn_tr3, proj4string = CRS(wgs_proj), data = fd_cn_tr3)
-```
-
-Transform to Equal area projection
-```{r}
-fd_cn_tr3_ee <- spTransform(fd_cn_tr3_pt, CRS(ee_russia))
-```
-
-Generate a spatial buffer
-```{r}
-fd_cn_tr3_ee_10m = gBuffer(fd_cn_tr3_ee, width = 10, capStyle="ROUND", joinStyle="ROUND")
-```
-
-Transform from sp to sf
-```{r}
-fd_cn_tr3_ee_sf = st_as_sf(fd_cn_tr3_ee)
-fd_cn_tr3_ee_10m_sf = st_as_sf(fd_cn_tr3_ee_10m)
-```
 
 ## Write to shape file
 
@@ -340,7 +332,7 @@ st_write(fd_bp_tr1_ee_sf, "../outputs/field-data/point/bp_tr1_ee_pt.shp", driver
 st_write(fd_bp_tr2_ee_sf, "../outputs/field-data/point/bp_tr2_ee_pt.shp", driver="ESRI Shapefile") 
 st_write(fd_cn_tr1_ee_sf, "../outputs/field-data/point/cn_tr1_ee_pt.shp", driver="ESRI Shapefile") 
 st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/point/cn_tr2_ee_pt.shp", driver="ESRI Shapefile") 
-st_write(fd_cn_tr3_ee_sf, "../outputs/field-data/point/cn_tr3_ee_pt.shp", driver="ESRI Shapefile") 
+
 ```
 
 Buffers
@@ -352,6 +344,6 @@ st_write(fd_bp_tr1_ee_10m_sf, "../outputs/field-data/buffer/bp_tr1_ee_10m.shp", 
 st_write(fd_bp_tr2_ee_10m_sf, "../outputs/field-data/buffer/bp_tr2_ee_10m.shp", driver="ESRI Shapefile") 
 st_write(fd_cn_tr1_ee_10m_sf, "../outputs/field-data/buffer/cn_tr1_ee_10m.shp", driver="ESRI Shapefile") 
 st_write(fd_cn_tr2_ee_10m_sf , "../outputs/field-data/buffer/cn_tr2_ee_10m.shp", driver="ESRI Shapefile") 
-st_write(fd_cn_tr3_ee_10m_sf , "../outputs/field-data/buffer/cn_tr3_ee_10m.shp", driver="ESRI Shapefile") 
+ 
 ```
 
