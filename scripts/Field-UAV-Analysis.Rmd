@@ -92,7 +92,7 @@ ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
 
 ```{r}
 sites_gcc = merge(sites_subset, gcc, by="ID") 
-sites_gcc = sites_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis))
+sites_gcc = sites_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis)) %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
 sites_gcc
 str(sites_gcc)
 ```
@@ -108,14 +108,14 @@ burn_year
 merge1 = merge(trees_subset, gcc, by="ID")
 merge2 = merge(burn_year, merge1, by="ID")
 tree_gcc = merge2 %>% mutate(prop_live = live/stems)
-tree_gcc = tree_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis))
+tree_gcc = tree_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis))%>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
 tree_gcc
 ```
 
 ```{r}
 merge12 = merge(shrubs_subset, gcc, by="ID")
 shrubs_gcc = merge(burn_year, merge12, by="ID")
-shrub_gcc = shrubs_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis))
+shrub_gcc = shrubs_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis)) %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
 shrub_gcc
 ```
 ### Add NDVI
@@ -128,19 +128,54 @@ tree_gcc_ndvi
 shrub_gcc_ndvi = merge(shrubs_gcc, ndvi_all, by = "ID")
 shrub_gcc_ndvi
 ```
+# Define grpah Theme and color Palette 
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+ 
+```{r}
 
+reg_theme = theme_bw() + theme(legend.position = "bottom") +
+  theme(axis.title.x = element_text(face = "bold", size = 12, hjust = 0.5, vjust = -0.3),
+        axis.title.y = element_text(face = "bold", size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
 
 # Data visualization
 
+
 ```{r}
-ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(burn_year))) +
+ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(transect_ID))) +
          geom_point(size = 3) +
-         scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+         scale_color_manual(values=cbbPalette) +
           ylab("mean gcc (25cm)") +
           xlab("distance from edge")  +
           theme_bw() 
 ```
 
+
+
+```{r}
+ggplot(data = sites_gcc_ndvi, aes(x = mean_gcc_25cm , y = mean_ndvi_25cm, color = factor(transect_ID))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean ndvi (25cm)") +
+          xlab("mean gcc (25cm)")  +
+          theme_bw() 
+```
 
 ```{r}
 ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_1m, color = factor(burn_year))) +
@@ -181,9 +216,9 @@ ggplot(data = shrubs_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(
 
 # Analysis GCC: 
 
-## Model: distance from eadge
+## 1. Model: distance from eadge
 ```{r}
-mod_dis = glm(mean_gcc_25cm ~ plot_dis, data = sites_gcc, family = gaussian)
+mod_dis = glm(mean_gcc_25cm ~ plot_dis:burn_year, data = sites_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -206,10 +241,44 @@ testDispersion(mod_dis.res)
 ```{r}
 summary(mod_dis)
 ```
+### Predicted data for for graph
+```{r}
+preddatgcc_dis = data.frame(plot_dis = sites_gcc$plot_dis, burn_year = sites_gcc$burn_year)
+
+head(preddatgcc_dis)
+
+predgcc_dis = predict(mod_dis, newdata = preddatgcc_dis, se.fit = TRUE)
+
+UL_gcc_dis = with(predgcc_dis, fit + 2*se.fit)
+LL_gcc_dis = with(predgcc_dis, fit - 2*se.fit)
+
+sites_gcc1 = mutate(sites_gcc, predgcc_dis = (predgcc_dis$fit), 
+               ucl_gcc_dis = (UL_gcc_dis), 
+               lcl_gcc_dis = (LL_gcc_dis))
+```
+
+
+### Graph  
+
+```{r}
+plot1_dis = ggplot(data = sites_gcc1, aes(x = plot_dis, y = mean_gcc_25cm, color = factor(burn_year) )) + 
+    geom_line(aes(y = predgcc_dis, color = factor(burn_year)), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_gcc_dis, ymax = ucl_gcc_dis, fill = burn_year, color = NULL, show.legend = FALSE), alpha = .15) +
+    scale_fill_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73"), guide = FALSE) + 
+    geom_line(aes(y= lcl_gcc_dis, color = factor(burn_year)), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_gcc_dis, color = factor(burn_year)), linetype='longdash', size = 1) +
+    scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) + 
+    ylab("Mean GCC (25cm)") +
+    xlab("Distance  from edge")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+plot1_dis
+```
 
 
 
-## Model: burn/unburned
+
+## 2. Model: burn/unburned
 ```{r}
 mod2 = glm(mean_gcc_25cm ~ burn_unburn, data = sites_gcc, family = gaussian)
 ```
@@ -263,20 +332,14 @@ mod2_graph = ggplot(data = mod2_graph1, aes(x = burn_unburn, y = response, color
 geom_point(size = 3, position = position_dodge(width = .75)) + 
   labs(x=(NULL), y= "Mean GCC") +
   scale_color_manual(values = c("tan", "darkgreen")) + 
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
+  comp_theme
 
 mod2_graph  
 ```
 
-## Model: burn year
+## 3. Model: GCC as a function of transects
 ```{r}
-mod3 = glm(mean_gcc_25cm ~ burn_year, data = sites_gcc, family = gaussian)
+mod3 = glm(mean_gcc_25cm ~ transect_ID, data = sites_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -303,17 +366,17 @@ summary(mod3)
 ### Graph
 
 ```{r}
-(mod3_graph = data.frame(summary(lsmeans(mod3, ~ burn_year),type = "response")))
+(mod3_graph = data.frame(summary(lsmeans(mod3, ~ transect_ID),type = "response")))
 ```
 
 ```{r}
 
 
-( mod3_graph1 = dplyr::select(mod3_graph, burn_year:asymp.UCL))
+( mod3_graph1 = dplyr::select(mod3_graph, transect_ID:asymp.UCL))
 
 
 
-names(mod3_graph1)[1:6] = c("burn_year", "response", "se", "df", "lcl", "ucl")
+names(mod3_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
 mod3_graph1 = data.frame(mod3_graph1)
 mod3_graph1
 
@@ -322,24 +385,18 @@ mod3_graph1
 
 
 ```{r}
-mod3_graph = ggplot(data = mod3_graph1, aes(x = burn_year, y = response, color = burn_year) ) + 
+plot_mod3 = ggplot(data = mod3_graph1, aes(x = transect_ID, y = response, color = transect_ID) ) + 
    geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
 geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=(NULL), y= "Mean GCC") +
-  scale_color_manual(values = c("#000000", "#E69F00", "#56B4E9", "#009E73")) + 
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
+  labs(x=("Transect ID"), y= "Mean GCC") +
+  scale_color_manual(values = cbbPalette) + 
+  comp_theme 
 
-mod3_graph  
+plot_mod3  
 ```
 
 
-## Model: burn/unburned + burn year
+## 4. Model: burn/unburned + burn year
 ```{r}
 mod4 = glm(mean_gcc_25cm ~ burn_year + burn_unburn, data = sites_gcc, family = gaussian)
 ```
@@ -394,13 +451,7 @@ mod4_graph = ggplot(data = mod4_graph1, aes(x = burn_year, y = response, color =
 geom_point(size = 3, position = position_dodge(width = .75)) + 
   labs(x=(NULL), y= "Mean GCC") +
   scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
+comp_theme
 
 mod4_graph  
 ```
@@ -408,7 +459,7 @@ mod4_graph
 
 
 
-## Model: GCC as a function of proportion of Live trees + burn year
+## 5. Model: GCC as a function of proportion of Live trees + burn year
 fit10 = glm.nb(seedling.ct ~ prop.canopy + prop.opencone + prop.cone.ct + offset(log(seedling.area)), data = fire2)
 ```{r}
 head(tree_gcc)
@@ -416,7 +467,7 @@ head(tree_gcc)
 
 
 ```{r}
-mod5 = glm(mean_gcc_tree ~ prop_live:burn_year + offset(log(area_sampled_m2)), data = tree_gcc, family = gaussian(link = "log"))
+mod5 = glm(mean_gcc_tree ~ prop_live + offset(log(area_sampled_m2)), data = tree_gcc, family = gaussian(link = "log"))
 ```
 
 ### Residuals with DHARMa
@@ -440,110 +491,69 @@ testDispersion(mod5.res)
 summary(mod5)
 ```
 
-### Graph
+### Data for graph
 
 ```{r}
-(mod5_graph = data.frame(summary(lsmeans(mod5, ~ prop_live:burn_year + offset(log(area_sampled_m2))),type = "response")))
+(mod5_graph = data.frame(summary(lsmeans(mod5, ~ prop_live + offset(log(area_sampled_m2))),type = "response")))
 ```
 
 ```{r}
 
-names(mod5_graph)[4:8] = c("response", "se", "df", "lcl", "ucl")
+names(mod5_graph)[6:7] = c("response", "se", "df", "lcl", "ucl")
 mod5_graph1 = data.frame(mod5_graph)
 mod5_graph1
 
 ```
 
-
-
 ```{r}
-mod5_graph = ggplot(data = mod5_graph1, aes(x = burn_year, y = response, color = burn_unburn) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=(NULL), y= "Mean GCC") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
+preddat5 = data.frame(prop_live = tree_gcc$prop_live, area_sampled_m2 = 314.16)
 
-mod4_graph  
-```
-```{r}
-min(tree_gcc$area_sampled_m2)
-max(tree_gcc$area_sampled_m2)
-```
+head(preddat5)
 
+pred5 = predict(mod5, newdata = preddat5, se.fit = TRUE)
 
-```{r}
-preddat1 = data.frame(prop_live = tree_gcc$prop_live, burn_year = tree_gcc$burn_year, area_sampled_m2 = 314.16)
+UL5 = with(pred5, fit + 2*se.fit)
+LL5 = with(pred5, fit - 2*se.fit)
 
-head(preddat1)
-
-pred1 = predict(mod5, newdata = preddat1, se.fit = TRUE)
-pred1
-UL = with(pred1, fit + 2*se.fit)
-LL = with(pred1, fit - 2*se.fit)
-
-tree_gcc1 = mutate(tree_gcc, pred1 = exp(pred1$fit), 
-               ucl = exp(UL), 
-               lcl = exp(LL), 
+tree_gcc1 = mutate(tree_gcc, pred5 = pred5$fit, 
+               ucl_mod5 = UL5, 
+               lcl_mod5 = LL5, 
                area_sampled_m2 = 314.16)
 ```
-```{r}
-head(tree_gcc1)
-```
-```{r}
-min(tree_gcc1$mean_gcc_tree)
-max(tree_gcc1$mean_gcc_tree)
 
-min(tree_gcc1$mean_gcc_tree)
-max(tree_gcc1$mean_gcc_tree)
-```
-
-### FIGURE  (Color, RIbbon, no Legend)
 ```{r}
-(plot1 = ggplot(data = tree_gcc1, aes(x = prop_live, y = mean_gcc_tree, color = factor(burn_year) )) + 
-    geom_line(aes(y = pred1, color = factor(burn_year)), linetype = 1, size = 2) + 
-        scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) + 
+min(tree_gcc$mean_gcc_tree)
+```
+### Graph
+
+```{r}
+plot_mod5 = ggplot(data = tree_gcc1, aes(x = prop_live, y = mean_gcc_tree)) + 
+    geom_line(aes(y = pred5), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
     ylab("Mean GCC") +
-    xlab("Proportion of live")  +
-    theme_bw() +
-    theme(legend.position = "none") +
-    theme(axis.title.x = element_text(face = "bold", size = 12, hjust = 0.5, vjust = -0.3),
-        axis.title.y = element_text(face = "bold", size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
+    xlab("Proportion of live trees")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
-( plot2 = plot1 + 
-        geom_line(aes(y=lcl, color = factor(burn_year)), linetype = 'longdash', size = 1) + 
-        geom_line(aes(y=ucl, color = factor(burn_year)), linetype='longdash', size = 1)  )
-
-( plot3 = plot2 + 
-  geom_ribbon(aes(ymin=lcl, ymax=ucl, fill= burn_year), linetype = 0, alpha=.25) +
-    scale_fill_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) ) 
+plot_mod5
 ```
 
 
 # Analysis NDVI
 
 
-## Model: distance from edge
+## 6.  Model: distance from edge
 canopymod1 = glmer(canopy2 ~ mortality + burncon + (1 | id), data = biomass, family = binomial(link = "logit"))
 ```{r}
-mod_dis2 = glm(mean_ndvi_25cm ~ plot_dis, data = sites_gcc_ndvi, family = gaussian)
+mod6 = glm(mean_ndvi_25cm ~ plot_dis:burn_year, data = sites_gcc_ndvi, family = gaussian)
 ```
 
 ### Residuals with DHARMa
 ```{r, include=FALSE}
-mod_dis2.res = simulateResiduals(fittedModel = mod_dis2, n = 500)
-mod_dis2.res$scaledResiduals
-mod_dis2.res$scaledResidualsNormal
+mod6.res = simulateResiduals(fittedModel = mod6, n = 500)
+mod6.res$scaledResiduals
+mod6.res$scaledResidualsNormal
 ```
 
 In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
@@ -561,4 +571,115 @@ summary(mod_dis2)
 ```
 
 
+
+```{r}
+preddat_ndvi = data.frame(plot_dis = sites_gcc_ndvi$plot_dis, burn_year = sites_gcc_ndvi$burn_year)
+
+head(preddat_ndvi)
+
+pred_ndvi = predict(mod_dis2, newdata = preddat_ndvi, se.fit = TRUE)
+
+UL = with(pred_ndvi, fit + 2*se.fit)
+LL = with(pred_ndvi, fit - 2*se.fit)
+
+sites_gcc_ndvi1 = mutate(sites_gcc_ndvi, pred_ndvi = exp(pred_ndvi$fit), 
+               ucl = exp(UL), 
+               lcl = exp(LL))
+```
+
+
+### FIGURE  (Color, RIbbon, no Legend)
+```{r}
+(plot1_dis2 = ggplot(data = sites_gcc_ndvi1, aes(x = plot_dis, y = mean_ndvi_25cm, color = factor(burn_year) )) + 
+    geom_line(aes(y = pred_ndvi, color = factor(burn_year)), linetype = 1, size = 2) + 
+        scale_color_manual(values=c("#000000", "#E69F00")) + 
+    ylab("Mean NDVI") +
+    xlab("Distance from edge")  +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    theme(axis.title.x = element_text(face = "bold", size = 12, hjust = 0.5, vjust = -0.3),
+        axis.title.y = element_text(face = "bold", size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) )
+
+( plot2_dis2 = plot1_dis2 + 
+        geom_line(aes(y=lcl, color = factor(burn_year)), linetype = 'longdash', size = 1) + 
+        geom_line(aes(y=ucl, color = factor(burn_year)), linetype='longdash', size = 1)  )
+
+( plot3_dis2 = plot2_dis2 + 
+  geom_ribbon(aes(ymin=lcl, ymax=ucl, fill= burn_year), linetype = 0, alpha=.25) +
+    scale_fill_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) ) 
+```
+
+
+# Analysis GCC and NDVI
+```{r}
+names(sites_gcc_ndvi)
+```
+
+## Model: distance from edge
+canopymod1 = glmer(canopy2 ~ mortality + burncon + (1 | id), data = biomass, family = binomial(link = "logit"))
+```{r}
+mod_gcc_ndvi = glm(mean_ndvi_25cm ~ mean_gcc_25cm:transect_ID, data = sites_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod_gcc_ndvi.res = simulateResiduals(fittedModel = mod_gcc_ndvi, n = 500)
+mod_gcc_ndvi.res$scaledResiduals
+mod_gcc_ndvi.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod_gcc_ndvi.res)
+```
+
+```{r}
+testDispersion(mod_gcc_ndvi.res)
+```
+
+### Sumamry
+```{r}
+summary(mod_gcc_ndvi)
+```
+
+
+
+```{r}
+preddat_gcc_ndvi = data.frame(mean_gcc_25cm = sites_gcc_ndvi$mean_gcc_25cm, transect_ID = sites_gcc_ndvi$transect_ID)
+
+head(preddat_gcc_ndvi)
+
+pred_gcc_ndvi = predict(mod_gcc_ndvi, newdata = preddat_gcc_ndvi, se.fit = TRUE)
+
+UL = with(pred_gcc_ndvi, fit + 2*se.fit)
+LL = with(pred_gcc_ndvi, fit - 2*se.fit)
+
+sites_gcc_ndvi2 = mutate(sites_gcc_ndvi, pred_gcc_ndvi = exp(pred_gcc_ndvi$fit), 
+               ucl = exp(UL), 
+               lcl = exp(LL))
+```
+
+
+### FIGURE  (Color, RIbbon, no Legend)
+
+```{r}
+(plot1_sp = ggplot(data = sites_gcc_ndvi2, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm, color = factor(transect_ID) )) + 
+    geom_line(aes(y = pred_gcc_ndvi, color = factor(transect_ID)), linetype = 1, size = 2) + 
+   geom_line(aes(y=lcl, color = factor(transect_ID)), linetype = 'longdash', size = 1) + 
+        geom_line(aes(y=ucl, color = factor(transect_ID)), linetype='longdash', size = 1) +
+        scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9")) + 
+    ylab("Mean NDVI") +
+    xlab("Mean GCC")  +
+    graph_theme + guides(color=guide_legend(override.aes=list(fill=NA))) )
+
+
+
+( plot2_sp = plot1_sp + 
+  geom_ribbon(aes(ymin=lcl, ymax=ucl, fill= transect_ID, show.legend = FALSE), linetype = 0, alpha=.25) +
+    scale_fill_manual(values=c("#000000", "#E69F00", "#56B4E9"), guide = FALSE) ) 
+```
 
