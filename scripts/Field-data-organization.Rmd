@@ -122,7 +122,7 @@ tree_info_drones
 
 ## Aggregate tree info to plot info
 Summarise tree info to plot
-  - Convert diamter to basal area (BA = 0.005454*DBH^2)
+  - Convert diamter to basal area 
   - Total basal area
   - count of live stems
   - count of dead stems
