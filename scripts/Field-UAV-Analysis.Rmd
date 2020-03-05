@@ -170,6 +170,75 @@ ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(tr
           theme_bw() 
 ```
 
+```{r}
+ggplot(data = shrub_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("shrub basal area") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+```{r}
+ggplot(data = tree_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("Tree basal area") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+```{r}
+ggplot(data = tree_gcc, aes(x = transect_ID , y = prop_live, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("Proportion live trees") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+
+## Boxplot with points
+```{r}
+ggplot(data = sites_gcc, aes(x = transect_ID , y = mean_gcc_25cm, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean gcc (25cm)") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
 
 
 ```{r}
@@ -770,7 +839,7 @@ plot_mod6 = ggplot(data = sites_gcc_ndvi1, aes(x = plot_dis, y = mean_gcc_25cm, 
     geom_line(aes(y= lcl_mod6, color = factor(burn_year)), linetype = 'longdash', size = 1) + 
     geom_line(aes(y= ucl_mod6, color = factor(burn_year)), linetype='longdash', size = 1) +
     scale_color_manual(values=c("#E69F00", "#56B4E9")) + 
-    ylab("Mean GCC (25cm)") +
+    ylab("Mean NDVI (25cm)") +
     xlab("Distance from edge (m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
@@ -1066,6 +1135,60 @@ plot_mod11 = ggplot(data = tree_gcc_ndvi1, aes(x = prop_live, y = mean_ndvi_tree
 plot_mod11
 ```
 
+## 14. Model: NDVI as a function of transects
+```{r}
+mod14 = glm(mean_ndvi_25cm ~ transect_ID, data = sites_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod14.res = simulateResiduals(fittedModel = mod14, n = 500)
+mod14.res$scaledResiduals
+mod14.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod14.res)
+```
+
+```{r}
+testDispersion(mod14.res)
+```
+
+### Sumamry
+```{r}
+summary(mod14)
+```
+
+### Data for Graph
+
+```{r}
+(mod14_graph = data.frame(summary(lsmeans(mod14, ~ transect_ID),type = "response")))
+```
+
+```{r}
+( mod14_graph1 = dplyr::select(mod14_graph, transect_ID:asymp.UCL))
+
+names(mod14_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
+mod14_graph1 = data.frame(mod14_graph1)
+mod14_graph1
+```
+
+
+### Graph 
+
+```{r}
+plot_mod14 = ggplot(data = mod14_graph1, aes(x = transect_ID, y = response, color = transect_ID) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=("Transect ID"), y= "Mean NDVI") +
+  scale_color_manual(values = cbbPalette) + 
+  comp_theme 
+
+plot_mod14  
+```
+
 
 # Analysis of NDVI and GCC
 
@@ -1156,7 +1279,7 @@ ggsave("../figures/2020-03-02_distance-burnyr.jpeg", plot = grid2_plot16, width 
 ```
 
 ## Figure: Burned vs. Unburned
-```{r fig.height=4, fig.width=6}
+```{r fig.height=3, fig.width=6}
 
 grid_plot27 = cowplot::plot_grid(plot_mod2, plot_mod7, labels = c("A", "B"), align = "hv", ncol= 2) 
 grid_plot27
@@ -1165,7 +1288,7 @@ grid_plot27
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-03-02_burn-unburn.jpeg", plot = grid_plot27, width = 6, height = 4, units = c("in"), dpi=600 )
+ggsave("../figures/2020-03-02_burn-unburn.jpeg", plot = grid_plot27, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
 ##  Figure: Tree biomass
@@ -1181,11 +1304,23 @@ ggsave("../figures/2020-03-02_tree-gcc-ndvi.jpeg", plot = grid_plot591011, width
 ##  Figure: shrub biomass
 ```{r fig.height=3, fig.width=6}
 
-grid_plot1213 = cowplot::plot_grid(plot_mod12, plot_mod13,  labels = c("A", "B", "C"), align = "hv", ncol= 2) 
+grid_plot1213 = cowplot::plot_grid(plot_mod12, plot_mod13,  labels = c("A", "B"), align = "hv", ncol= 2) 
 grid_plot1213
 
 ```
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-03-02_shrub-gcc-ndvi.jpeg", plot = grid_plot1213, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
+##  Figure: GCC and NDVI by transect
+```{r fig.height=5, fig.width=6}
+
+grid_plot314 = cowplot::plot_grid(plot_mod3, plot_mod14,  labels = c("A", "B"), align = "hv", nrow= 2) 
+grid_plot314
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-02_transect-gcc-ndvi.jpeg", plot = grid_plot314, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
