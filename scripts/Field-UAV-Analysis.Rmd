@@ -239,7 +239,14 @@ ggplot(data = sites_gcc, aes(x = transect_ID , y = mean_gcc_25cm, color = factor
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
 ```
-
+```{r}
+ggplot(data = sites_gcc_ndvi, aes(x = mean_ndvi_25cm , y = mean_ndvi_25cm, color = factor(transect_ID))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean ndvi (25cm)") +
+          xlab("")  +
+          theme_bw() 
+```
 
 ```{r}
 ggplot(data = sites_gcc_ndvi, aes(x = mean_gcc_25cm , y = mean_ndvi_25cm, color = factor(transect_ID))) +
@@ -289,9 +296,128 @@ ggplot(data = shrubs_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(
 
 # Analysis: 
 
+# Burned vs Unburned
+# Analysis: Time Since Fire
+
+## 15. Model: GCC as a function of transects
+```{r}
+mod15 = glm(mean_gcc_25cm ~ burn_year, data = sites_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod15.res = simulateResiduals(fittedModel = mod15, n = 500)
+mod15.res$scaledResiduals
+mod15.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod15.res)
+```
+
+```{r}
+testDispersion(mod15.res)
+```
+
+### Sumamry
+```{r}
+summary(mod15)
+```
+
+### Data for Graph
+
+```{r}
+(mod15_graph = data.frame(summary(lsmeans(mod15, ~ burn_year),type = "response")))
+```
+
+```{r}
+( mod15_graph1 = dplyr::select(mod15_graph, burn_year:asymp.UCL))
+
+names(mod15_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
+mod15_graph1 = data.frame(mod15_graph1)
+mod15_graph1
+```
+
+
+### Graph 
+
+```{r}
+plot_mod15 = ggplot(data = mod15_graph1, aes(x = burn_year, y = response, color = burn_year) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=("Burn year"), y= "Mean GCC") +
+  scale_color_manual(values = cbbPalette) + 
+  comp_theme 
+
+plot_mod15  
+```
+
+## 16. Model: NDVI as a function of burn year
+```{r}
+mod16 = glm(mean_ndvi_25cm ~ burn_year, data = sites_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod16.res = simulateResiduals(fittedModel = mod16, n = 500)
+mod16.res$scaledResiduals
+mod16.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod16.res)
+```
+
+```{r}
+testDispersion(mod16.res)
+```
+
+### Sumamry
+```{r}
+summary(mod16)
+```
+
+### Data for Graph
+
+```{r}
+(mod16_graph = data.frame(summary(lsmeans(mod16, ~ burn_year),type = "response")))
+```
+
+```{r}
+( mod16_graph1 = dplyr::select(mod16_graph, burn_year:asymp.UCL))
+
+names(mod16_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
+mod16_graph1 = data.frame(mod16_graph1)
+mod16_graph1
+```
+
+
+### Graph 
+
+```{r}
+plot_mod16 = ggplot(data = mod16_graph1, aes(x = burn_year, y = response, color = burn_year) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=("Burn year"), y= "Mean NDVI") +
+   scale_color_manual(values=c("#000000", "#56B4E9")) + 
+  comp_theme 
+
+plot_mod16  
+```
+
+
+
+## Distance from Unburned
+## As it relates to vegetation cover
+## GCC relates to NDVI
+
+
+
 ## 1. Model: GCC distance from eadge
 ```{r}
-mod1 = glm(mean_gcc_25cm ~ plot_dis:burn_year, data = sites_gcc, family = gaussian)
+mod1 = glm(mean_gcc_25cm ~ plot_dis + burn_year, data = sites_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -314,6 +440,11 @@ testDispersion(mod1.res)
 ```{r}
 summary(mod1)
 ```
+
+```{r}
+(mod1_sum = data.frame(summary(lsmeans(mod1, ~ plot_dis:burn_year),type = "response")))
+```
+
 ### Predicted data for for graph
 ```{r}
 preddat_mod1 = data.frame(plot_dis = sites_gcc$plot_dis, burn_year = sites_gcc$burn_year)

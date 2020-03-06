@@ -180,6 +180,7 @@ plot(alnus_f08_multi[[7]])
 plot(alnus_f08_multi[[8]])
 ```
 
+## Pull out the 4 bands with data
 ```{r}
 alnus_f08_4band <- alnus_f08_multi[[c(1, 3, 5, 7)]]
 cn_f17_4band = cn_f17_multi[[c(1, 3, 5, 7)]] 
@@ -213,18 +214,6 @@ cn_f20_ndvi = (cn_f20_4band[[2]] - cn_f20_4band[[3]]) / (cn_f20_4band[[2]] + cn_
 plot(alnus_f08_ndvi)
 ```
 
-## Write to file
-```{r eval=FALSE, include=FALSE}
-writeRaster(alnus_f08_ndvi, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
-writeRaster(cn_f17_ndvi, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
-writeRaster(cn_f20_ndvi, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
-```
-
-
-```{r}
-plot(alnus_f08_ndvi)
-```
-
 ```{r}
 plot(cn_f17_ndvi)
 ```
@@ -233,7 +222,76 @@ plot(cn_f17_ndvi)
 plot(cn_f20_ndvi)
 ```
 
+### Write to file
+```{r eval=FALSE, include=FALSE}
+writeRaster(alnus_f08_ndvi, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f17_ndvi, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f20_ndvi, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
+```
 
+## Select bands to calculated NDVIre 
+ (nir-red) / (nir+red)
+ Band 1 - Green
+ Band 2 = NIR
+ Band 3 = Red 
+ Band 4 = Red Edge
+
+```{r}
+alnus_f08_ndvire <- (alnus_f08_4band[[2]] - alnus_f08_4band[[4]]) / (alnus_f08_4band[[2]] + alnus_f08_4band[[4]])
+cn_f17_ndvire = (cn_f17_4band[[2]] - cn_f17_4band[[4]]) / (cn_f17_4band[[2]] + cn_f17_4band[[4]])
+cn_f20_ndvire = (cn_f20_4band[[2]] - cn_f20_4band[[4]]) / (cn_f20_4band[[2]] + cn_f20_4band[[4]])
+```
+
+
+
+
+```{r}
+plot(alnus_f08_ndvire)
+```
+
+```{r}
+plot(cn_f17_ndvire)
+```
+
+```{r}
+plot(cn_f20_ndvire)
+```
+
+### Write to file
+```{r eval=FALSE, include=FALSE}
+writeRaster(alnus_f08_ndvire, filename="../outputs/ndvi/alnus_f08_NDVIre", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f17_ndvire, filename="../outputs/ndvi/cn_f17_NDVIre", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f20_ndvire, filename="../outputs/ndvi/cn_f20_NDVIre", format="GTiff", overwrite=TRUE)
+```
+
+## Select bands to calculated MSRre
+ (nir-red) / (nir+red)
+ Band 1 - Green
+ Band 2 = NIR
+ Band 3 = Red 
+ Band 4 = Red Edge
+```{r}
+alnus_f08_msrre <- ((alnus_f08_4band[[2]] / alnus_f08_4band[[3]])-1 / sqrt((alnus_f08_4band[[2]] / alnus_f08_4band[[4]])+1))
+
+
+cn_f17_ndvire = (cn_f17_4band[[2]] - cn_f17_4band[[4]]) / (cn_f17_4band[[2]] + cn_f17_4band[[4]])
+cn_f20_ndvire = (cn_f20_4band[[2]] - cn_f20_4band[[4]]) / (cn_f20_4band[[2]] + cn_f20_4band[[4]])
+```
+
+
+
+
+```{r}
+plot(alnus_f08_msrre )
+```
+
+```{r}
+plot(cn_f17_ndvire)
+```
+
+```{r}
+plot(cn_f20_ndvire)
+```
 
 
 
