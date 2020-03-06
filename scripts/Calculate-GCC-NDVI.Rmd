@@ -47,20 +47,24 @@ cn_tr1_f15
 ```
 
 
-Elena's code
-## masking to elimate unwanted values 
+# Elena's code
+masking to elimate unwanted values 
 f1b <- mask(f1[[1:3]],f1[[4]],maskvalue=0)
 plot(f1b)
 
-## calculating gcc
+calculating gcc
 gcc <- f1b[[2]]/(f1b[[1]]+f1b[[2]]+f1b[[3]])
 plot(gcc)
 
+# Look at band details
 ```{r}
 alnus_tr1_f07@layers
 ```
-
+# Calculate GCC
 gcc = G /(R+G+B)
+Band 1 = Red
+Band 2 = Green
+Band 3 = Blue
 ```{r}
 f_gcc <- function(x) {
   (x[,2])/(x[,1]+x[,2]+x[,3])
@@ -74,6 +78,9 @@ brp_tr1_f09
 brp_tr2_f12
 cn_tr2_f17
 cn_tr1_f15 
+
+cn_f20_ndvi = (cn_f20_4band[[2]] - cn_f20_4band[[3]]) / (cn_f20_4band[[2]] + cn_f20_4band[[3]])
+
 ```{r}
 alnus_tr1_f07_gcc <- calc(alnus_tr1_f07, f_gcc)
 ans_tr2_f04_gcc <- calc(ans_tr2_f04, f_gcc)
@@ -83,6 +90,21 @@ brp_tr2_f12_gcc <- calc(brp_tr2_f12, f_gcc)
 cn_tr2_f17_gcc <- calc(cn_tr2_f17, f_gcc)
 cn_tr1_f15_gcc <- calc(cn_tr1_f15, f_gcc)
 ```
+
+
+```{r}
+alnus_tr1_f07_gcc1 <-  (alnus_tr1_f07[[2]] / (alnus_tr1_f07[[1]] + alnus_tr1_f07[[2]] + alnus_tr1_f07[[3]]))
+
+```
+
+```{r}
+plot(alnus_tr1_f07_gcc)
+```
+
+```{r}
+plot(alnus_tr1_f07_gcc1)
+```
+
 
 # Write GCC to file
 ```{r eval=FALSE, include=FALSE}
@@ -123,10 +145,16 @@ plot(cn_tr2_f17_gcc)
 
 # Multispectral Data
 ```{r}
-alnus_f8 <- list.files(path="../data/multispectral/RU_ALN_TR1_FL008M", pattern =".tif$", full.names=TRUE)
-cn_f17 <- list.files(path="../data/multispectral/RU_CYN_TR2_FL017B", pattern =".tif$", full.names=TRUE)
-cn_f20 <- list.files(path="../data/multispectral/RU_CYN_TR1_FL020M", pattern =".tif$", full.names=TRUE)
+alnus_f8 <- list.files(path="../data/multispectral/RU_ALN_TR1_FL008M", pattern =".tif$", full.names=TRUE, recursive=TRUE)
+cn_f17 <- list.files(path="../data/multispectral/RU_CYN_TR2_FL017B", pattern =".tif$", full.names=TRUE, recursive=TRUE)
+cn_f20 <- list.files(path="../data/multispectral/RU_CYN_TR1_FL020M", pattern =".tif$", full.names=TRUE, recursive=TRUE)
 ```
+
+
+```{r}
+alnus_f8
+```
+
 
 ```{r}
 alnus_f08_multi = stack(alnus_f8)
@@ -145,49 +173,64 @@ cn_f20_multi
 ```{r}
 alnus_f08_multi@layers
 ```
+```{r}
+plot(alnus_f08_multi[[7]])
+```
+```{r}
+plot(alnus_f08_multi[[8]])
+```
+
+```{r}
+alnus_f08_4band <- alnus_f08_multi[[c(1, 3, 5, 7)]]
+cn_f17_4band = cn_f17_multi[[c(1, 3, 5, 7)]] 
+cn_f20_4band = cn_f20_multi[[c(1, 3, 5, 7)]] 
+
+```
+
+```{r}
+alnus_f08_4band@layers
+cn_f17_4band@layers
+cn_f17_4band@layers
+```
+
 
 ## Select bands to calculated NDVI 
  (nir-red) / (nir+red)
-```{r}
-alnus_f08_nir_red <- alnus_f08_multi[[c(5, 7)]]
-cn_f17_nir_red = cn_f17_multi[[c(5, 7)]] 
-cn_f20_nir_red = cn_f20_multi[[c(5, 7)]] 
+ Band 1 - Green
+ Band 2 = NIR
+ Band 3 = Red 
+ Band 4 = Red Edge
 
+```{r}
+alnus_f08_ndvi <- (alnus_f08_4band[[2]] - alnus_f08_4band[[3]]) / (alnus_f08_4band[[2]] + alnus_f08_4band[[3]])
+cn_f17_ndvi = (cn_f17_4band[[2]] - cn_f17_4band[[3]]) / (cn_f17_4band[[2]] + cn_f17_4band[[3]])
+cn_f20_ndvi = (cn_f20_4band[[2]] - cn_f20_4band[[3]]) / (cn_f20_4band[[2]] + cn_f20_4band[[3]])
 ```
 
-## NDVI Function
-```{r}
-f_NDVI <- function(x) {
-  (x[,1]-x[,2])/(x[,1]+x[,2])
-}
-```
 
-### Calculate NDVI
 
 ```{r}
-alnus_f08_NDVI <- calc(alnus_f08_nir_red, f_NDVI)
-cn_f17_NDVI <- calc(cn_f17_nir_red, f_NDVI)
-cn_f20_NDVI <- calc(cn_f20_nir_red, f_NDVI)
+plot(alnus_f08_ndvi)
 ```
 
 ## Write to file
 ```{r eval=FALSE, include=FALSE}
-writeRaster(alnus_f08_NDVI, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
-writeRaster(cn_f17_NDVI, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
-writeRaster(cn_f20_NDVI, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(alnus_f08_ndvi, filename="../outputs/ndvi/alnus_f08_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f17_ndvi, filename="../outputs/ndvi/cn_f17_NDVI", format="GTiff", overwrite=TRUE)
+writeRaster(cn_f20_ndvi, filename="../outputs/ndvi/cn_f20_NDVI", format="GTiff", overwrite=TRUE)
 ```
 
 
 ```{r}
-plot(alnus_f08_NDVI)
+plot(alnus_f08_ndvi)
 ```
 
 ```{r}
-plot(cn_f17_NDVI)
+plot(cn_f17_ndvi)
 ```
 
 ```{r}
-plot(cn_f20_NDVI)
+plot(cn_f20_ndvi)
 ```
 
 
