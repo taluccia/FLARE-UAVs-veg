@@ -296,7 +296,6 @@ ggplot(data = shrubs_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(
 
 # Analysis: 
 
-# Burned vs Unburned
 # Analysis: Time Since Fire
 
 ## 15. Model: GCC as a function of transects
@@ -653,7 +652,9 @@ testDispersion(mod18.res)
 summary(mod18)
 ```
 
-
+```{r}
+(mod18_sum = data.frame(summary(lsmeans(mod18, ~ plot_dis),type = "response")))
+```
 
 ```{r}
 preddat_mod18 = data.frame(plot_dis = sites_gcc_ndvi$plot_dis)
@@ -687,7 +688,7 @@ plot_mod18 = ggplot(data = sites_gcc_ndvi18, aes(x = plot_dis, y = mean_ndvi_25c
 plot_mod18
 ```
 
-# Analysis: Burned and Unburned: Difference in reflectance 
+# Analysis: Burned and Unburned
 
 ## 2. Model: GCC burn/unburned
 ```{r}
@@ -845,6 +846,10 @@ summary(mod5)
 ```
 
 ### Data for graph
+```{r}
+lsmeans(mod5, ~ prop_live)
+
+```
 
 ```{r}
 (mod5_graph = data.frame(summary(lsmeans(mod5, ~ prop_live), type = "response")))
@@ -1574,6 +1579,19 @@ grid_plot27
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-03-02_burn-unburn.jpeg", plot = grid_plot27, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
+## Figure: TIme since burn
+```{r fig.height=3, fig.width=6}
+
+grid_plot_tsb = cowplot::plot_grid(plot_mod15, plot_mod16, labels = c("A", "B"), align = "hv", ncol= 2) 
+grid_plot_tsb
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-12_TimeSinceBurn.jpeg", plot = grid_plot_tsb, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
 ##  Figure: Tree biomass
