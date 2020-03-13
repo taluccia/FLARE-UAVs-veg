@@ -144,7 +144,7 @@ comp_theme = theme_bw() + theme(legend.position = "none") +
 ```{r}
 
 reg_theme = theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.3, r = 0.2, b = 0.3, l = 0.1), "cm")) +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
   theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
         axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
         axis.text.x = element_text(size = 10, color = "black"),
@@ -298,9 +298,9 @@ ggplot(data = shrubs_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(
 
 # Analysis: Time Since Fire
 
-## 15. Model: GCC as a function of transects
+## 15. Model: GCC 
 ```{r}
-mod15 = glm(mean_gcc_25cm ~ burn_year, data = sites_gcc, family = gaussian)
+mod15 = glm(mean_gcc_25cm ~ burn_year:burn_unburn, data = sites_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -327,26 +327,19 @@ summary(mod15)
 ### Data for Graph
 
 ```{r}
-(mod15_graph = data.frame(summary(lsmeans(mod15, ~ burn_year),type = "response")))
+(mod15_graph = data.frame(summary(lsmeans(mod15, ~ burn_year:burn_unburn),type = "response")))
 ```
 
-```{r}
-( mod15_graph1 = dplyr::select(mod15_graph, burn_year:asymp.UCL))
-
-names(mod15_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
-mod15_graph1 = data.frame(mod15_graph1)
-mod15_graph1
-```
 
 
 ### Graph 
 
 ```{r}
-plot_mod15 = ggplot(data = mod15_graph1, aes(x = burn_year, y = response, color = burn_year) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+plot_mod15 = ggplot(data = mod15_graph, aes(x = burn_year, y = lsmean, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = asymp.LCL, ymax = asymp.UCL), position = position_dodge(width = .75)) + 
 geom_point(size = 3, position = position_dodge(width = .75)) + 
   labs(x=("Burn year"), y= "Mean GCC") +
-  scale_color_manual(values = cbbPalette) + 
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
   comp_theme 
 
 plot_mod15  
@@ -354,7 +347,7 @@ plot_mod15
 
 ## 16. Model: NDVI as a function of burn year
 ```{r}
-mod16 = glm(mean_ndvi_25cm ~ burn_year, data = sites_gcc_ndvi, family = gaussian)
+mod16 = glm(mean_ndvi_25cm ~ burn_year:burn_unburn, data = sites_gcc_ndvi, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -381,26 +374,20 @@ summary(mod16)
 ### Data for Graph
 
 ```{r}
-(mod16_graph = data.frame(summary(lsmeans(mod16, ~ burn_year),type = "response")))
+(mod16_graph = data.frame(summary(lsmeans(mod16, ~ burn_year:burn_unburn),type = "response")))
 ```
 
-```{r}
-( mod16_graph1 = dplyr::select(mod16_graph, burn_year:asymp.UCL))
 
-names(mod16_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
-mod16_graph1 = data.frame(mod16_graph1)
-mod16_graph1
-```
 
 
 ### Graph 
 
 ```{r}
-plot_mod16 = ggplot(data = mod16_graph1, aes(x = burn_year, y = response, color = burn_year) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+plot_mod16 = ggplot(data = mod16_graph, aes(x = burn_year, y = lsmean, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = asymp.LCL, ymax = asymp.UCL), position = position_dodge(width = .75)) + 
 geom_point(size = 3, position = position_dodge(width = .75)) + 
   labs(x=("Burn year"), y= "Mean NDVI") +
-   scale_color_manual(values=c("#000000", "#56B4E9")) + 
+   scale_color_manual(values = c("#E69F00", "#009E73")) + 
   comp_theme 
 
 plot_mod16  
@@ -1353,7 +1340,68 @@ plot_mod8 = ggplot(data = sites_gcc_ndvi1, aes(x = mean_gcc_25cm, y = mean_ndvi_
 plot_mod8
 ```
 
+## 19. Model: NDVIas  function of GCC
+canopymod1 = glmer(canopy2 ~ mortality + burncon + (1 | id), data = biomass, family = binomial(link = "logit"))
+```{r}
+mod19 = glm(mean_ndvi_25cm ~ mean_gcc_25cm, data = sites_gcc_ndvi, family = gaussian)
+```
 
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod19.res = simulateResiduals(fittedModel = mod19, n = 500)
+mod19.res$scaledResiduals
+mod19.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod19.res)
+```
+
+```{r}
+testDispersion(mod19.res)
+```
+
+### Sumamry
+```{r}
+summary(mod19)
+```
+
+```{r}
+preddat_mod19 = data.frame(mean_gcc_25cm = sites_gcc_ndvi$mean_gcc_25cm)
+
+head(preddat_mod19)
+
+pred_mod19 = predict(mod19, newdata = preddat_mod19, se.fit = TRUE)
+
+UL_mod19 = with(pred_mod19, fit + 2*se.fit)
+LL_mod19 = with(pred_mod19, fit - 2*se.fit)
+
+sites_gcc_ndvi19 = mutate(sites_gcc_ndvi, pred_mod19 = pred_mod19$fit, 
+               ucl_mod19 = UL_mod19, 
+               lcl_mod19 = LL_mod19)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod19 = ggplot(data = sites_gcc_ndvi19, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod19), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod19, ymax = ucl_mod19, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod19), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod19), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI") +
+    xlab("Mean GCC")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+plot_mod19
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-11_ndvi_gcc.jpeg", plot = plot_mod19, width = 3, height = 3, units = c("in"), dpi=600 )
+```
 
 
 
@@ -1580,6 +1628,21 @@ grid_plot27
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-03-02_burn-unburn.jpeg", plot = grid_plot27, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
+
+
+## Figure: Burned vs. Unburned + Burn Year
+```{r fig.height=6, fig.width=6}
+
+grid_plot_comb1 = cowplot::plot_grid(plot_mod2, plot_mod7, plot_mod15, plot_mod16, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_plot_comb1
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-11_burn-unburn-year.jpeg", plot = grid_plot_comb1, width = 6, height = 6, units = c("in"), dpi=600 )
+```
+
 
 ## Figure: TIme since burn
 ```{r fig.height=3, fig.width=6}
