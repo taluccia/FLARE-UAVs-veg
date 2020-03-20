@@ -324,6 +324,11 @@ testDispersion(mod15.res)
 summary(mod15)
 ```
 
+
+```{r}
+with(summary(mod15), 1 - deviance/null.deviance)
+```
+
 ### Data for Graph
 
 ```{r}
@@ -423,6 +428,11 @@ testDispersion(mod1.res)
 summary(mod1)
 ```
 
+
+```{r}
+with(summary(mod1), 1 - deviance/null.deviance)
+```
+
 ```{r}
 (mod1_sum = data.frame(summary(lsmeans(mod1, ~ plot_dis:burn_year),type = "response")))
 ```
@@ -513,6 +523,9 @@ summary(mod6)
 ```
 
 
+```{r}
+with(summary(mod16), 1 - deviance/null.deviance)
+```
 
 ```{r}
 preddat_mod6 = data.frame(plot_dis = sites_gcc_ndvi$plot_dis, burn_year = sites_gcc_ndvi$burn_year)
@@ -1366,6 +1379,11 @@ testDispersion(mod19.res)
 ```{r}
 summary(mod19)
 ```
+
+```{r}
+data.frame(summary(lsmeans(mod19, ~ mean_gcc_25cm), type = "response"))
+```
+
 
 ```{r}
 preddat_mod19 = data.frame(mean_gcc_25cm = sites_gcc_ndvi$mean_gcc_25cm)
