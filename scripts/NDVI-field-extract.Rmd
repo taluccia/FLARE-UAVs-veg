@@ -57,11 +57,88 @@ cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_p
 ```
 
 
-## 1m - extract mean pixel values
-Use 1m buffer for GCC as  function of distance from edge
-extract(rasterA,points, buffer=150, fun=mean)
+## 25cm - extract mean pixel values
 
-- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+```{r}
+extract_alnus_tr1_25cm = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=.25, fun=mean, df=TRUE )
+extract_cn_tr1_25cm = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_cn_tr2_25cm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.25, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_25cm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_alnus_tr1_25cm
+```
+
+```{r}
+extract_cn_tr1_25cm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_cn_tr1_25cm
+```
+
+```{r}
+extract_cn_tr2_25cm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_cn_tr2_25cm
+```
+
+
+```{r}
+ndvi_25cm = bind_rows(extract_alnus_tr1_25cm, extract_cn_tr1_25cm, extract_cn_tr2_25cm) %>% dplyr::select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
+length(unique(ndvi_25cm$ID))
+ndvi_25cm
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(ndvi_25cm,"../outputs/extracted_data/ndvi_25cm.csv", row.names = FALSE)
+```
+
+
+## 50cm - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_50cm = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=.50, fun=mean, df=TRUE )
+extract_cn_tr1_50cm = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=.50, fun=mean,  df=TRUE )
+extract_cn_tr2_50cm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.50, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_50cm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_alnus_tr1_50cm
+```
+
+```{r}
+extract_cn_tr1_50cm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_cn_tr1_50cm
+```
+
+```{r}
+extract_cn_tr2_50cm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_cn_tr2_50cm
+```
+
+
+```{r}
+ndvi_50cm = bind_rows(extract_alnus_tr1_50cm, extract_cn_tr1_50cm, extract_cn_tr2_50cm) %>% dplyr::select(plot_id, mean_ndvi_50cm) %>% rename(ID = plot_id)
+length(unique(ndvi_50cm$ID))
+ndvi_50cm
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(ndvi_50cm,"../outputs/extracted_data/ndvi_50cm.csv", row.names = FALSE)
+```
+
+
+
+## 1m - extract mean pixel values
 
 ```{r}
 extract_alnus_tr1 = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=1, fun=mean, df=TRUE )
@@ -88,7 +165,6 @@ names(extract_cn_tr2) = c('ID', 'mean_ndvi_1m', 'plot_id')
 extract_cn_tr2
 ```
 
-extract_alnus_tr1, extract_ans_tr2, extract_ans_tr3, extract_brp_tr1, extract_brp_tr2, extract_cn_tr1, extract_cn_tr2
 
 ```{r}
 ndvi_1m = bind_rows(extract_alnus_tr1, extract_cn_tr1, extract_cn_tr2) %>% dplyr::select(plot_id, mean_ndvi_1m) %>% rename(ID = plot_id)
@@ -96,25 +172,14 @@ length(unique(ndvi_1m$ID))
 ndvi_1m
 ```
 
+
 ```{r eval=FALSE, include=FALSE}
-cn_bind = rbind(extract_cn_tr1, extract_cn_tr2)
-ndvi_1m = rbind(extract_alnus_tr1, cn_bind)
-
-ndvi_1m = ndvi_1m %>% select(plot_id, mean_ndvi_1m) %>% rename(ID = plot_id)
-```
-
-```{r}
 write.csv(ndvi_1m,"../outputs/extracted_data/ndvi_1m.csv", row.names = FALSE)
 ```
 
 ## 3m - extract mean pixel values
-Use 1m buffer for GCC as  function of distance from edge
-extract(rasterA,points, buffer=150, fun=mean)
-
-- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
 
 ```{r}
-
 extract_alnus_tr1_3m = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=3, fun=mean, df=TRUE )
 extract_cn_tr1_3m = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=3, fun=mean,  df=TRUE )
 extract_cn_tr2_3m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=3, fun=mean,  df=TRUE )
@@ -146,75 +211,91 @@ length(unique(ndvi_3m$ID))
 ndvi_3m
 ```
 
+
 ```{r eval=FALSE, include=FALSE}
-cn_bind_3m = rbind(extract_cn_tr1_3m, extract_cn_tr2_3m)
-ndvi_3m = rbind(extract_alnus_tr1_3m, cn_bind_3m)
-
-ndvi_3m = ndvi_3m %>% select(plot_id, mean_ndvi_3m) %>% rename(ID = plot_id)
-ndvi_3m
-```
-
-```{r}
 write.csv(ndvi_3m,"../outputs/extracted_data/ndvi_3m.csv", row.names = FALSE)
 ```
 
-## .25m - extract mean pixel values
-Use 1m buffer for GCC as  function of distance from edge
-extract(rasterA,points, buffer=150, fun=mean)
-
-- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
+## 5m - extract mean pixel values
 
 ```{r}
-
-extract_alnus_tr1_qm = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=.25, fun=mean, df=TRUE )
-extract_cn_tr1_qm = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=.25, fun=mean,  df=TRUE )
-extract_cn_tr2_qm = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=.25, fun=mean,  df=TRUE )
+extract_alnus_tr1_5m = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=5, fun=mean, df=TRUE )
+extract_cn_tr1_5m = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=5, fun=mean,  df=TRUE )
+extract_cn_tr2_5m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=5, fun=mean,  df=TRUE )
 ```
 
 
 ```{r}
-extract_alnus_tr1_qm$plot_id = alnus_tr1_pt$ID
-names(extract_alnus_tr1_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
-extract_alnus_tr1_qm
+extract_alnus_tr1_5m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_alnus_tr1_5m
 ```
 
 ```{r}
-extract_cn_tr1_qm$plot_id = cn_tr1_pt$ID
-names(extract_cn_tr1_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
-extract_cn_tr1_qm
+extract_cn_tr1_5m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_cn_tr1_5m
 ```
 
 ```{r}
-extract_cn_tr2_qm$plot_id = cn_tr2_pt$ID
-names(extract_cn_tr2_qm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
-extract_cn_tr2_qm
+extract_cn_tr2_5m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_cn_tr2_5m
 ```
 
 
 ```{r}
-ndvi_qm = bind_rows(extract_alnus_tr1_qm, extract_cn_tr1_qm, extract_cn_tr2_qm) %>% dplyr::select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
-length(unique(ndvi_qm$ID))
-ndvi_qm
+ndvi_5m = bind_rows(extract_alnus_tr1_5m, extract_cn_tr1_5m, extract_cn_tr2_5m) %>% dplyr::select(plot_id, mean_ndvi_5m) %>% rename(ID = plot_id)
+length(unique(ndvi_5m$ID))
+ndvi_5m
 ```
 
 
 ```{r eval=FALSE, include=FALSE}
-cn_bind_qm = rbind(extract_cn_tr1_qm, extract_cn_tr2_qm)
-ndvi_qm = rbind(extract_alnus_tr1_qm, cn_bind_qm)
-ndvi_qm = ndvi_qm %>% select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
-ndvi_qm
+write.csv(ndvi_5m,"../outputs/extracted_data/ndvi_5m.csv", row.names = FALSE)
+```
+
+## 10m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_10m = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=10, fun=mean, df=TRUE )
+extract_cn_tr1_10m = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=10, fun=mean,  df=TRUE )
+extract_cn_tr2_10m = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10, fun=mean,  df=TRUE )
+```
+
+
+```{r}
+extract_alnus_tr1_10m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_alnus_tr1_10m
 ```
 
 ```{r}
-write.csv(ndvi_qm,"../outputs/extracted_data/ndvi_25cm.csv", row.names = FALSE)
+extract_cn_tr1_10m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_cn_tr1_10m
+```
+
+```{r}
+extract_cn_tr2_10m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_cn_tr2_10m
+```
+
+
+```{r}
+ndvi_10m = bind_rows(extract_alnus_tr1_10m, extract_cn_tr1_10m, extract_cn_tr2_10m) %>% dplyr::select(plot_id, mean_ndvi_10m) %>% rename(ID = plot_id)
+length(unique(ndvi_10m$ID))
+ndvi_10m
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(ndvi_10m,"../outputs/extracted_data/ndvi_10m.csv", row.names = FALSE)
 ```
 
 
 ## Tree - extract mean pixel values
-Use 1m buffer for GCC as  function of distance from edge
-extract(rasterA,points, buffer=150, fun=mean)
-
-- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
 
 ```{r}
 
@@ -251,19 +332,15 @@ ndvi_tree
 
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 write.csv(ndvi_tree,"../outputs/extracted_data/ndvi_tree.csv", row.names = FALSE)
 ```
 
 
 ## shrub - extract mean pixel values
-Use 1m buffer for GCC as  function of distance from edge
-extract(rasterA,points, buffer=150, fun=mean)
 
-- Choose buffer based on pixel size and maintaining fine scale resolution but aggregating so that values are at the same spatial scale
 
 ```{r}
-
 extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f08, alnus_tr1_pt, buffer=alnus_tr1_pt$plt_lng, fun=mean, df=TRUE )
 extract_cn_tr1_shrub = raster::extract(cn_tr1_f20, cn_tr1_pt, buffer=cn_tr1_pt$plt_lng, fun=mean,  df=TRUE )
 extract_cn_tr2_shrub = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=cn_tr2_pt$plt_lng, fun=mean,  df=TRUE )
@@ -295,9 +372,7 @@ length(unique(ndvi_shrub$ID))
 ndvi_shrub
 ```
 
-
-
-```{r}
+```{r eval=FALSE, include=FALSE}
 write.csv(ndvi_shrub,"../outputs/extracted_data/ndvi_shrub.csv", row.names = FALSE)
 ```
 
@@ -307,14 +382,17 @@ write.csv(ndvi_shrub,"../outputs/extracted_data/ndvi_shrub.csv", row.names = FAL
 # Combine ndvi data
 
 ```{r}
-ndvi_merge1 = merge(ndvi_1m, ndvi_3m,  by= "ID")
-ndvi_merge2 = merge(ndvi_merge1, ndvi_qm, by="ID")
-ndvi_merge3 = merge(ndvi_tree, ndvi_shrub,  by="ID")
-ndvi = merge(ndvi_merge2, ndvi_merge3,  by="ID")
-ndvi
+ndvi_merge1 = merge(ndvi_25cm, ndvi_50cm,  by= "ID")
+ndvi_merge2 = merge(ndvi_1m, ndvi_3m,  by= "ID")
+ndvi_merge3 = merge(ndvi_5m, ndvi_10m,  by= "ID")
+ndvi_merge4 = merge(ndvi_tree, ndvi_shrub,  by="ID")
+ndvi_merge5 = merge(ndvi_merge1, ndvi_merge2, by="ID")
+ndvi_merge6 = merge(ndvi_merge3, ndvi_merge4, by="ID")
+ndvi_all = merge(ndvi_merge5, ndvi_merge6,  by="ID")
+ndvi_all
 ```
 
 
 ```{r}
-write.csv(ndvi,"../outputs/extracted_data/ndvi_all.csv", row.names = FALSE)
+write.csv(ndvi_all,"../outputs/extracted_data/ndvi_all.csv", row.names = FALSE)
 ```
