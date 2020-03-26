@@ -296,7 +296,7 @@ ggplot(data = shrubs_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(
 
 # Analysis: 
 
-# Analysis: Time Since Fire
+# Part 1: Time Since Fire
 
 ## 15. Model: GCC 
 ```{r}
@@ -400,7 +400,7 @@ plot_mod16
 
 
 
-# Analysis: Distance from Unburned
+# Part 2: Distance from Unburned
 
 ## 1. Model: GCC distance from eadge
 ```{r}
@@ -688,11 +688,11 @@ plot_mod18 = ggplot(data = sites_gcc_ndvi18, aes(x = plot_dis, y = mean_ndvi_25c
 plot_mod18
 ```
 
-# Analysis: Burned and Unburned
+# Part 3: Burned and Unburned
 
 ## 2. Model: GCC burn/unburned
 ```{r}
-mod2 = glm(mean_gcc_25cm ~ burn_unburn, data = sites_gcc, family = gaussian)
+mod2 = glm(mean_gcc_25cm ~ burn_unburn, data = site_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -811,7 +811,7 @@ plot_mod7
 
 
 
-# Analysis Vegetation cover
+# Part 4: Vegetation cover
 
 ## 5. Model: GCC proportion of Live trees
 
@@ -1287,7 +1287,7 @@ plot_mod11
 
 
 
-# Analysis: GCC relates to NDVI
+# Part 5: GCC relates to NDVI
 
 ```{r}
 names(sites_gcc_ndvi)
@@ -1419,183 +1419,6 @@ plot_mod19
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-03-11_ndvi_gcc.jpeg", plot = plot_mod19, width = 3, height = 3, units = c("in"), dpi=600 )
-```
-
-
-
-
-# Extra Models
-
-## 3. Model: GCC as a function of transects
-```{r}
-mod3 = glm(mean_gcc_25cm ~ transect_ID, data = sites_gcc, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod3.res = simulateResiduals(fittedModel = mod3, n = 500)
-mod3.res$scaledResiduals
-mod3.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod3.res)
-```
-
-```{r}
-testDispersion(mod3.res)
-```
-
-### Sumamry
-```{r}
-summary(mod3)
-```
-
-### Data for Graph
-
-```{r}
-(mod3_graph = data.frame(summary(lsmeans(mod3, ~ transect_ID),type = "response")))
-```
-
-```{r}
-( mod3_graph1 = dplyr::select(mod3_graph, transect_ID:asymp.UCL))
-
-names(mod3_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
-mod3_graph1 = data.frame(mod3_graph1)
-mod3_graph1
-```
-
-
-### Graph 
-
-```{r}
-plot_mod3 = ggplot(data = mod3_graph1, aes(x = transect_ID, y = response, color = transect_ID) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=("Transect ID"), y= "Mean GCC") +
-  scale_color_manual(values = cbbPalette) + 
-  comp_theme 
-
-plot_mod3  
-```
-
-
-## 4. Model: GCC burn/unburned + burn year
-
-```{r}
-mod4 = glm(mean_gcc_25cm ~ burn_year + burn_unburn, data = sites_gcc, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod4.res = simulateResiduals(fittedModel = mod4, n = 500)
-mod4.res$scaledResiduals
-mod4.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod4.res)
-```
-
-```{r}
-testDispersion(mod4.res)
-```
-
-### Sumamry
-```{r}
-summary(mod4)
-```
-
-### data for Graph
-
-```{r}
-(mod4_graph = data.frame(summary(lsmeans(mod4, ~ burn_year + burn_unburn),type = "response")))
-```
-
-```{r}
-levels(mod4_graph$burn_unburn)[levels(mod4_graph$burn_unburn)=="burned"] = "Burned"
-levels(mod4_graph$burn_unburn)[levels(mod4_graph$burn_unburn)=="unburned"] = "Unburned"
-
-
-( mod4_graph1 = dplyr::select(mod4_graph, burn_year:asymp.UCL))
-
-
-
-names(mod4_graph1)[1:7] = c("burn_year","burn_unburn", "response", "se", "df", "lcl", "ucl")
-mod4_graph1 = data.frame(mod4_graph1)
-mod4_graph1
-
-```
-
-### Graph
-
-```{r}
-mod4_graph = ggplot(data = mod4_graph1, aes(x = burn_year, y = response, color = burn_unburn) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=(NULL), y= "Mean GCC") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-comp_theme
-
-mod4_graph  
-```
-
-
-
-## 14. Model: NDVI as a function of transects
-```{r}
-mod14 = glm(mean_ndvi_25cm ~ transect_ID, data = sites_gcc_ndvi, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod14.res = simulateResiduals(fittedModel = mod14, n = 500)
-mod14.res$scaledResiduals
-mod14.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod14.res)
-```
-
-```{r}
-testDispersion(mod14.res)
-```
-
-### Sumamry
-```{r}
-summary(mod14)
-```
-
-### Data for Graph
-
-```{r}
-(mod14_graph = data.frame(summary(lsmeans(mod14, ~ transect_ID),type = "response")))
-```
-
-```{r}
-( mod14_graph1 = dplyr::select(mod14_graph, transect_ID:asymp.UCL))
-
-names(mod14_graph1)[2:6] = c("response", "se", "df", "lcl", "ucl")
-mod14_graph1 = data.frame(mod14_graph1)
-mod14_graph1
-```
-
-
-### Graph 
-
-```{r}
-plot_mod14 = ggplot(data = mod14_graph1, aes(x = transect_ID, y = response, color = transect_ID) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=("Transect ID"), y= "Mean NDVI") +
-  scale_color_manual(values = cbbPalette) + 
-  comp_theme 
-
-plot_mod14  
 ```
 
 
