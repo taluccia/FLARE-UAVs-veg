@@ -28,6 +28,16 @@ library(tidyr)
 library(dplyr)
 ```
 
+# Functions
+
+```{r}
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+
+```
+
 # Site info
 
 ```{r}
@@ -49,7 +59,7 @@ site_info2
 ```
 
 
-Site info by transect
+Filter out required field transects that coorespond to UAV data
 ```{r}
 fd_alnus_tr1 = site_info2 %>% group_by(site) %>% filter(site=='Alnus') %>% group_by(transect) %>% filter(transect == 1)
 fd_ans_tr2 = site_info2 %>% group_by(site) %>% filter(site=='ANS') %>% group_by(transect) %>% filter(transect == 2)
@@ -60,6 +70,7 @@ fd_cn_tr1 = site_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(
 fd_cn_tr2 = site_info2 %>% group_by(region) %>% filter(site=='CN') %>% group_by(transect) %>% filter(transect == 2)
 ```
 
+Recombind filtered transects from above.
 ```{r}
 ans_12 = rbind(fd_ans_tr2 , fd_ans_tr3)
 brp_12 = rbind( fd_bp_tr1, fd_bp_tr2)
@@ -72,6 +83,16 @@ site_info_drones
 
 ```{r}
 length(unique(site_info_drones$ID))
+```
+
+```{r}
+head(site_info_drones)
+```
+
+ Create a plot_dis column to pull out numeric values from the plot column. There  are some sites that  had two  plots  at  -25 labeled  as -25a and -25b, which is  not useful for analysis.  Unique ID and plot  include the a or b designation
+```{r}
+sites_subset = site_info_drones %>% mutate(plot_dis = numextract(plot)) %>% mutate(burn_unburn = ifelse(plot_dis>=0, "burned", "unburned")) %>% dplyr::select(ID, region:plot, plot_dis, burn_unburn, slope:aspect) %>% mutate(burn_year = as.factor(burn_year))
+sites_subset
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -180,11 +201,17 @@ tree_info_uav = merge(plot_radius,  stems_ba,  by=c("ID","site", "transect", "pl
 tree_info_uav
 ```
 
+```{r}
+trees_subset = trees %>% mutate(plot_dis = numextract(plot))  %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:total_ba) %>% rename(tree_area_sampled_m2 = area_sampled_m2, tree_radius = radius, tree_total_ba = total_ba)
+trees_subset
+```
 
 
 ```{r eval=FALSE, include=FALSE}
 write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
 ```
+
+
 
 ```{r}
 tree_radius = tree_info_uav %>% dplyr::select(ID, area_sampled_m2:radius)
@@ -342,6 +369,14 @@ names(merge3)
 shrub_info_uav = merge5 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x", bevi_ct = "Betula divaricata.x", bena_ct = "Betula nana ssp. exilis.x", betu_ct = "Betula spp..x", salix_ct = "Salix spp..x", alnus_ba = "Alnus spp..y", bevi_ba = "Betula divaricata.y", bena_ba = "Betula nana ssp. exilis.y", betu_ba = "Betula spp..y", salix_ba = "Salix spp..y")
 ```
 
+```{r}
+head(shrub_info_uav)
+```
+
+```{r}
+shrubs_subset = shrub_info_uav %>% mutate(plot_dis = numextract(plot)) %>% dplyr::select(ID:plot, plot_dis, plot_width:plot_length, area_sampled_m2:salix_ba) %>% rename(shrub_area_sampled_m2 = area_sampled_m2, shrub_total_ba = total_ba)
+shrubs_subset
+```
 
 
 ```{r eval=FALSE, include=FALSE}
@@ -355,4 +390,18 @@ shrub_plot_size = shrub_info_uav %>% dplyr::select(ID, area_sampled_m2, plot_wid
 
 ```{r eval=FALSE, include=FALSE}
 write.csv(shrub_plot_size,"../outputs/field_subset/shrub_plot_size.csv", row.names = FALSE)
+```
+
+
+# Combine site, tree, and shrub data
+
+```{r}
+com_merge1 = merge(trees_subset, shrubs_subset,  by=c("ID","site", "transect", "plot", "plot_dis"))
+field_data = merge(sites_subset, com_merge1,  by=c("ID","site", "transect", "plot", "plot_dis"))
+field_data
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(field_data,"../outputs/field_subset/field_data_all.csv", row.names = FALSE)
 ```
