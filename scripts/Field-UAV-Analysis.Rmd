@@ -8,6 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Overview
+
 
 # Pakcages
 ```{r}
@@ -25,112 +27,59 @@ library(DHARMa)
 
 # Field Data
 ```{r}
-sites = read.csv("../data/field_subset/site_info_uav.csv")
-shrubs = read.csv("../data/field_subset/shrub_info_uav.csv")
-trees = read.csv("../data/field_subset/tree_info_uav.csv")
+field_data = read.csv("../data/field_subset/field_data_all.csv")
 ```
 
 ```{r}
-sites
-```
- Create a plot_dis column to pull out numeric values from the plot column. There  are some sites that  had two  plots  at  -25 labeled  as -25a and -25b, which is  not useful for analysis.  Unique ID and plot  include the a or b designation
-```{r}
-numextract <- function(string){ 
-  str_extract(string, "\\-*\\d+\\.*\\d*")
-} 
-
-sites_subset = sites %>% mutate(plot_dis = numextract(plot)) %>% mutate(burn_unburn = ifelse(plot_dis>=0, "burned", "unburned")) %>% dplyr::select(ID, region:plot, plot_dis, burn_unburn, slope:aspect) %>% mutate(burn_year = as.factor(burn_year))
-sites_subset
-```
-````{r}
-trees_subset = trees %>% mutate(plot_dis = numextract(plot))  %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:total_ba)
-shrubs_subset = shrubs %>% mutate(plot_dis = numextract(plot)) %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:salix_ba)
-```
-
-
-```{r}
-trees
+head(field_data)
 ```
 
 ## field Plot sizes
 
 ```{r}
-shrubs %>% group_by(site, transect) %>% 
-  summarise(min(area_sampled_m2))
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(shrub_area_sampled_m2))
 ```
 
 ```{r}
-shrubs %>% group_by(site, transect) %>% 
-  summarise(max(area_sampled_m2))
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(shrub_area_sampled_m2))
 ```
 
 ```{r}
-trees %>% group_by(site, transect) %>% 
-  summarise(min(radius))
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(tree_radius))
 ```
 
 ```{r}
-trees %>% group_by(site, transect) %>% 
-  summarise(max(radius))
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(tree_radius))
 ```
 
 # UAV Data
 
 ```{r}
-gcc_1m = read.csv("../data/extracted_data/gcc_1m.csv", strip.white = TRUE)
-gcc_3m = read.csv("../data/extracted_data/gcc_3m.csv", strip.white = TRUE)
-gcc_25cm = read.csv("../data/extracted_data/gcc_25cm.csv", strip.white = TRUE)
-gcc = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_1m = read.csv("../data/extracted_data/ndvi_1m.csv", strip.white = TRUE)
-ndvi_3m = read.csv("../data/extracted_data/ndvi_3m.csv", strip.white = TRUE)
-ndvi_25cm = read.csv("../data/extracted_data/ndvi_25cm.csv", strip.white = TRUE)
+gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
 ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
 ```
 
-
-# Combine Field and UAV
-
 ```{r}
-sites_gcc = merge(sites_subset, gcc, by="ID") 
-sites_gcc = sites_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis)) %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
-sites_gcc
-str(sites_gcc)
+head(gcc_all)
+head(ndvi_all)
 ```
 
-```{r}
-burn_year = sites_gcc %>% dplyr::select(ID, burn_year)
-burn_year
-```
-
-
+# Combine Field and UAV data
 
 ```{r}
-merge1 = merge(trees_subset, gcc, by="ID")
-merge2 = merge(burn_year, merge1, by="ID")
-tree_gcc = merge2 %>% mutate(prop_live = live/stems)
-tree_gcc = tree_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis))%>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
-tree_gcc
+gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
+gcc_ndvi
+field_gcc = merge(field_data, gcc_all, by="ID") 
+field_gcc
+field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
+field_gcc_ndvi
 ```
 
-```{r}
-merge12 = merge(shrubs_subset, gcc, by="ID")
-shrubs_gcc = merge(burn_year, merge12, by="ID")
-shrub_gcc = shrubs_gcc %>% mutate(plot_dis = as.numeric(sites_gcc$plot_dis)) %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))
-shrub_gcc
-```
-### Add NDVI
-
-```{r}
-sites_gcc_ndvi = merge(sites_gcc, ndvi_all, by = "ID")
-sites_gcc_ndvi
-tree_gcc_ndvi = merge(tree_gcc, ndvi_all, by = "ID")
-tree_gcc_ndvi
-shrub_gcc_ndvi = merge(shrubs_gcc, ndvi_all, by = "ID")
-shrub_gcc_ndvi
-```
 # Define grpah Theme and color Palette 
-
-
 
 ```{r}
 comp_theme = theme_bw() + theme(legend.position = "none") +  
@@ -162,7 +111,7 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 
 
 ```{r}
-ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(transect_ID))) +
+ggplot(data = field_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(transect_ID))) +
          geom_point(size = 3) +
          scale_color_manual(values=cbbPalette) +
           ylab("mean gcc (25cm)") +
@@ -171,7 +120,7 @@ ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(tr
 ```
 
 ```{r}
-ggplot(data = shrub_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
+ggplot(data = field_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
   geom_boxplot() +       
   geom_point() +
          scale_color_manual(values=cbbPalette) +
@@ -188,7 +137,7 @@ ggplot(data = shrub_gcc, aes(x = transect_ID , y = total_ba, color = factor(tran
 ```
 
 ```{r}
-ggplot(data = tree_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
+ggplot(data = field_gcc, aes(x = transect_ID , y = total_ba, color = factor(transect_ID))) +
   geom_boxplot() +       
   geom_point() +
          scale_color_manual(values=cbbPalette) +
@@ -205,7 +154,7 @@ ggplot(data = tree_gcc, aes(x = transect_ID , y = total_ba, color = factor(trans
 ```
 
 ```{r}
-ggplot(data = tree_gcc, aes(x = transect_ID , y = prop_live, color = factor(transect_ID))) +
+ggplot(data = field_gcc, aes(x = transect_ID , y = prop_live, color = factor(transect_ID))) +
   geom_boxplot() +       
   geom_point() +
          scale_color_manual(values=cbbPalette) +
@@ -276,7 +225,7 @@ ggplot(data = sites_gcc, aes(x = plot_dis , y = mean_gcc_3m, color = factor(burn
 ```
 
 ```{r}
-ggplot(data = tree_gcc, aes(x = prop_live , y = mean_gcc_tree, color = factor(burn_year))) +
+ggplot(data = field_gcc, aes(x = prop_live , y = mean_gcc_tree, color = factor(burn_year))) +
          geom_point(size = 3) +
          scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
           ylab("mean gcc") +
@@ -816,12 +765,7 @@ plot_mod7
 ## 5. Model: GCC proportion of Live trees
 
 ```{r}
-head(tree_gcc)
-```
-
-
-```{r}
-mod5 = glm(mean_gcc_tree ~ prop_live, data = tree_gcc, family = gaussian)
+mod5 = glm(mean_gcc_tree ~ prop_live, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -858,7 +802,7 @@ lsmeans(mod5, ~ prop_live)
 
 
 ```{r}
-preddat5 = data.frame(prop_live = tree_gcc$prop_live)
+preddat5 = data.frame(prop_live = field_gcc$prop_live)
 
 head(preddat5)
 
@@ -867,22 +811,22 @@ pred5 = predict(mod5, newdata = preddat5, se.fit = TRUE)
 UL5 = with(pred5, fit + 2*se.fit)
 LL5 = with(pred5, fit - 2*se.fit)
 
-tree_gcc5 = mutate(tree_gcc, pred5 = pred5$fit, 
+field_gcc5 = mutate(field_gcc, pred5 = pred5$fit, 
                ucl_mod5 = UL5, 
                lcl_mod5 = LL5)
 ```
 
 ```{r}
-min(tree_gcc$mean_gcc_tree)
-mean(tree_gcc$area_sampled_m2)
-min(tree_gcc$area_sampled_m2)
-median(tree_gcc$area_sampled_m2)
-max(tree_gcc$area_sampled_m2)
+min(field_gcc$mean_gcc_tree)
+mean(field_gcc$tree_area_sampled_m2)
+min(field_gcc$tree_area_sampled_m2)
+median(field_gcc$tree_area_sampled_m2)
+max(field_gcc$tree_area_sampled_m2)
 ```
 ### Graph
 
 ```{r}
-plot_mod5 = ggplot(data = tree_gcc5, aes(x = prop_live, y = mean_gcc_tree)) + 
+plot_mod5 = ggplot(data = field_gcc5, aes(x = prop_live, y = mean_gcc_tree)) + 
     geom_line(aes(y = pred5), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL), alpha = .15) +
     geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
@@ -896,14 +840,8 @@ plot_mod5
 
 
 ## 9. Model: GCC tree  BA
-
 ```{r}
-head(tree_gcc)
-```
-
-
-```{r}
-mod9 = glm(mean_gcc_tree ~ total_ba, data = tree_gcc, family = gaussian)
+mod9 = glm(mean_gcc_tree ~ total_ba, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -942,7 +880,7 @@ mod9_graph1
 ```
 
 ```{r}
-preddat_mod9 = data.frame(total_ba = tree_gcc$total_ba)
+preddat_mod9 = data.frame(total_ba = field_gcc$total_ba)
 
 head(preddat_mod9)
 
@@ -951,7 +889,7 @@ pred_mod9 = predict(mod9, newdata = preddat_mod9, se.fit = TRUE)
 UL_mod9 = with(pred_mod9, fit + 2*se.fit)
 LL_mod9 = with(pred_mod9, fit - 2*se.fit)
 
-tree_gcc1 = mutate(tree_gcc, pred_mod9 = pred_mod9$fit, 
+field_gcc1 = mutate(field_gcc, pred_mod9 = pred_mod9$fit, 
                ucl_mod9 = UL_mod9, 
                lcl_mod9 = LL_mod9)
 ```
@@ -959,7 +897,7 @@ tree_gcc1 = mutate(tree_gcc, pred_mod9 = pred_mod9$fit,
 ### Graph
 
 ```{r}
-plot_mod9 = ggplot(data = tree_gcc1, aes(x = total_ba, y = mean_gcc_tree)) + 
+plot_mod9 = ggplot(data = field_gcc1, aes(x = total_ba, y = mean_gcc_tree)) + 
     geom_line(aes(y = pred_mod9), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod9, ymax = ucl_mod9, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
@@ -973,13 +911,10 @@ plot_mod9
 
 ## 12. Model: GCC shrub  BA
 
-```{r}
-head(shrub_gcc)
-```
 
 
 ```{r}
-mod12 = glm(mean_gcc_shrub ~ total_ba, data = shrub_gcc, family = gaussian)
+mod12 = glm(mean_gcc_shrub ~ total_ba, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -1018,7 +953,7 @@ mod12_graph1
 ```
 
 ```{r}
-preddat_mod12 = data.frame(total_ba = shrub_gcc$total_ba)
+preddat_mod12 = data.frame(shrub_total_ba = field_gcc$shrub_total_ba)
 
 head(preddat_mod12)
 
@@ -1027,7 +962,7 @@ pred_mod12 = predict(mod12, newdata = preddat_mod12, se.fit = TRUE)
 UL_mod12 = with(pred_mod12, fit + 2*se.fit)
 LL_mod12 = with(pred_mod12, fit - 2*se.fit)
 
-shrub_gcc1 = mutate(shrub_gcc, pred_mod12 = pred_mod12$fit, 
+field_gcc1 = mutate(field_gcc, pred_mod12 = pred_mod12$fit, 
                ucl_mod12 = UL_mod12, 
                lcl_mod12 = LL_mod12)
 ```
@@ -1035,7 +970,7 @@ shrub_gcc1 = mutate(shrub_gcc, pred_mod12 = pred_mod12$fit,
 ### Graph
 
 ```{r}
-plot_mod12 = ggplot(data = shrub_gcc1, aes(x = total_ba, y = mean_gcc_tree)) + 
+plot_mod12 = ggplot(data = field_gcc1, aes(x = total_ba, y = mean_gcc_tree)) + 
     geom_line(aes(y = pred_mod12), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
@@ -1052,12 +987,12 @@ plot_mod12
 ## 10. Model: NDVI tree BA
 
 ```{r}
-head(tree_gcc_ndvi)
+head(field_gcc_ndvi)
 ```
 
 
 ```{r}
-mod10 = glm(mean_ndvi_tree ~ total_ba, data = tree_gcc_ndvi, family = gaussian)
+mod10 = glm(mean_ndvi_tree ~ total_ba, data = field_gcc_ndvi, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -1096,7 +1031,7 @@ mod10_graph1
 ```
 
 ```{r}
-preddat_mod10 = data.frame(total_ba = tree_gcc_ndvi$total_ba)
+preddat_mod10 = data.frame(total_ba = field_gcc_ndvi$total_ba)
 
 head(preddat_mod10)
 
@@ -1105,7 +1040,7 @@ pred_mod10 = predict(mod10, newdata = preddat_mod10, se.fit = TRUE)
 UL_mod10 = with(pred_mod10, fit + 2*se.fit)
 LL_mod10 = with(pred_mod10, fit - 2*se.fit)
 
-tree_gcc_ndvi10 = mutate(tree_gcc_ndvi, pred_mod10 = pred_mod10$fit, 
+field_gcc_ndvi10 = mutate(field_gcc_ndvi, pred_mod10 = pred_mod10$fit, 
                ucl_mod10 = UL_mod10, 
                lcl_mod10 = LL_mod10)
 ```
@@ -1113,7 +1048,7 @@ tree_gcc_ndvi10 = mutate(tree_gcc_ndvi, pred_mod10 = pred_mod10$fit,
 ### Graph
 
 ```{r}
-plot_mod10 = ggplot(data = tree_gcc_ndvi10, aes(x = total_ba, y = mean_gcc_tree)) + 
+plot_mod10 = ggplot(data = field_gcc_ndvi10, aes(x = total_ba, y = mean_gcc_tree)) + 
     geom_line(aes(y = pred_mod10), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod10, ymax = ucl_mod10, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
@@ -1127,17 +1062,14 @@ plot_mod10
 
 ## 13. Model: NDVI shrub BA
 
+
 ```{r}
-head(shrub_gcc_ndvi)
+max(field_gcc_ndvi$mean_ndvi_shrub)
+min(field_gcc_ndvi$mean_ndvi_shrub)
 ```
 
 ```{r}
-max(shrub_gcc_ndvi$mean_ndvi_shrub)
-min(shrub_gcc_ndvi$mean_ndvi_shrub)
-```
-
-```{r}
-mod13 = glm(mean_ndvi_shrub ~ total_ba, data = shrub_gcc_ndvi, family = gaussian)
+mod13 = glm(mean_ndvi_shrub ~ total_ba, data = field_gcc_ndvi, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -1176,7 +1108,7 @@ mod13_graph1
 ```
 
 ```{r}
-preddat_mod13 = data.frame(total_ba = shrub_gcc_ndvi$total_ba)
+preddat_mod13 = data.frame(shrub_total_ba = field_gcc_ndvi$shrub_total_ba)
 
 head(preddat_mod13)
 
@@ -1185,7 +1117,7 @@ pred_mod13 = predict(mod13, newdata = preddat_mod13, se.fit = TRUE)
 UL_mod13 = with(pred_mod13, fit + 2*se.fit)
 LL_mod13 = with(pred_mod13, fit - 2*se.fit)
 
-shrub_gcc_ndvi1 = mutate(shrub_gcc_ndvi, pred_mod13 = pred_mod13$fit, 
+field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred_mod13 = pred_mod13$fit, 
                ucl_mod13 = UL_mod13, 
                lcl_mod13 = LL_mod13)
 ```
@@ -1193,7 +1125,7 @@ shrub_gcc_ndvi1 = mutate(shrub_gcc_ndvi, pred_mod13 = pred_mod13$fit,
 ### Graph
 
 ```{r}
-plot_mod13 = ggplot(data = shrub_gcc_ndvi1, aes(x = total_ba, y = mean_ndvi_shrub)) + 
+plot_mod13 = ggplot(data = field_gcc_ndvi1, aes(x = shrub_total_ba, y = mean_ndvi_shrub)) + 
     geom_line(aes(y = pred_mod13), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod13, ymax = ucl_mod13, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod13), linetype = 'longdash', size = 1) + 
@@ -1209,13 +1141,10 @@ plot_mod13
 
 ## 11. Model: NDVI proportion of Live trees
 
-```{r}
-head(tree_gcc_ndvi)
-```
 
 
 ```{r}
-mod11 = glm(mean_ndvi_tree ~ prop_live, data = tree_gcc_ndvi, family = gaussian)
+mod11 = glm(mean_ndvi_tree ~ prop_live, data = field_gcc_ndvi, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -1254,7 +1183,7 @@ mod11_graph1
 ```
 
 ```{r}
-preddat11 = data.frame(prop_live = tree_gcc_ndvi$prop_live)
+preddat11 = data.frame(prop_live = field_gcc_ndvi$prop_live)
 
 head(preddat11)
 
@@ -1263,7 +1192,7 @@ pred11 = predict(mod11, newdata = preddat11, se.fit = TRUE)
 UL11 = with(pred11, fit + 2*se.fit)
 LL11 = with(pred11, fit - 2*se.fit)
 
-tree_gcc_ndvi1 = mutate(tree_gcc_ndvi, pred11 = pred11$fit, 
+field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred11 = pred11$fit, 
                ucl_mod11 = UL11, 
                lcl_mod11 = LL11)
 ```
@@ -1272,7 +1201,7 @@ tree_gcc_ndvi1 = mutate(tree_gcc_ndvi, pred11 = pred11$fit,
 ### Graph
 
 ```{r}
-plot_mod11 = ggplot(data = tree_gcc_ndvi1, aes(x = prop_live, y = mean_ndvi_tree)) + 
+plot_mod11 = ggplot(data = field_gcc_ndvi1, aes(x = prop_live, y = mean_ndvi_tree)) + 
     geom_line(aes(y = pred11), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
