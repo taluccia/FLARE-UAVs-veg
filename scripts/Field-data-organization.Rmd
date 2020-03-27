@@ -202,7 +202,7 @@ tree_info_uav
 ```
 
 ```{r}
-trees_subset = trees %>% mutate(plot_dis = numextract(plot))  %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:total_ba) %>% rename(tree_area_sampled_m2 = area_sampled_m2, tree_radius = radius, tree_total_ba = total_ba)
+trees_subset = trees %>% mutate(plot_dis = numextract(plot))  %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:total_ba) %>% rename(tree_area_sampled_m2 = area_sampled_m2, tree_radius = radius, tree_total_ba = total_ba) %>% mutate(prop_live = live/stems)
 trees_subset
 ```
 
