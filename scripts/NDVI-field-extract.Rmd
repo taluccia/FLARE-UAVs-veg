@@ -32,8 +32,6 @@ library(ggplot2)
 
 # NVDI DATA
 
-
-
 alnus_tr1_f08
 cn_tr2_f17
 cn_tr1_f20 
