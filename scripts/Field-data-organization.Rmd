@@ -400,7 +400,10 @@ com_merge1 = merge(trees_subset, shrubs_subset,  by=c("ID","site", "transect", "
 field_data = merge(sites_subset, com_merge1,  by=c("ID","site", "transect", "plot", "plot_dis"))
 field_data
 ```
+```{r}
+field_data = field_data %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>% dplyr::select(ID,transect_ID,  site:salix_ba)
 
+```
 
 ```{r eval=FALSE, include=FALSE}
 write.csv(field_data,"../outputs/field_subset/field_data_all.csv", row.names = FALSE)
