@@ -956,10 +956,10 @@ plot_mod11 = ggplot(data = field_gcc11, aes(x = plot_dis, y = mean_gcc_10m)) +
     geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
     geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
     ylab("Mean GCC") +
-    xlab("Distance from the unburned edge (m)")  +
+    xlab("Distance from the unburned edge \n(m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
-    scale_x_continuous(breaks = c(-25, 0, 50, 100, 150, 200))
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
 
 plot_mod11
 ```
@@ -1021,7 +1021,7 @@ plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = plot_dis, y = mean_ndvi_10m
     geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
     geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
     ylab("Mean NDVI") +
-    xlab("Distance from the unburned edge n\(m)")  +
+    xlab("Distance from the unburned edge \n(m)")  +
     reg_theme + guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
 
