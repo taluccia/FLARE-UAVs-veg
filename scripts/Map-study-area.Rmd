@@ -1,0 +1,153 @@
+---
+title: "Map-script"
+author: "Anna Talucci"
+date: "4/2/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+Skeleton for developing a amp figure for FLARE UAS vegetation paper
+
+This script is reliant on
+* `Rproj` and therefore the `wd()`does not have to be set
+* Relative path names "../folder-name/file-name.ext"
+* This script is reliant on the following folders 
+    +"../scripts/" --this houses all scripts written in RMarkdown
+    +"../data/shapfiles/" --this houses shape files
+    +"../figures/
+* Please reference the Git Hub repository called **FLARE-UAV-veg** to see the file structure used here
+
+# Packages
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(DT)
+library(sf)
+library(ggmap) # devtools::install_github("dkahle/ggmap")
+library(ggrepel)
+library(raster)
+library(rgdal)
+library(rasterVis)
+library(RColorBrewer)
+library(cowplot)
+library(ggspatial)
+library(maps)
+```
+
+# Read in shapefile boundaries
+
+We are using relative file path names here. Note the file name is preceded by the sub-folder shapefiles in the data folder.
+
+```{r}
+shapefile <- st_read("../data/shapefiles/FILE-NAME.shp") # Replace FILENAME
+```
+
+
+# Create a bounding box 
+
+Use metadata from all_fires shapefile to identify `xmin`, `xmax`, `ymin`, and `ymax` to define the bounding box
+
+```{r}
+(insetrect <- data.frame(xmin = 985362, xmax = 1069051, ymin = 894097.7, ymax = 939814.2)) #Replace numeric values
+```
+
+# Map Making
+
+
+## British Columbia with study area bounding box
+
+This map will serve as an inset in the final map. 
+
+**Edit data!!**
+
+```{r}
+map_inset = ggplot() + 
+  geom_sf(data = shapefile, fill = "#E8E8E8", color = "black") +
+  #Use bounding box from above
+  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
+  xlab("")+ylab("")+
+  coord_sf() +
+   theme_void() +
+  #add a bounding box so that will border the inset
+  theme(panel.background = element_rect(colour = "black", fill = "white", size = 0.5))
+
+map_inset
+```
+
+## Map with legend bottom
+
+Here e create a map with a legend box that is placed outside of the map along the bottom. 
+
+**Edit data!!**
+
+```{r}
+map_main = ggplot() +
+  #add shapefile
+  geom_sf(data = bc, aes(fill = "BC", color = "BC")) + 
+  #add shapefile
+  geom_sf(data = parks, aes(fill = "Parks", color = "Parks"), show.legend = TRUE) + 
+  #add shapefile
+  geom_sf(data = lakes, aes(fill = "Lakes", color = "Lakes"), show.legend = TRUE, key_glyph = draw_key_rect) + 
+  #add shapefile
+  geom_sf(data = fire1, fill = NA, aes(color = "Fire1"), size = 1, show.legend = TRUE, key_glyph = draw_key_rect) + 
+  #add shapefile
+  geom_sf(data = fire2, fill = NA, aes(color = "Fire2"), size = 1, show.legend = TRUE)  +
+  #add shapefile
+  geom_sf(data = fire3, fill = NA, aes(color = "Fire3"), size = 1, show.legend = TRUE) + 
+  #manually define colors with hexcodes 
+  scale_color_manual(values = c("BC" = "#E8E8E8", "Parks" = "#C3ECB2", "Lakes" = "#AADAFF", "Fire1" = "#b82b2b", "Fire2" = "#b06f0c", "Fire3" =  "#dd7116"), 
+                       labels = c("British Columbia", "Chelaslie fire", "Entiako fire", "Tweedsmuir fire", "Lakes", "Provincial parks"),
+                       name = "") + 
+  #manual define fill; for no fill NA
+  scale_fill_manual(values = c("BC" = "#E8E8E8", "Parks" = "#C3ECB2", "Lakes" = "#AADAFF", "Fire1" = NA, "Fire2" = NA, "Fire3" =  NA), guide=FALSE) + 
+  #define coordinates based on shapefile metadata
+  coord_sf(crs = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs", xlim = c(983000, 1071000), ylim = c(892000, 941000), expand = FALSE)  + 
+  #add a scale bar
+  annotation_scale(location = "br", width_hint = 0.25, text_size = 12, text_face = NULL, text_family = "serif", text_col = "black") + 
+  #add North Arrow
+    annotation_north_arrow(location = "br", which_north = "true", 
+        pad_x = unit(0.4, "in"), pad_y = unit(0.5, "in"),
+        style = north_arrow_nautical(line_width = 1, line_col = "black", fill = c("black", "white"), text_size = 10, text_face = NULL, text_family = "serif", text_col = "black", text_angle = 0)) + 
+  #define theme
+  theme(axis.text.x = element_text(face = "plain", color = "black", size = 10),
+        axis.text.y = element_text(face = "plain", color = "black", size = 10),
+        legend.position= "bottom",
+        legend.key = element_rect(fill = "white")) 
+
+map_main
+```
+
+# Combining Maps
+
+We combine our study area map with the inset map for a final map figure
+
+
+```{r fig.height=4, fig.width=6}
+fig_manuscript = ggdraw() +
+  #add base map
+  draw_plot(map_main) +
+  #add inset and define size and location 
+  draw_plot(map_inset, x = 0.12, y = 0.32, width = .25, height = .25) 
+ 
+fig_manuscript
+```
+
+# Save map as file
+
+Use `ggsave()` to export the map to a file. Note the relative path name. Multiple extensions are available. Width and height are defined for this figure, but should be adjusted for future figures.
+
+**CHANGE FILE NAME!!**
+
+```{r}
+ggsave("../figures/MAP-FILE-NAMEt.png", plot = fig_manuscript, width = 6, height = 4, dpi = 600)
+```
+
+
