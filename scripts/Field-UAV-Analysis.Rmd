@@ -289,7 +289,7 @@ summary(mod1)
 ```
 
 ```{r}
-with(summary(mod1), 1 - deviance/null.deviance)
+with(summary(mod1), 1 - (deviance/null.deviance))
 ```
 
 ```{r}
@@ -733,6 +733,32 @@ geom_point(size = 3, position = position_dodge(width = .75)) +
 plot_mod7 
 ```
 
+```{r}
+boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn) ) + # define plot axes
+geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center",
+dotsize = .5, fill = "grey64", colour = "grey64") + # Dotplot by group
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4) + # Add means to the plot
+labs(x=(NULL), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod7
+
+```
+
+```{r}
+ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m)) + 
+    geom_dotplot(binaxis='y', stackdir='center') +
+
+  geom_errorbar(data = mod7_graph1, aes(x = burn_unburn, y = response, color = burn_unburn, width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl))) + 
+geom_point(size = 3, position = position_dodge(width = .75)) +
+  
+  stat_summary(data = mod7_graph1, fun.data=mod7_graph1, fun.args = list(mult=1), 
+        geom="errorbar", color="red", width=0.2) +
+  stat_summary(fun.y=mean, geom="point", color="red")
+```
+
 
 ## 8. Model: NDVI burn/unburned
 ```{r}
@@ -793,7 +819,19 @@ geom_point(size = 3, position = position_dodge(width = .75)) +
 plot_mod8 
 ```
 
+```{r}
+boxplot_mod8 = ggplot(field_gcc_ndvi, aes(x=burn_unburn, y=mean_ndvi_10m, color = burn_unburn) ) + # define plot axes
+geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center",
+dotsize = .5, fill = "grey64", colour = "grey64") + # Dotplot by group
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4) + # Add means to the plot
+labs(x=(NULL), y= "Mean NDVI") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
 
+boxplot_mod8
+
+```
 
 ## 9. Model: GCC by burn-year 
 ```{r}
@@ -821,11 +859,6 @@ testDispersion(mod9.res)
 summary(mod9)
 ```
 
-
-```{r}
-with(summary(mod9), 1 - deviance/null.deviance)
-```
-
 ### Data for Graph
 
 ```{r}
@@ -845,6 +878,19 @@ geom_point(size = 3, position = position_dodge(width = .75)) +
   comp_theme 
 
 plot_mod9  
+```
+
+```{r}
+boxplot_mod9 = ggplot(field_gcc, aes(x=burn_year, y=mean_gcc_10m, color = burn_unburn) ) + 
+  geom_boxplot() +
+  geom_dotplot(binaxis = "y", stackdir = "center", binpositions = "all", stackgroups = TRUE, dotsize = .5, fill = "grey64", colour = "grey64") + # Dotplot by group
+  stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4) + # Add means to the plot
+  labs(x=("Burn year"), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod9
+
 ```
 
 ## 10. Model: NDVI as a function of burn year
