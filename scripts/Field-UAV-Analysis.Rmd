@@ -734,11 +734,10 @@ plot_mod7
 ```
 
 ```{r}
-boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn) ) + # define plot axes
-geom_boxplot() +
-  geom_dotplot(binaxis = "y", stackdir = "center",
-dotsize = .5, fill = "grey64", colour = "grey64") + # Dotplot by group
-stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4) + # Add means to the plot
+boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn, fill=burn_unburn) ) + # define plot axes
+geom_boxplot(fill = "white") +
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = .5) + 
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + 
 labs(x=(NULL), y= "Mean GCC") +
   scale_color_manual(values = c("#E69F00", "#009E73")) + 
   comp_theme
@@ -809,11 +808,11 @@ plot_mod8
 ```
 
 ```{r}
-boxplot_mod8 = ggplot(field_gcc_ndvi, aes(x=burn_unburn, y=mean_ndvi_10m, color = burn_unburn) ) + # define plot axes
-geom_boxplot() +
+boxplot_mod8 = ggplot(field_gcc_ndvi, aes(x=burn_unburn, y=mean_ndvi_10m, color = burn_unburn, fill = burn_unburn) ) + # define plot axes
+geom_boxplot(fill = "white") +
   geom_dotplot(binaxis = "y", stackdir = "center",
-dotsize = .5, fill = "grey64", colour = "grey64") + # Dotplot by group
-stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4) + # Add means to the plot
+dotsize = .5) + # Dotplot by group
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + # Add means to the plot
 labs(x=(NULL), y= "Mean NDVI") +
   scale_color_manual(values = c("#E69F00", "#009E73")) + 
   comp_theme
@@ -1529,6 +1528,17 @@ grid_plot_burn
 ggsave("../figures/2020-03-31_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
 
+### Boxplots burn/unburn
+```{r fig.height=6, fig.width=6}
+
+grid_boxplot_burn = cowplot::plot_grid(boxplot_mod7, boxplot_mod8, boxplot_mod9, boxplot_mod10, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_boxplot_burn
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-04-02_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+```
 ### Distance from unburned edge
 
 ```{r fig.height=3, fig.width=6}
