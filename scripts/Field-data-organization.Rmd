@@ -216,48 +216,62 @@ tree_biomass
 ```
 
 ```{r}
-tree_ba = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*0.00007854))
-```
-
-```{r}
-size_plot = tree_info_drones1 %>%
+tree_total_biomass = tree_biomass %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(area_sampled_m2 = median(area_sampled_m2)) 
-
-size_plot  
+    summarise(tree_total_biomass = sum(tree_biomass)) 
+tree_total_biomass  
 ```
 
+### Basal Area
+
+basal area for each tree
 ```{r}
-radius = tree_info_drones1 %>%
+tree_ba = dplyr::mutate(tree_info_drones, tree_ba = ((diameter_cm^2)*0.00007854))
+```
+
+Total basal area per plot
+
+```{r}
+tree_total_ba = tree_ba %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(radius = median(radius))
-
-radius  
+    summarise(tree_total_ba = sum(tree_ba)) 
+tree_total_ba  
 ```
 
+### Tree plot
 ```{r}
-ba = tree_info_drones1 %>%
+tree_plot = tree_info_drones %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(total_ba = sum(total_ba)) 
-ba  
+    summarise(tree_plot_area = median(area_sampled_m2)) 
+
+tree_plot  
+```
+### tree radius
+```{r}
+tree_radius = tree_info_drones %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(tree_radius = median(radius))
+
+tree_radius  
 ```
 
+
 ```{r}
-stems = tree_info_drones1 %>%
+stems = tree_info_drones %>%
     group_by(ID, site, transect, plot, live) %>%
     summarise(n = n()) %>%
     mutate(stems = sum(n)) %>%
     spread(live, n, fill = 0)
 stems
 ```
-
+### Merge tree data
 ```{r}
-plot_radius = merge(size_plot, radius,  by=c("ID","site", "transect", "plot"))
+plot_radius = merge(tree_plot, tree_radius,  by=c("ID","site", "transect", "plot"))
 plot_radius
 ```
 
 ```{r}
-stems_ba = merge(stems,  ba,  by=c("ID","site", "transect", "plot"))
+stems_ba = merge(stems,  tree_total_ba,  by=c("ID","site", "transect", "plot"))
 stems_ba
 ```
 
@@ -267,16 +281,21 @@ tree_info_uav = merge(plot_radius,  stems_ba,  by=c("ID","site", "transect", "pl
 tree_info_uav
 ```
 
+```{r}
+tree_subset = merge(tree_info_uav,  tree_total_biomass,  by=c("ID","site", "transect", "plot"))
+tree_subset
+```
+
 
 ```{r eval=FALSE, include=FALSE}
-write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names = FALSE)
+write.csv(tree_subset,"../outputs/field_subset/tree_plot.csv", row.names = FALSE)
 ```
 
 
 ### Create a file for plot radius for tree data
 
 ```{r}
-tree_radius = tree_info_uav %>% dplyr::select(ID, area_sampled_m2:radius)
+tree_radius = tree_subset %>% dplyr::select(ID, tree_plot_area:tree_radius)
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -366,73 +385,83 @@ shrub_info_drones = shrub_info_drones %>% dplyr::mutate(a = ifelse(genus == "Aln
 shrub_info_drones
 ```
 
-Calculate biomass
+Calculate biomass per shrub
 ```{r}
-biomass = shrub_info_drones %>% dplyr::mutate(biomass = a*basal_diameter_cm^b)
-biomass
+shrub_biomass = shrub_info_drones %>% dplyr::mutate(shrub_biomass = a*basal_diameter_cm^b)
+shrub_biomass
 ```
 
-
-### Total BA
-```{r}
-ba = dplyr::mutate(shrub_info_drones, total_ba = ((basal_diameter_cm^2)*0.00007854))
-ba
-```
-
-### Plot Area
-```{r}
-shrub_info_drones2 = dplyr::mutate(shrub_info_drones1, area_plot_m2 = (plot_width*plot_length)) 
-
-shrub_info_drones2 
-```
-
-### Plot Calculations
+Calculate total shrub biomass per plot
 
 ```{r}
-width_plot = shrub_info_drones2 %>%
+shrub_total_biomass = shrub_biomass %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(plot_width = median(plot_width)) 
-
-width_plot  
+    summarise(shrub_total_biomass = sum(shrub_biomass)) 
+shrub_total_biomass  
 ```
 
+###  BA per shrub
 ```{r}
-length_plot = shrub_info_drones2 %>%
+shrub_ba = dplyr::mutate(shrub_info_drones, shrub_ba = ((basal_diameter_cm^2)*0.00007854))
+shrub_ba
+```
+```{r}
+shrub_total_ba = shrub_ba  %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(plot_length = median(plot_length)) 
+    summarise(shrub_total_ba = sum(shrub_ba))
 
-length_plot  
+shrub_total_ba  
+```
+
+```{r}
+genus_ba = shrub_ba %>%
+    group_by(ID, site, transect, plot, genus) %>%
+    summarise(shrub_total_ba = sum(shrub_ba)) %>%
+    spread(genus, shrub_total_ba, fill = 0) %>% rename(alnus_ba = Alnus, betual_ba = Betula, salix_ba = Salix)
+genus_ba  
+```
+
+### Plot size
+
+```{r}
+plot_area = dplyr::mutate(shrub_info_drones, plot_area = (plot_width*plot_length)) 
+
+plot_area
 ```
 ```{r}
-plot_area = shrub_info_drones2  %>%
+shrub_plot_area = plot_area  %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(area_sampled_m2 = median(area_plot_m2))
+    summarise(shrub_plot_area = median(plot_area))
 
-plot_area  
+shrub_plot_area  
 ```
+
+
 ```{r}
-total_ba = shrub_info_drones2  %>%
+shrub_width_plot = shrub_info_drones %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(total_ba = sum(total_ba))
+    summarise(shrub_plot_width = median(plot_width)) 
 
-total_ba  
+shrub_width_plot  
 ```
 
 ```{r}
-ba = shrub_info_drones2 %>%
-    group_by(ID, site, transect, plot, species) %>%
-    summarise(total_ba = sum(total_ba)) %>%
-    spread(species, total_ba, fill = 0)
-ba  
+shrub_length_plot = shrub_info_drones %>%
+    group_by(ID, site, transect, plot) %>%
+    summarise(shrub_plot_length = median(plot_length)) 
+
+shrub_length_plot  
 ```
 
+### Count by genus
 ```{r}
-species = shrub_info_drones2 %>%
-    group_by(ID, site, transect, plot, species) %>%
+shrub_genus_ct = shrub_info_drones %>%
+    group_by(ID, site, transect, plot, genus) %>%
     summarise(n = n()) %>%
-    mutate(shrubs = sum(n)) %>%
-    spread(species, n, fill = 0)
-species
+    mutate(shrub_ct = sum(n)) %>%
+    spread(genus, n, fill = 0) %>%
+    rename(alnus_ct = Alnus, betual_ct = Betula, salix_ct = Salix)
+shrub_genus_ct
 ```
 
 
@@ -440,53 +469,41 @@ species
 
 ### combine
 ```{r}
-merge1 = merge(plot_area, total_ba,  by=c("ID","site", "transect", "plot"))
+merge1 = merge(shrub_total_biomass, shrub_total_ba,  by=c("ID","site", "transect", "plot"))
 merge1
 ```
 
 ```{r}
-merge2 = merge(species,  ba,  by=c("ID","site", "transect", "plot"))
+merge2 = merge(genus_ba,  shrub_genus_ct,  by=c("ID","site", "transect", "plot"))
 merge2
 ```
 
 ```{r}
-merge3 = merge(width_plot, length_plot, by=c("ID","site", "transect", "plot"))
+merge3 = merge(shrub_width_plot, shrub_length_plot, by=c("ID","site", "transect", "plot"))
 ```
 
+```{r}
+merge3_5 = merge(shrub_plot_area, merge3, by=c("ID","site", "transect", "plot"))
+```
 
 ```{r}
 merge4 = merge(merge1,  merge2,  by=c("ID","site", "transect", "plot"))
 merge4
 ```
 ```{r}
-merge5 = merge(merge4,  merge3,  by=c("ID","site", "transect", "plot"))
-merge5
+shrub_subset = merge(merge4,  merge3_5,  by=c("ID","site", "transect", "plot"))
+shrub_subset
 ```
 
-```{r}
-names(merge3)
-```
 
-```{r}
-shrub_info_uav = merge5 %>% rename(shrub_ct = shrubs, alnus_ct = "Alnus spp..x", bevi_ct = "Betula divaricata.x", bena_ct = "Betula nana ssp. exilis.x", betu_ct = "Betula spp..x", salix_ct = "Salix spp..x", alnus_ba = "Alnus spp..y", bevi_ba = "Betula divaricata.y", bena_ba = "Betula nana ssp. exilis.y", betu_ba = "Betula spp..y", salix_ba = "Salix spp..y")
-```
-
-```{r}
-head(shrub_info_uav)
-```
-
-```{r}
-shrubs_subset = shrub_info_uav %>% mutate(plot_dis = numextract(plot)) %>% dplyr::select(ID:plot, plot_dis, plot_width:plot_length, area_sampled_m2:salix_ba) %>% rename(shrub_area_sampled_m2 = area_sampled_m2, shrub_total_ba = total_ba)
-shrubs_subset
-```
 
 
 ```{r eval=FALSE, include=FALSE}
-write.csv(shrub_info_uav,"../outputs/field_subset/shrub_info_uav.csv", row.names = FALSE)
+write.csv(shrub_subset,"../outputs/field_subset/shrub_plot.csv", row.names = FALSE)
 ```
 
 ```{r}
-shrub_plot_size = shrub_info_uav %>% dplyr::select(ID, area_sampled_m2, plot_width, plot_length)
+shrub_plot_size = shrub_subset %>% dplyr::select(ID, shrub_plot_area, shrub_plot_width, shrub_plot_length)
 ```
 
 
@@ -498,12 +515,12 @@ write.csv(shrub_plot_size,"../outputs/field_subset/shrub_plot_size.csv", row.nam
 # Combine site, tree, and shrub data
 
 ```{r}
-com_merge1 = merge(trees_subset, shrubs_subset,  by=c("ID","site", "transect", "plot", "plot_dis"))
-field_data = merge(sites_subset, com_merge1,  by=c("ID","site", "transect", "plot", "plot_dis"))
+com_merge1 = merge(tree_subset, shrub_subset,  by=c("ID","site", "transect", "plot"))
+field_data = merge(sites_subset, com_merge1,  by=c("ID","site", "transect", "plot"))
 field_data
 ```
 ```{r}
-field_data = field_data %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>% dplyr::select(ID,transect_ID,  site:salix_ba)
+field_data = field_data %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>% dplyr::select(ID,transect_ID,  site:shrub_plot_length)
 
 ```
 
