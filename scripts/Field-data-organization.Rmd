@@ -26,6 +26,7 @@ Total Basla area in meteres squared
 ```{r}
 library(tidyr)
 library(dplyr)
+library(stringr)
 ```
 
 # Functions
@@ -115,8 +116,13 @@ head(tree_info)
 ## Create a unique ID for each point
 and select the columns needed to agregate to plot level
 ```{r}
-tree_info2 = tree_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
-  dplyr::select(ID, region:plot, diameter_cm, live, radius, area_sampled_m2)
+tree_info %>% mutate(plot_dis = numextract(plot)) 
+```
+
+
+```{r}
+tree_info2 = tree_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>% mutate(plot_dis = numextract(plot)) %>%
+  dplyr::select(ID, region:plot, plot_dis, diameter_cm, live, radius, area_sampled_m2)
 tree_info2
 ```
 
@@ -199,11 +205,6 @@ stems_ba
 ```{r}
 tree_info_uav = merge(plot_radius,  stems_ba,  by=c("ID","site", "transect", "plot"))
 tree_info_uav
-```
-
-```{r}
-trees_subset = trees %>% mutate(plot_dis = numextract(plot))  %>% dplyr::select(ID:plot, plot_dis, area_sampled_m2:total_ba) %>% rename(tree_area_sampled_m2 = area_sampled_m2, tree_radius = radius, tree_total_ba = total_ba) %>% mutate(prop_live = live/stems)
-trees_subset
 ```
 
 
