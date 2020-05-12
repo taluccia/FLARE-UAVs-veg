@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-Skeleton for developing a amp figure for FLARE UAS vegetation paper
+Skeleton for developing a map figure for FLARE UAS vegetation paper
 
 This script is reliant on
 * `Rproj` and therefore the `wd()`does not have to be set
