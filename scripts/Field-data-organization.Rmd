@@ -11,21 +11,50 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
+This script is reliant on
+* `Rproj` and therefore the `wd()`does not have to be set
+* Relative path names "../folder-name/file-name.ext"
+* This script is reliant on the following folders 
+    +"../scripts/" --this houses all scripts written in RMarkdown
+    +"../data/shapfiles/" --this houses shape files
+    +"../figures/
 
-alnus_tr1_f07
-ans_tr2_f04
-ans_tr3_f06
-brp_tr1_f09
-brp_tr2_f12
-cn_tr2_f17
-cn_tr1_f15 
+**Data organization** 
+Involve converting to plot level varaibles and some cleaning. Create plot_dis for distance on the transect that removes alpha 'a' and 'b' from -25 plots on BP transect.
+
+Flight Code      |	Field Site	  | Transect 	| UAV Flight	 
+-----------------|----------------|-----------|----------------
+alnus_tr1_f07    |  Alnus         |    1      |     7
+ans_tr2_f04      |  AN            |    2      |     4
+ans_tr3_f06      |  AN            |    3      |     6
+brp_tr1_f09      |  BP            |    1      |     9
+brp_tr2_f12      |  BP            |    2      |    12
+cn_tr2_f17       |  CN            |    2      |    17
+cn_tr1_f15       |  CN            |    1      |    15
+
+**Calculate total basla areafor plots**
+Total Basal area in meteres squared
+
+**Calculate biomass in grams**
+
+Use allometric equations from Alexander et al (2012) for trees and Berner et al 2015 for shrubs. 
+Equation: M=ax^b	[x=BD or DBH]
+
+Genus    |	latin	  | BD 	      |   a	  |    b
+---------|----------|-----------|-------|---------
+Alder    |	alnus   |	0.18-9.52 |	23.7  |	 2.68
+birch    |	betual  |	0.09-2.53	| 28.1	|  2.97
+willow   |	salix	  | 0.10-6.30	| 23.53 |	 2.83
+larch	   |	        | 0.7-39.2	| 39.46	|  2.26
 
 
-Total Basla area in meteres squared
+Genus    |	latin	  |  	 DBH    |   a	  |    b
+---------|----------|-----------|-------|---------			
+Larch	   |          |	0.08-29.3	| 179.2	|  2.01
+
 # Pakcages
 ```{r}
-library(tidyr)
-library(dplyr)
+library(tidyverse)
 library(stringr)
 ```
 
@@ -114,15 +143,14 @@ head(tree_info)
 # Subset field data by transect
 
 ## Create a unique ID for each point
-and select the columns needed to agregate to plot level
-```{r}
-tree_info %>% mutate(plot_dis = numextract(plot)) 
-```
+  - and select the columns needed to agregate to plot level
+  - create plot_dis column to have distance along transect
+  - create unique id for each plot
 
 
 ```{r}
 tree_info2 = tree_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>% mutate(plot_dis = numextract(plot)) %>%
-  dplyr::select(ID, region:plot, plot_dis, diameter_cm, live, radius, area_sampled_m2)
+  dplyr::select(ID, region:plot, plot_dis, diameter_cm:basal_breast, live, radius, area_sampled_m2)
 tree_info2
 ```
 
@@ -147,6 +175,7 @@ tree_info_drones = rbind(alnus_ans, brp_cn)
 tree_info_drones
 ```
 
+
 ## Aggregate tree info to plot info
 Summarise tree info to plot
   - Convert diamter to basal area 
@@ -155,8 +184,39 @@ Summarise tree info to plot
   - count of dead stems
 
 
+### Biomass
+
+Equation: M=ax^b	[x=BD or DBH]
+
+Genus    |	latin	  | BD 	      |   a	  |    b
+---------|----------|-----------|-------|---------
+larch	   |	        | 0.7-39.2	| 39.46	|  2.26
+
+
+Genus    |	latin	  |  	 DBH    |   a	  |    b
+---------|----------|-----------|-------|---------			
+Larch	   |          |	0.08-29.3	| 179.2	|  2.01
+
+
+
+Add coefficients for biomass calculation
 ```{r}
-tree_info_drones1 = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*0.00007854))
+tree_info_drones = tree_info_drones %>% dplyr::mutate(a = ifelse(basal_breast == "dbh", 179.2,
+                                     ifelse(basal_breast == "bd", 39.46, 0))) %>% 
+  dplyr::mutate(b = ifelse(basal_breast == "dbh", 2.01,
+                                     ifelse(basal_breast == "bd", 2.26, 0)))
+
+tree_info_drones
+```
+
+Calculate biomass
+```{r}
+tree_biomass = tree_info_drones %>% dplyr::mutate(tree_biomass = a*diameter_cm^b)
+tree_biomass
+```
+
+```{r}
+tree_ba = dplyr::mutate(tree_info_drones, total_ba = ((diameter_cm^2)*0.00007854))
 ```
 
 ```{r}
@@ -213,6 +273,7 @@ write.csv(tree_info_uav,"../outputs/field_subset/tree_info_uav.csv", row.names =
 ```
 
 
+### Create a file for plot radius for tree data
 
 ```{r}
 tree_radius = tree_info_uav %>% dplyr::select(ID, area_sampled_m2:radius)
@@ -237,12 +298,18 @@ head(shrub_info)
 ```
 
 # Subset field data by transect
+```{r}
+shrub_info %>% mutate(genus = word(species, 1))
+```
 
 ## Create a unique ID for each point
-and select the columns needed to agregate to plot level
+  - create plot_dis column to have distance along transect
+  - create unique id for each plot
+  - create column for genus for biomass equation
+  - and select the columns needed to agregate to plot level
 ```{r}
-shrub_info2 = shrub_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>%
- dplyr:: select(ID, region:plot, plot_width:basal_diameter_cm)
+shrub_info2 = shrub_info %>% mutate(ID =  paste(site, burn_year, transect, plot, sep = '_')) %>% mutate(plot_dis = numextract(plot)) %>% mutate(genus = word(species, 1)) %>%
+ dplyr:: select(ID, region:plot, plot_dis, plot_width:species, genus, basal_diameter_cm)
 shrub_info2
 ```
 
@@ -269,23 +336,57 @@ shrub_info_drones
 
 ## Aggregate tree info to plot info
 Summarise tree info to plot
+  - calculate biomass by genus
   - Convert diamter to basal area (BA = 0.005454*DBH^2)
   - Total basal area
   - count of live stems
   - count of dead stems
 
+### Biomass
 
+Equation: M=ax^b	[x=BD or DBH]
+
+Genus    |	latin	  | BD 	      |   a	  |    b
+---------|----------|-----------|-------|---------
+Alder    |	alnus   |	0.18-9.52 |	23.7  |	 2.68
+birch    |	betual  |	0.09-2.53	| 28.1	|  2.97
+willow   |	salix	  | 0.10-6.30	| 23.53 |	 2.83
+
+
+
+Add coefficients for biomass calculation
 ```{r}
-shrub_info_drones1 = dplyr::mutate(shrub_info_drones, total_ba = ((basal_diameter_cm^2)*0.00007854))
-shrub_info_drones1
+shrub_info_drones = shrub_info_drones %>% dplyr::mutate(a = ifelse(genus == "Alnus", 23.7,
+                                     ifelse(genus == "Betula", 28.1,
+                                            ifelse(genus == "Salix", 23.53, 0)))) %>% 
+  dplyr::mutate(b = ifelse(genus == "Alnus", 2.68,
+                                     ifelse(genus == "Betula", 2.97,
+                                            ifelse(genus == "Salix", 2.83, 0))))
+
+shrub_info_drones
+```
+
+Calculate biomass
+```{r}
+biomass = shrub_info_drones %>% dplyr::mutate(biomass = a*basal_diameter_cm^b)
+biomass
 ```
 
 
+### Total BA
+```{r}
+ba = dplyr::mutate(shrub_info_drones, total_ba = ((basal_diameter_cm^2)*0.00007854))
+ba
+```
+
+### Plot Area
 ```{r}
 shrub_info_drones2 = dplyr::mutate(shrub_info_drones1, area_plot_m2 = (plot_width*plot_length)) 
 
 shrub_info_drones2 
 ```
+
+### Plot Calculations
 
 ```{r}
 width_plot = shrub_info_drones2 %>%
