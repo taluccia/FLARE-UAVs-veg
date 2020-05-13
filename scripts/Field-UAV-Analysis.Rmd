@@ -1492,6 +1492,71 @@ plot_mod18
 ```
 
 
+## 19. Model: GCC tree  Biomass
+```{r}
+mod19 = glm(mean_gcc_tree ~ tree_total_biomass, data = field_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod19.res = simulateResiduals(fittedModel = mod19, n = 500)
+mod19.res$scaledResiduals
+mod19.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod19.res)
+```
+
+```{r}
+testDispersion(mod19.res)
+```
+
+### Sumamry
+```{r}
+summary(mod19)
+```
+
+### Data for graph
+
+```{r}
+(mod19_graph = data.frame(summary(lsmeans(mod19, ~ tree_total_biomass),type = "response")))
+```
+
+
+
+```{r}
+preddat_mod19 = data.frame(tree_total_biomass = field_gcc$tree_total_biomass)
+
+head(preddat_mod19)
+
+pred_mod19 = predict(mod19, newdata = preddat_mod19, se.fit = TRUE)
+
+UL_mod19 = with(pred_mod19, fit + 2*se.fit)
+LL_mod19 = with(pred_mod19, fit - 2*se.fit)
+
+field_gcc19 = mutate(field_gcc, pred_mod19 = pred_mod19$fit, 
+               ucl_mod19 = UL_mod19, 
+               lcl_mod19 = LL_mod19)
+```
+
+### Graph
+
+```{r}
+plot_mod19 = ggplot(data = field_gcc19, aes(x = tree_total_biomass, y = mean_gcc_tree)) + 
+  geom_point(size = 2) +
+    geom_line(aes(y = pred_mod19), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod19, ymax = ucl_mod19, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod19), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod19), linetype='longdash', size = 1) +
+    ylab("Mean GCC") +
+    xlab("Tree above ground biomass" ~(g))  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+plot_mod19
+```
+
 
 
 
