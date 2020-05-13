@@ -38,12 +38,12 @@ head(field_data)
 
 ```{r}
 field_data %>% group_by(site, transect) %>% 
-  summarise(min(shrub_area_sampled_m2))
+  summarise(min(shrub_plot_area))
 ```
 
 ```{r}
 field_data %>% group_by(site, transect) %>% 
-  summarise(max(shrub_area_sampled_m2))
+  summarise(max(shrub_plot_area))
 ```
 
 ```{r}
