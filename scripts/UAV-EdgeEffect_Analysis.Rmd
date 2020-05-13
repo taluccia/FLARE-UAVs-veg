@@ -1,0 +1,565 @@
+---
+title: "UAV-EdgeEffect-Analysis"
+author: "Anna Talucci"
+date: "5/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(DHARMa)
+```
+
+
+# Field Data
+```{r}
+field_data = read.csv("../data/field_subset/field_data_all.csv")
+```
+
+```{r}
+head(field_data)
+```
+
+## field Plot sizes
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(tree_radius))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(tree_radius))
+```
+
+# UAV Data
+
+```{r}
+gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+```
+
+```{r}
+head(gcc_all)
+head(ndvi_all)
+```
+
+# Combine Field and UAV data
+
+```{r}
+gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
+gcc_ndvi
+field_gcc = merge(field_data, gcc_all, by="ID") 
+field_gcc
+field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
+field_gcc_ndvi
+```
+
+# burn_year as factor
+
+```{r}
+field_gcc$burn_year = as.factor(field_gcc$burn_year)
+field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
+
+str(field_gcc)
+str(field_gcc_ndvi)
+```
+
+
+
+# Define graph Theme and color Palette 
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+ 
+```{r}
+
+reg_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+# Data visualization
+
+# Part 2:  Post-fire
+
+## 7. Model: GCC burn/unburned
+```{r}
+mod7 = glm(mean_gcc_10m ~ burn_unburn, data = field_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod7.res = simulateResiduals(fittedModel = mod7, n = 500)
+mod7.res$scaledResiduals
+mod7.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod7.res)
+```
+
+```{r}
+testDispersion(mod7.res)
+```
+
+### Sumamry
+```{r}
+summary(mod7)
+```
+
+### Data for graph
+
+```{r}
+(mod7_graph = data.frame(summary(lsmeans(mod7, pairwise ~ burn_unburn),type = "response")))
+```
+
+```{r}
+levels(mod7_graph$lsmeans.burn_unburn)[levels(mod7_graph$lsmeans.burn_unburn)=="burned"] = "Burned"
+levels(mod7_graph$lsmeans.burn_unburn)[levels(mod7_graph$lsmeans.burn_unburn)=="unburned"] = "Unburned"
+
+( mod7_graph1 = dplyr::select(mod7_graph, lsmeans.burn_unburn:lsmeans.asymp.UCL))
+
+
+
+names(mod7_graph1)[1:6] = c("burn_unburn", "response", "se", "df", "lcl", "ucl")
+mod7_graph1 = data.frame(mod7_graph1)
+mod7_graph1
+
+```
+
+### Graph
+
+```{r}
+plot_mod7 = ggplot(data = mod7_graph1, aes(x = burn_unburn, y = response, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=(NULL), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+plot_mod7 
+```
+
+```{r}
+boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn, fill=burn_unburn) ) + # define plot axes
+geom_boxplot(fill = "white") +
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = .5) + 
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + 
+labs(x=(NULL), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod7
+
+```
+
+
+
+## 8. Model: NDVI burn/unburned
+```{r}
+mod8 = glm(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod8.res = simulateResiduals(fittedModel = mod8, n = 500)
+mod8.res$scaledResiduals
+mod8.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod8.res)
+```
+
+```{r}
+testDispersion(mod8.res)
+```
+
+### Sumamry
+```{r}
+summary(mod8)
+```
+
+### Data for graph
+
+```{r}
+(mod8_graph = data.frame(summary(lsmeans(mod8, pairwise ~ burn_unburn),type = "response")))
+```
+
+```{r}
+levels(mod8_graph$lsmeans.burn_unburn)[levels(mod8_graph$lsmeans.burn_unburn)=="burned"] = "Burned"
+levels(mod8_graph$lsmeans.burn_unburn)[levels(mod8_graph$lsmeans.burn_unburn)=="unburned"] = "Unburned"
+
+( mod8_graph1 = dplyr::select(mod8_graph, lsmeans.burn_unburn:lsmeans.asymp.UCL))
+
+
+
+names(mod8_graph1)[1:6] = c("burn_unburn", "response", "se", "df", "lcl", "ucl")
+mod8_graph1 = data.frame(mod8_graph1)
+mod8_graph1
+
+```
+
+### Graph
+
+```{r}
+plot_mod8 = ggplot(data = mod8_graph1, aes(x = burn_unburn, y = response, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=(NULL), y= "Mean NDVI") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+plot_mod8 
+```
+
+```{r}
+boxplot_mod8 = ggplot(field_gcc_ndvi, aes(x=burn_unburn, y=mean_ndvi_10m, color = burn_unburn, fill = burn_unburn) ) + # define plot axes
+geom_boxplot(fill = "white") +
+  geom_dotplot(binaxis = "y", stackdir = "center",
+dotsize = .5) + # Dotplot by group
+stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + # Add means to the plot
+labs(x=(NULL), y= "Mean NDVI") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod8
+
+```
+
+## 9. Model: GCC by burn-year 
+```{r}
+mod9 = glm(mean_gcc_10m ~ burn_year:burn_unburn, data = field_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod9.res = simulateResiduals(fittedModel = mod9, n = 500)
+mod9.res$scaledResiduals
+mod9.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod9.res)
+```
+
+```{r}
+testDispersion(mod9.res)
+```
+
+### Sumamry
+```{r}
+summary(mod9)
+```
+
+### Data for Graph
+
+```{r}
+(mod9_graph = data.frame(summary(lsmeans(mod9, ~ burn_year:burn_unburn),type = "response")))
+```
+
+
+
+### Graph 
+
+```{r}
+plot_mod9 = ggplot(data = mod9_graph, aes(x = burn_year, y = lsmean, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = asymp.LCL, ymax = asymp.UCL), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=("Burn year"), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme 
+
+plot_mod9  
+```
+
+```{r}
+boxplot_mod9 = ggplot(field_gcc, aes(x=burn_year, y=mean_gcc_10m, color = burn_unburn,  fill = burn_unburn)) + 
+  geom_boxplot(position=position_dodge(0.8), fill = "white") +
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = .5, position=position_dodge(0.8)) +
+  stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4, position = position_dodge(0.8)) + # Add means to the plot
+  labs(x=("Burn year"), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod9
+
+```
+
+## 10. Model: NDVI as a function of burn year
+```{r}
+mod10 = glm(mean_ndvi_10m ~ burn_year:burn_unburn, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod10.res = simulateResiduals(fittedModel = mod10, n = 500)
+mod10.res$scaledResiduals
+mod10.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod10.res)
+```
+
+```{r}
+testDispersion(mod10.res)
+```
+
+### Sumamry
+```{r}
+summary(mod10)
+```
+
+### Data for Graph
+
+```{r}
+(mod10_graph = data.frame(summary(lsmeans(mod10, ~ burn_year:burn_unburn),type = "response")))
+```
+
+
+
+
+### Graph 
+
+```{r}
+plot_mod10 = ggplot(data = mod10_graph, aes(x = burn_year, y = lsmean, color = burn_unburn) ) + 
+   geom_errorbar(width = .2, lwd = .75, aes(ymin = asymp.LCL, ymax = asymp.UCL), position = position_dodge(width = .75)) + 
+geom_point(size = 3, position = position_dodge(width = .75)) + 
+  labs(x=("Burn year"), y= "Mean NDVI") +
+   scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme 
+
+plot_mod10  
+```
+
+```{r}
+boxplot_mod10 = ggplot(field_gcc_ndvi, aes(x=burn_year, y=mean_ndvi_10m, color = burn_unburn,  fill = burn_unburn)) + 
+  geom_boxplot(position=position_dodge(0.8), fill = "white") +
+  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = .5, position=position_dodge(0.8)) +
+  stat_summary(fun.y = mean, geom= "point", shape = 18, size = 4, position = position_dodge(0.8)) + # Add means to the plot
+  labs(x=("Burn year"), y= "Mean GCC") +
+  scale_color_manual(values = c("#E69F00", "#009E73")) + 
+  comp_theme
+
+boxplot_mod10
+
+```
+
+
+## 11. Model: GCC distance from unburned edge 
+```{r}
+mod11 = glm(mean_gcc_10m ~ plot_dis, data = field_gcc, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod11.res = simulateResiduals(fittedModel = mod1, n = 500)
+mod11.res$scaledResiduals
+mod11.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod11.res)
+```
+
+```{r}
+testDispersion(mod11.res)
+```
+
+### Sumamry
+```{r}
+summary(mod11)
+```
+
+```{r}
+(mod11_sum = data.frame(summary(lsmeans(mod11, ~ plot_dis),type = "response")))
+```
+
+### Predicted data for for graph
+```{r}
+preddat_mod11 = data.frame(plot_dis = field_gcc$plot_dis)
+
+head(preddat_mod11)
+
+pred_mod11 = predict(mod11, newdata = preddat_mod11, se.fit = TRUE)
+
+UL_mod11 = with(pred_mod11, fit + 2*se.fit)
+LL_mod11 = with(pred_mod11, fit - 2*se.fit)
+
+field_gcc11 = mutate(field_gcc, pred_mod11 = (pred_mod11$fit), 
+               ucl_mod11 = (UL_mod11), 
+               lcl_mod11 = (LL_mod11))
+```
+
+
+### Graph  
+
+```{r}
+plot_mod11 = ggplot(data = field_gcc11, aes(x = plot_dis, y = mean_gcc_10m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod11), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
+    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
+    ylab("Mean GCC") +
+    xlab("Distance from the unburned edge \n(m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
+
+plot_mod11
+```
+
+
+## 12.  Model: NDVI distance from edge
+```{r}
+mod12 = glm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod12.res = simulateResiduals(fittedModel = mod12, n = 500)
+mod12.res$scaledResiduals
+mod12.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod12.res)
+```
+
+```{r}
+testDispersion(mod12.res)
+```
+
+### Sumamry
+```{r}
+summary(mod12)
+```
+
+```{r}
+(mod12_sum = data.frame(summary(lsmeans(mod12, ~ plot_dis),type = "response")))
+```
+
+```{r}
+preddat_mod12 = data.frame(plot_dis = field_gcc_ndvi$plot_dis)
+
+head(preddat_mod12)
+
+pred_mod12 = predict(mod12, newdata = preddat_mod12, se.fit = TRUE)
+
+UL_mod12 = with(pred_mod12, fit + 2*se.fit)
+LL_mod12 = with(pred_mod12, fit - 2*se.fit)
+
+field_gcc_ndvi12 = mutate(field_gcc_ndvi, pred_mod12 = (pred_mod12$fit), 
+               ucl_mod12 = (UL_mod12), 
+               lcl_mod12 = (LL_mod12))
+```
+
+### Graph  
+
+```{r}
+plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = plot_dis, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod12), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
+    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
+    ylab("Mean NDVI") +
+    xlab("Distance from the unburned edge \n(m)")  +
+    reg_theme + guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
+
+plot_mod12
+```
+
+# Manuscript figures
+
+## Part 2: Post-fire
+
+### Burned vs. Unburned + Burn Year
+```{r fig.height=6, fig.width=6}
+
+grid_plot_burn = cowplot::plot_grid(plot_mod7, plot_mod8, plot_mod9, plot_mod10, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_plot_burn
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-31_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+```
+
+### Boxplots burn/unburn
+```{r fig.height=6, fig.width=6}
+
+grid_boxplot_burn = cowplot::plot_grid(boxplot_mod7, boxplot_mod8, boxplot_mod9, boxplot_mod10, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_boxplot_burn
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-04-02_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+```
+### Distance from unburned edge
+
+```{r fig.height=3, fig.width=6}
+
+grid_plot_edge = cowplot::plot_grid(plot_mod11, plot_mod12, labels = c("A", "B"), align = "hv", ncol= 2) 
+grid_plot_edge
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-03-31_distance_edge_pts.jpeg", plot = grid_plot_edge, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+

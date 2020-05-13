@@ -1,0 +1,677 @@
+---
+title: "UAV-Biomass-Analysis"
+author: "Anna Talucci"
+date: "5/13/2020"
+output: html_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(DHARMa)
+```
+
+
+# Field Data
+```{r}
+field_data = read.csv("../data/field_subset/field_data_all.csv")
+```
+
+```{r}
+head(field_data)
+```
+
+## field Plot sizes
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(tree_radius))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(tree_radius))
+```
+
+# UAV Data
+
+```{r}
+gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+```
+
+```{r}
+head(gcc_all)
+head(ndvi_all)
+```
+
+# Combine Field and UAV data
+
+```{r}
+gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
+gcc_ndvi
+field_gcc = merge(field_data, gcc_all, by="ID") 
+field_gcc
+field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
+field_gcc_ndvi
+```
+
+# burn_year as factor
+
+```{r}
+field_gcc$burn_year = as.factor(field_gcc$burn_year)
+field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
+
+str(field_gcc)
+str(field_gcc_ndvi)
+```
+
+
+
+# Define graph Theme and color Palette 
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+ 
+```{r}
+
+reg_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+# Data visualization
+
+
+```{r}
+ggplot(data = field_gcc, aes(x = plot_dis , y = mean_gcc_25cm, color = factor(transect_ID))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean gcc (25cm)") +
+          xlab("distance from edge")  +
+          theme_bw() 
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = transect_ID , y = shrub_total_ba, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("shrub basal area") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = transect_ID , y = tree_total_ba, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("Tree basal area") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = transect_ID , y = prop_live, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("Proportion live trees") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+
+
+Boxplot with points
+```{r}
+ggplot(data = field_gcc, aes(x = transect_ID , y = mean_gcc_25cm, color = factor(transect_ID))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean gcc (25cm)") +
+          xlab("Transect ID")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "Transect ID"))
+```
+```{r}
+ggplot(data = field_gcc_ndvi, aes(x = mean_ndvi_25cm , y = mean_ndvi_25cm, color = factor(transect_ID))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean ndvi (25cm)") +
+          xlab("")  +
+          theme_bw() 
+```
+
+```{r}
+ggplot(data = field_gcc_ndvi, aes(x = mean_gcc_25cm , y = mean_ndvi_25cm, color = factor(transect_ID))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=cbbPalette) +
+          ylab("mean ndvi (25cm)") +
+          xlab("mean gcc (25cm)")  +
+          theme_bw() 
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = plot_dis , y = mean_gcc_1m, color = factor(burn_year))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+          ylab("mean gcc (1m)") +
+          xlab("distance from edge")  +
+          theme_bw() 
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = plot_dis , y = mean_gcc_3m, color = factor(burn_year))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+          ylab("mean gcc (3m)") +
+          xlab("distance from edge")  +
+          theme_bw() 
+```
+
+```{r}
+ggplot(data = field_gcc, aes(x = prop_live , y = mean_gcc_tree, color = factor(burn_year))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+          ylab("mean gcc") +
+          xlab("proportion live trees")  +
+          theme_bw() 
+```
+
+
+```{r}
+ggplot(data = field_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(burn_year))) +
+         geom_point(size = 3) +
+         scale_color_manual(values=c("#000000", "#E69F00", "#56B4E9", "#009E73")) +
+          ylab("mean gcc") +
+          xlab("shrub abundance")  +
+          theme_bw() 
+```
+
+# Analysis: 
+
+# Part 1: GCC relates to NDVI
+
+Assess spatial scale...
+
+
+## 1. Model: NDVIas  function of GCC
+```{r}
+mod1 = glm(mean_ndvi_25cm ~ mean_gcc_25cm, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod1.res = simulateResiduals(fittedModel = mod1, n = 500)
+mod1.res$scaledResiduals
+mod1.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod1.res)
+```
+
+```{r}
+testDispersion(mod1.res)
+```
+
+### Sumamry
+```{r}
+summary(mod1)
+```
+
+```{r}
+with(summary(mod1), 1 - (deviance/null.deviance))
+```
+
+```{r}
+data.frame(summary(lsmeans(mod1, ~ mean_gcc_25cm), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod1 = data.frame(mean_gcc_25cm = field_gcc_ndvi$mean_gcc_25cm)
+
+head(preddat_mod1)
+
+pred_mod1 = predict(mod1, newdata = preddat_mod1, se.fit = TRUE)
+
+UL_mod1 = with(pred_mod1, fit + 2*se.fit)
+LL_mod1 = with(pred_mod1, fit - 2*se.fit)
+
+field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred_mod1 = pred_mod1$fit, 
+               ucl_mod1 = UL_mod1, 
+               lcl_mod1 = LL_mod1)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod1 = ggplot(data = field_gcc_ndvi1, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod1), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI (25cm)") +
+    xlab("Mean GCC (25cm)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks = c(0.32, 0.37, 0.42, 0.47)) 
+
+plot_mod1
+```
+
+
+## 2. Model: NDVIas  function of GCC
+```{r}
+mod2 = glm(mean_ndvi_50cm ~ mean_gcc_50cm, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod2.res = simulateResiduals(fittedModel = mod2, n = 500)
+mod2.res$scaledResiduals
+mod2.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod2.res)
+```
+
+```{r}
+testDispersion(mod2.res)
+```
+
+### Sumamry
+```{r}
+summary(mod2)
+```
+
+```{r}
+with(summary(mod2), 1 - deviance/null.deviance)
+```
+
+```{r}
+data.frame(summary(lsmeans(mod2, ~ mean_gcc_50cm), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod2 = data.frame(mean_gcc_50cm = field_gcc_ndvi$mean_gcc_50cm)
+
+head(preddat_mod2)
+
+pred_mod2 = predict(mod2, newdata = preddat_mod2, se.fit = TRUE)
+
+UL_mod2 = with(pred_mod2, fit + 2*se.fit)
+LL_mod2 = with(pred_mod2, fit - 2*se.fit)
+
+field_gcc_ndvi2 = mutate(field_gcc_ndvi, pred_mod2 = pred_mod2$fit, 
+               ucl_mod2 = UL_mod2, 
+               lcl_mod2 = LL_mod2)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod2 = ggplot(data = field_gcc_ndvi2, aes(x = mean_gcc_50cm, y = mean_ndvi_50cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod2), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod2, ymax = ucl_mod2, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI (50cm)") +
+    xlab("Mean GCC (50cm)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+plot_mod2
+```
+
+## 3. Model: NDVIas  function of GCC
+```{r}
+mod3 = glm(mean_ndvi_1m ~ mean_gcc_1m, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod3.res = simulateResiduals(fittedModel = mod3, n = 500)
+mod3.res$scaledResiduals
+mod3.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod3.res)
+```
+
+```{r}
+testDispersion(mod3.res)
+```
+
+### Sumamry
+```{r}
+summary(mod3)
+```
+
+```{r}
+with(summary(mod3), 1 - deviance/null.deviance)
+```
+
+```{r}
+data.frame(summary(lsmeans(mod3, ~ mean_gcc_1m), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod3 = data.frame(mean_gcc_1m = field_gcc_ndvi$mean_gcc_1m)
+
+head(preddat_mod3)
+
+pred_mod3 = predict(mod3, newdata = preddat_mod3, se.fit = TRUE)
+
+UL_mod3 = with(pred_mod3, fit + 2*se.fit)
+LL_mod3 = with(pred_mod3, fit - 2*se.fit)
+
+field_gcc_ndvi3 = mutate(field_gcc_ndvi, pred_mod3 = pred_mod3$fit, 
+               ucl_mod3 = UL_mod3, 
+               lcl_mod3 = LL_mod3)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod3 = ggplot(data = field_gcc_ndvi3, aes(x = mean_gcc_1m, y = mean_ndvi_1m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod3), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI (1m)") +
+    xlab("Mean GCC  (1m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+plot_mod3
+```
+
+## 4. Model: NDVIas  function of GCC
+```{r}
+mod4 = glm(mean_ndvi_3m ~ mean_gcc_3m, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod4.res = simulateResiduals(fittedModel = mod4, n = 500)
+mod4.res$scaledResiduals
+mod4.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod4.res)
+```
+
+```{r}
+testDispersion(mod4.res)
+```
+
+### Sumamry
+```{r}
+summary(mod4)
+```
+
+```{r}
+with(summary(mod4), 1 - deviance/null.deviance)
+```
+
+```{r}
+data.frame(summary(lsmeans(mod4, ~ mean_gcc_3m), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod4 = data.frame(mean_gcc_3m = field_gcc_ndvi$mean_gcc_3m)
+
+head(preddat_mod4)
+
+pred_mod4 = predict(mod4, newdata = preddat_mod4, se.fit = TRUE)
+
+UL_mod4 = with(pred_mod4, fit + 2*se.fit)
+LL_mod4 = with(pred_mod4, fit - 2*se.fit)
+
+field_gcc_ndvi4 = mutate(field_gcc_ndvi, pred_mod4 = pred_mod4$fit, 
+               ucl_mod4 = UL_mod4, 
+               lcl_mod4 = LL_mod4)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod4 = ggplot(data = field_gcc_ndvi4, aes(x = mean_gcc_3m, y = mean_ndvi_3m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod4), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI (3m)") +
+    xlab("Mean GCC (3m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+    scale_y_continuous(breaks=c(0.0, 0.1, 0.2))
+
+plot_mod4
+```
+
+## 5. Model: NDVIas  function of GCC
+```{r}
+mod5 = glm(mean_ndvi_5m ~ mean_gcc_5m, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod5.res = simulateResiduals(fittedModel = mod5, n = 500)
+mod5.res$scaledResiduals
+mod5.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod5.res)
+```
+
+```{r}
+testDispersion(mod5.res)
+```
+
+### Sumamry
+```{r}
+summary(mod5)
+```
+
+```{r}
+with(summary(mod5), 1 - deviance/null.deviance)
+```
+
+```{r}
+data.frame(summary(lsmeans(mod5, ~ mean_gcc_5m), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod5 = data.frame(mean_gcc_5m = field_gcc_ndvi$mean_gcc_5m)
+
+head(preddat_mod5)
+
+pred_mod5 = predict(mod5, newdata = preddat_mod5, se.fit = TRUE)
+
+UL_mod5 = with(pred_mod5, fit + 2*se.fit)
+LL_mod5 = with(pred_mod5, fit - 2*se.fit)
+
+field_gcc_ndvi5 = mutate(field_gcc_ndvi, pred_mod5 = pred_mod5$fit, 
+               ucl_mod5 = UL_mod5, 
+               lcl_mod5 = LL_mod5)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod5), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI (5m)") +
+    xlab("Mean GCC (5m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+    scale_y_continuous(breaks=c(0.0, 0.1))
+
+plot_mod5
+```
+
+## 6. Model: NDVIas  function of GCC
+```{r}
+mod6 = glm(mean_ndvi_10m ~ mean_gcc_10m, data = field_gcc_ndvi, family = gaussian)
+```
+
+### Residuals with DHARMa
+```{r, include=FALSE}
+mod6.res = simulateResiduals(fittedModel = mod6, n = 500)
+mod6.res$scaledResiduals
+mod6.res$scaledResidualsNormal
+```
+
+In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
+```{r}
+plotSimulatedResiduals(simulationOutput = mod6.res)
+```
+
+```{r}
+testDispersion(mod6.res)
+```
+
+### Sumamry
+```{r}
+summary(mod6)
+```
+
+```{r}
+with(summary(mod6), 1 - deviance/null.deviance)
+```
+
+```{r}
+data.frame(summary(lsmeans(mod6, ~ mean_gcc_10m), type = "response"))
+```
+
+### Data for graph
+```{r}
+preddat_mod6 = data.frame(mean_gcc_10m = field_gcc_ndvi$mean_gcc_10m)
+
+head(preddat_mod6)
+
+pred_mod6 = predict(mod6, newdata = preddat_mod6, se.fit = TRUE)
+
+UL_mod6 = with(pred_mod6, fit + 2*se.fit)
+LL_mod6 = with(pred_mod6, fit - 2*se.fit)
+
+field_gcc_ndvi6 = mutate(field_gcc_ndvi, pred_mod6 = pred_mod6$fit, 
+               ucl_mod6 = UL_mod6, 
+               lcl_mod6 = LL_mod6)
+```
+
+### Graph 
+
+```{r fig.height=3, fig.width=3}
+plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
+    
+    ylab("Mean NDVI  (10m)") +
+    xlab("Mean GCC (10m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+    scale_y_continuous(breaks=c(0.0, 0.1))
+
+plot_mod6
+```
+
