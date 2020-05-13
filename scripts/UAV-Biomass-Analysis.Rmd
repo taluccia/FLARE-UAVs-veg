@@ -259,15 +259,15 @@ ggplot(data = field_gcc, aes(x = shrub_ct , y = mean_gcc_shrub, color = factor(b
 ```
 
 # Analysis: 
-
-# Part 1: GCC relates to NDVI
-
-Assess spatial scale...
-
-
-## 1. Model: NDVIas  function of GCC
 ```{r}
-mod1 = glm(mean_ndvi_25cm ~ mean_gcc_25cm, data = field_gcc_ndvi, family = gaussian)
+head(field_gcc)
+```
+
+# Part 4: Biomass as it relates to GCC and NDVI
+
+## 1. Model: Woody Biomass function of GCC
+```{r}
+mod1 = glm(mean_gcc_25cm ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -296,12 +296,13 @@ with(summary(mod1), 1 - (deviance/null.deviance))
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod1, ~ mean_gcc_25cm), type = "response"))
+data.frame(summary(lsmeans(mod1, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
+
 ```{r}
-preddat_mod1 = data.frame(mean_gcc_25cm = field_gcc_ndvi$mean_gcc_25cm)
+preddat_mod1 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod1)
 
@@ -310,7 +311,7 @@ pred_mod1 = predict(mod1, newdata = preddat_mod1, se.fit = TRUE)
 UL_mod1 = with(pred_mod1, fit + 2*se.fit)
 LL_mod1 = with(pred_mod1, fit - 2*se.fit)
 
-field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred_mod1 = pred_mod1$fit, 
+field_gcc1 = mutate(field_gcc, pred_mod1 = pred_mod1$fit, 
                ucl_mod1 = UL_mod1, 
                lcl_mod1 = LL_mod1)
 ```
@@ -318,17 +319,16 @@ field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred_mod1 = pred_mod1$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod1 = ggplot(data = field_gcc_ndvi1, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm)) + 
+plot_mod1 = ggplot(data = field_gcc1, aes(x = woody_biomass_g_m, y = mean_gcc_25cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod1), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (25cm)") +
-    xlab("Mean GCC (25cm)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks = c(0.32, 0.37, 0.42, 0.47)) 
+    ylab("Mean GCC (25cm)") +
+    xlab("AGB (g per m^2)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod1
 ```
@@ -336,7 +336,7 @@ plot_mod1
 
 ## 2. Model: NDVIas  function of GCC
 ```{r}
-mod2 = glm(mean_ndvi_50cm ~ mean_gcc_50cm, data = field_gcc_ndvi, family = gaussian)
+mod2 = glm(mean_gcc_50cm ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -365,12 +365,12 @@ with(summary(mod2), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod2, ~ mean_gcc_50cm), type = "response"))
+data.frame(summary(lsmeans(mod2, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
 ```{r}
-preddat_mod2 = data.frame(mean_gcc_50cm = field_gcc_ndvi$mean_gcc_50cm)
+preddat_mod2 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod2)
 
@@ -379,7 +379,7 @@ pred_mod2 = predict(mod2, newdata = preddat_mod2, se.fit = TRUE)
 UL_mod2 = with(pred_mod2, fit + 2*se.fit)
 LL_mod2 = with(pred_mod2, fit - 2*se.fit)
 
-field_gcc_ndvi2 = mutate(field_gcc_ndvi, pred_mod2 = pred_mod2$fit, 
+field_gcc2 = mutate(field_gcc, pred_mod2 = pred_mod2$fit, 
                ucl_mod2 = UL_mod2, 
                lcl_mod2 = LL_mod2)
 ```
@@ -387,15 +387,15 @@ field_gcc_ndvi2 = mutate(field_gcc_ndvi, pred_mod2 = pred_mod2$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod2 = ggplot(data = field_gcc_ndvi2, aes(x = mean_gcc_50cm, y = mean_ndvi_50cm)) + 
+plot_mod2 = ggplot(data = field_gcc2, aes(x = woody_biomass_g_m, y = mean_gcc_50cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod2), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod2, ymax = ucl_mod2, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (50cm)") +
-    xlab("Mean GCC (50cm)")  +
+    ylab("Mean GCC (50cm)") +
+    xlab("Biomass")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod2
@@ -403,7 +403,7 @@ plot_mod2
 
 ## 3. Model: NDVIas  function of GCC
 ```{r}
-mod3 = glm(mean_ndvi_1m ~ mean_gcc_1m, data = field_gcc_ndvi, family = gaussian)
+mod3 = glm(mean_gcc_1m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -432,12 +432,12 @@ with(summary(mod3), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod3, ~ mean_gcc_1m), type = "response"))
+data.frame(summary(lsmeans(mod3, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
 ```{r}
-preddat_mod3 = data.frame(mean_gcc_1m = field_gcc_ndvi$mean_gcc_1m)
+preddat_mod3 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod3)
 
@@ -446,7 +446,7 @@ pred_mod3 = predict(mod3, newdata = preddat_mod3, se.fit = TRUE)
 UL_mod3 = with(pred_mod3, fit + 2*se.fit)
 LL_mod3 = with(pred_mod3, fit - 2*se.fit)
 
-field_gcc_ndvi3 = mutate(field_gcc_ndvi, pred_mod3 = pred_mod3$fit, 
+field_gcc3 = mutate(field_gcc, pred_mod3 = pred_mod3$fit, 
                ucl_mod3 = UL_mod3, 
                lcl_mod3 = LL_mod3)
 ```
@@ -454,15 +454,15 @@ field_gcc_ndvi3 = mutate(field_gcc_ndvi, pred_mod3 = pred_mod3$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod3 = ggplot(data = field_gcc_ndvi3, aes(x = mean_gcc_1m, y = mean_ndvi_1m)) + 
+plot_mod3 = ggplot(data = field_gcc3, aes(x = woody_biomass_g_m, y = mean_gcc_1m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod3), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (1m)") +
-    xlab("Mean GCC  (1m)")  +
+    ylab("Mean GCC (1m)") +
+    xlab("biomass")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod3
@@ -470,7 +470,7 @@ plot_mod3
 
 ## 4. Model: NDVIas  function of GCC
 ```{r}
-mod4 = glm(mean_ndvi_3m ~ mean_gcc_3m, data = field_gcc_ndvi, family = gaussian)
+mod4 = glm(mean_gcc_3m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -499,12 +499,12 @@ with(summary(mod4), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod4, ~ mean_gcc_3m), type = "response"))
+data.frame(summary(lsmeans(mod4, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
 ```{r}
-preddat_mod4 = data.frame(mean_gcc_3m = field_gcc_ndvi$mean_gcc_3m)
+preddat_mod4 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod4)
 
@@ -513,7 +513,7 @@ pred_mod4 = predict(mod4, newdata = preddat_mod4, se.fit = TRUE)
 UL_mod4 = with(pred_mod4, fit + 2*se.fit)
 LL_mod4 = with(pred_mod4, fit - 2*se.fit)
 
-field_gcc_ndvi4 = mutate(field_gcc_ndvi, pred_mod4 = pred_mod4$fit, 
+field_gcc4 = mutate(field_gcc, pred_mod4 = pred_mod4$fit, 
                ucl_mod4 = UL_mod4, 
                lcl_mod4 = LL_mod4)
 ```
@@ -521,25 +521,23 @@ field_gcc_ndvi4 = mutate(field_gcc_ndvi, pred_mod4 = pred_mod4$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod4 = ggplot(data = field_gcc_ndvi4, aes(x = mean_gcc_3m, y = mean_ndvi_3m)) + 
+plot_mod4 = ggplot(data = field_gcc4, aes(x = woody_biomass_g_m, y = mean_gcc_3m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod4), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (3m)") +
-    xlab("Mean GCC (3m)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1, 0.2))
+    ylab("Mean GCC (3m)") +
+    xlab("Biomass")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod4
 ```
 
 ## 5. Model: NDVIas  function of GCC
 ```{r}
-mod5 = glm(mean_ndvi_5m ~ mean_gcc_5m, data = field_gcc_ndvi, family = gaussian)
+mod5 = glm(mean_gcc_5m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -568,12 +566,12 @@ with(summary(mod5), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod5, ~ mean_gcc_5m), type = "response"))
+data.frame(summary(lsmeans(mod5, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
 ```{r}
-preddat_mod5 = data.frame(mean_gcc_5m = field_gcc_ndvi$mean_gcc_5m)
+preddat_mod5 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod5)
 
@@ -582,7 +580,7 @@ pred_mod5 = predict(mod5, newdata = preddat_mod5, se.fit = TRUE)
 UL_mod5 = with(pred_mod5, fit + 2*se.fit)
 LL_mod5 = with(pred_mod5, fit - 2*se.fit)
 
-field_gcc_ndvi5 = mutate(field_gcc_ndvi, pred_mod5 = pred_mod5$fit, 
+field_gcc5 = mutate(field_gcc, pred_mod5 = pred_mod5$fit, 
                ucl_mod5 = UL_mod5, 
                lcl_mod5 = LL_mod5)
 ```
@@ -590,7 +588,7 @@ field_gcc_ndvi5 = mutate(field_gcc_ndvi, pred_mod5 = pred_mod5$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m)) + 
+plot_mod5 = ggplot(data = field_gcc5, aes(x =woody_biomass_g_m, y = mean_gcc_5m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod5), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
@@ -598,17 +596,14 @@ plot_mod5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
     
     ylab("Mean NDVI (5m)") +
-    xlab("Mean GCC (5m)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1))
-
+    xlab("Biomass")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 plot_mod5
 ```
 
 ## 6. Model: NDVIas  function of GCC
 ```{r}
-mod6 = glm(mean_ndvi_10m ~ mean_gcc_10m, data = field_gcc_ndvi, family = gaussian)
+mod6 = glm(mean_gcc_10m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
 ### Residuals with DHARMa
@@ -637,12 +632,13 @@ with(summary(mod6), 1 - deviance/null.deviance)
 ```
 
 ```{r}
-data.frame(summary(lsmeans(mod6, ~ mean_gcc_10m), type = "response"))
+data.frame(summary(lsmeans(mod6, ~ woody_biomass_g_m), type = "response"))
 ```
 
 ### Data for graph
+
 ```{r}
-preddat_mod6 = data.frame(mean_gcc_10m = field_gcc_ndvi$mean_gcc_10m)
+preddat_mod6 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
 head(preddat_mod6)
 
@@ -651,7 +647,7 @@ pred_mod6 = predict(mod6, newdata = preddat_mod6, se.fit = TRUE)
 UL_mod6 = with(pred_mod6, fit + 2*se.fit)
 LL_mod6 = with(pred_mod6, fit - 2*se.fit)
 
-field_gcc_ndvi6 = mutate(field_gcc_ndvi, pred_mod6 = pred_mod6$fit, 
+field_gcc6 = mutate(field_gcc, pred_mod6 = pred_mod6$fit, 
                ucl_mod6 = UL_mod6, 
                lcl_mod6 = LL_mod6)
 ```
@@ -659,19 +655,31 @@ field_gcc_ndvi6 = mutate(field_gcc_ndvi, pred_mod6 = pred_mod6$fit,
 ### Graph 
 
 ```{r fig.height=3, fig.width=3}
-plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_10m)) + 
+plot_mod6 = ggplot(data = field_gcc6, aes(x = woody_biomass_g_m, y = mean_gcc_10m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI  (10m)") +
-    xlab("Mean GCC (10m)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1))
+    ylab("Mean GCC  (10m)") +
+    xlab("Biomass")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod6
 ```
 
+# Manuscript Figures 
+
+
+
+```{r fig.height=7, fig.width=6}
+
+grid_biomass_gcc = cowplot::plot_grid(plot_mod1, plot_mod2, plot_mod3, plot_mod4, plot_mod5, plot_mod6,   labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
+grid_biomass_gcc
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-13_Biomass-gcc.jpeg", plot = , width = 6, height = 7, units = c("in"), dpi=600 )
+```
