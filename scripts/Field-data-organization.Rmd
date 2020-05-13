@@ -520,7 +520,9 @@ field_data = merge(sites_subset, com_merge1,  by=c("ID","site", "transect", "plo
 field_data
 ```
 ```{r}
-field_data = field_data %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>% dplyr::select(ID,transect_ID,  site:shrub_plot_length)
+field_data = field_data %>% mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>% mutate(prop_live = (live/stems*100)) %>% mutate(woody_biomass = (tree_total_biomass + shrub_total_biomass)) %>% mutate(woody_ba = (tree_total_ba + shrub_total_ba)) %>% dplyr::select(ID,transect_ID,  site:prop_live)
+
+field_data
 
 ```
 
