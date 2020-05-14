@@ -40,6 +40,7 @@ library(RColorBrewer)
 library(cowplot)
 library(ggspatial)
 library(maps)
+library(RStoolbox)
 ```
 
 # Read in shapefile boundaries
@@ -125,6 +126,39 @@ map_main = ggplot() +
 map_main
 ```
 
+# Raster
+
+## Raster Stack for 3-band RGB Image
+
+```{r}
+kr_stack <- stack("../data/satellite/UAV-veg-image-sentinel.tif")
+```
+
+```{r}
+extent(kr_stack)
+```
+
+## Map with north arrow and scale bar
+```{r}
+plot_raster = ggplot() + ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
+  xlim(159.9998, 163.0002) + ylim(67.24968, 69.25023) +
+  
+  
+  annotation_scale(location = "br", width_hint = 0.25, text_size = 12, text_face = NULL, text_family = "serif", text_col = "black") +
+    annotation_north_arrow(location = "tl", which_north = "true", 
+        pad_x = unit(0.4, "in"), pad_y = unit(0.5, "in"),
+        style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 10, text_face = NULL, text_family = "serif", text_col = "black")) +
+  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(159.9998, 163.0002), ylim = c(67.24968, 69.25023), expand = TRUE)
+
+plot_raster
+
+```
+
+
+
+
+
+
 # Combining Maps
 
 We combine our study area map with the inset map for a final map figure
@@ -139,6 +173,11 @@ fig_manuscript = ggdraw() +
  
 fig_manuscript
 ```
+
+
+
+
+
 
 # Save map as file
 
