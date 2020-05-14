@@ -953,12 +953,19 @@ grid_biomass_gcc = cowplot::plot_grid(plot_mod1, plot_mod2, plot_mod3, plot_mod4
 grid_biomass_gcc
 
 ```
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-13_Biomass-tree-gcc.jpeg", plot = grid_biomass_gcc, width = 6, height = 7, units = c("in"), dpi=600 )
+```
 
 ```{r fig.height=7, fig.width=6}
 
 grid_biomass_ndvi = cowplot::plot_grid(plot_mod7, plot_mod8, plot_mod9, plot_mod10, plot_mod11, plot_mod12, labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
 grid_biomass_ndvi
 
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-13_Biomass-tree-ndvi.jpeg", plot = grid_biomass_ndvi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
 ```{r fig.height=7, fig.width=6}
