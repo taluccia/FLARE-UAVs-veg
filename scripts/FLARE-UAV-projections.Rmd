@@ -145,6 +145,17 @@ cyn_f15_pt = SpatialPointsDataFrame(f15[,5:6], f15,
 cyn_f15_pt_ee = spTransform(cyn_f15_pt, CRS(newproj))
 ```
 
+Transform from sp to sf
+```{r}
+cyn_f15_pt_ee_sf = st_as_sf(cyn_f15_pt_ee)
+```
+
+Write shapefile to outputs
+```{r}
+st_write(cyn_f15_pt_ee_sf, "../outputs/shapefiles/cyn_f15_ee.shp", driver="ESRI Shapefile") 
+```
+
+
 ## Flight 16
 
 ```{r}
