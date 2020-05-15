@@ -26,9 +26,7 @@ This script is reliant on
 # Packages
 
 ```{r message=FALSE, warning=FALSE}
-library(dplyr)
-library(tidyr)
-library(ggplot2)
+library(tidyverse)
 library(DT)
 library(sf)
 library(ggmap) # devtools::install_github("dkahle/ggmap")
@@ -41,6 +39,14 @@ library(cowplot)
 library(ggspatial)
 library(maps)
 library(RStoolbox)
+library(mapproj)
+```
+# Projections 
+
+Russia Equal area projection
+
+```{r}
+newproj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
 # Read in shapefile boundaries
@@ -48,16 +54,29 @@ library(RStoolbox)
 We are using relative file path names here. Note the file name is preceded by the sub-folder shapefiles in the data folder.
 
 ```{r}
-shapefile <- st_read("../data/shapefiles/FILE-NAME.shp") # Replace FILENAME
+shapefile <- st_read("../data/shapefiles/RUS_adm0.shp") 
 ```
 
+```{r}
+ru_shp <- st_transform(shapefile, CRS(newproj))
+
+
+```
 
 # Create a bounding box 
 
 Use metadata from all_fires shapefile to identify `xmin`, `xmax`, `ymin`, and `ymax` to define the bounding box
 
+From raster data below:
+Show in New WindowClear OutputExpand/Collapse Output
+class      : Extent 
+xmin       : 159.9998 
+xmax       : 163.0002 
+ymin       : 67.24968 
+ymax       : 69.25023 
+
 ```{r}
-(insetrect <- data.frame(xmin = 985362, xmax = 1069051, ymin = 894097.7, ymax = 939814.2)) #Replace numeric values
+(insetrect <- data.frame(xmin = 159.9998, xmax = 163.0002, ymin = 67.24968, ymax = 69.25023)) #Replace numeric values
 ```
 
 # Map Making
@@ -68,10 +87,66 @@ Use metadata from all_fires shapefile to identify `xmin`, `xmax`, `ymin`, and `y
 This map will serve as an inset in the final map. 
 
 **Edit data!!**
+```{r}
+laea <- "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" 
+
+
+
+data("wrld_simpl", package = "maptools")                                                                            
+wm <- crop(wrld_simpl, extent(-180, 180, 60, 90))                                                                   
+plot(wm) 
+
+wm_ee <- spTransform(wm, CRSobj = CRS(laea))
+plot(wm_ee)
+wm_ee
+wm
+```
+```{r}
+
+```
+
+
+```{r}
+# Defines the x axes required
+x_lines <- seq(-120,180, by = 60)
+
+ggplot() +
+  geom_polygon(data = wm, aes(x = long, y = lat, group = group), fill = "grey", colour = "black", alpha = 0.8) +
+  
+  coord_map("ortho", orientation = c(90, 0, 0)) +
+  scale_y_continuous(breaks = seq(60, 90, by = 5), labels = NULL) +
+
+  # Removes Axes and labels
+  scale_x_continuous(breaks = NULL) +
+  xlab("") + 
+  ylab("") +
+
+  # Adds labels
+  geom_text(aes(x = 0, y = seq(65, 85, by = 10), hjust = 0.4, label = paste0(seq(65, 85, by = 10), "°N"))) +
+  geom_text(aes(x = x_lines, y = 54, label = c("120°W", "60°W", "0°", "60°E", "120°E", "180°W"))) +
+
+  # Adds axes
+  geom_hline(aes(yintercept = 60), size = 1)  +
+  geom_segment(aes(y = 60, yend = 90, x = x_lines, xend = x_lines), linetype = "dashed") +
+
+# Change theme to remove axes and ticks
+theme(panel.background = element_blank(),
+      panel.grid.major = element_line(size = 0.25, linetype = 'dashed', colour = "black"),
+      axis.ticks=element_blank()) +
+  
+  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) 
+
+
+
+  
+```
+
+
+
 
 ```{r}
 map_inset = ggplot() + 
-  geom_sf(data = shapefile, fill = "#E8E8E8", color = "black") +
+  geom_sf(data = ru_shp, fill = "#E8E8E8", color = "black") +
   #Use bounding box from above
   geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
   xlab("")+ylab("")+
@@ -155,7 +230,41 @@ plot_raster
 ```
 
 
+# UAV Transect
+```{r}
+f15_pt <- st_read("../data/shapefiles/cyn_f15_ee.shp") 
+```
 
+```{r}
+f15_pt
+```
+
+
+```{r}
+cyn_f15_stack = stack("../data/ortho_stereo/CYN_TR1_FL015.tif")
+```
+
+```{r}
+cyn_f15_stack
+```
+
+```{r}
+cyn_f15_ee <- projectRaster(cyn_f15_stack, crs=newproj)
+```
+
+```{r}
+cyn_f15_ee
+```
+```{r}
+plot(cyn_f15_stack) # the plot function lets you view the maps
+plot(cyn_f15_ee, add=TRUE)
+```
+
+
+```{r}
+ ggplot() + ggRGB(cyn_f15_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
+
+```
 
 
 
