@@ -250,11 +250,11 @@ data.frame(xmin = 2141096, xmax = 2141263, ymin = 2497337, ymax = 2497589) #Repl
 
 2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
 ```{r}
-coords_tr <- matrix(c(2141096, 2497337,
-               2141263, 2497337,
-                2141263, 2497589,
+coords_tr <- matrix(c(2141096, 2497300,
+               2141280, 2497300,
+                2141280, 2497589,
                2141096, 2497589,
-               2141096, 2497337), 
+               2141096, 2497300), 
              ncol = 2, byrow = TRUE)
 
 poly_tr = Polygon(coords_tr)
@@ -285,6 +285,7 @@ f15_raster_crop = crop(cn_tr1_f15_raster, spatpoly_tr)
 
 ```{r}
 plot(f15_crop)
+plot(cn_tr1_pt, add=TRUE)
 ```
 
 ```{r}
