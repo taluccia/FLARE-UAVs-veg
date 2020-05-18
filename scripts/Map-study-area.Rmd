@@ -79,6 +79,7 @@ ymax       : 69.25023
 (insetrect <- data.frame(xmin = 159.9998, xmax = 163.0002, ymin = 67.24968, ymax = 69.25023)) #Replace numeric values
 ```
 
+
 # Map Making
 
 
@@ -98,7 +99,7 @@ wm
 ```
 
 
-##Worldmap fromArtic view
+##Worldmap from Arctic view
 label = paste0(seq(60, 90, by = 10), "°N")
 ```{r fig.height=3.5, fig.width=3}
 # Defines the x axes required
@@ -189,6 +190,40 @@ map_main = ggplot() +
 
 map_main
 ```
+# transects
+
+```{r}
+plot100_pt = readOGR("../data/field-spatial/point/plot100_pt_sf.shp", "plot100_pt_sf") 
+```
+
+```{r}
+plot100_pt_sf = st_as_sf(plot100_pt)
+plot100_pt_sf
+```
+
+# Cherskiy
+2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
+
+x = 161.399713, y = 68.739907,
+```{r}
+coords_ch <- matrix(c(161.399713, 68.739907), 
+             ncol = 2, byrow = TRUE)
+
+ch = Poin(coords_tr)
+spatpoly_tr = SpatialPolygons(list(Polygons(list(poly_tr), ID = "a")), proj4string=CRS(ee_proj))
+plot(spatpoly_tr, axes = TRUE)
+
+```
+
+```{r}
+cherskiy = st_point(c(161.399713, 68.739907))
+cherskiy
+```
+```{r}
+cherskiy = st_sf(geometry = st_sfc(st_point(c(161.399713, 68.739907))), crs = ("+proj=longlat +datum=WGS84 +no_defs"))
+
+cherskiy
+```
 
 # Raster
 
@@ -203,16 +238,23 @@ extent(kr_stack)
 ```
 
 ## Map with north arrow and scale bar
-```{r}
-plot_raster = ggplot() + ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
-  xlim(159.9998, 163.0002) + ylim(67.24968, 69.25023) +
+, labels = c("67.5°N", "", "", "90°N")
+```{r fig.height=7, fig.width=3.5}
+plot_raster = ggplot() + 
+  ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
+  geom_sf(data = cherskiy, size = 3, shape = 21, fill = "cornsilk1") +
+     geom_sf(data = plot100_pt_sf, size = 3, shape = 23, fill = "tomato1") +
+  scale_y_continuous(breaks = seq(67.5, 69, by = .5)) +
+  scale_x_continuous(breaks = seq(160.5, 162.5, by = 1)) +
   
+  annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.4, "in"), pad_y = unit(0.5, "in"), style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 10, text_face = NULL, text_family = "serif", text_col = "black")) +
+  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(160.4, 162.6), ylim = c(67.5, 68.9), expand = TRUE) +
   
-  annotation_scale(location = "br", width_hint = 0.25, text_size = 12, text_face = NULL, text_family = "serif", text_col = "black") +
-    annotation_north_arrow(location = "tl", which_north = "true", 
-        pad_x = unit(0.4, "in"), pad_y = unit(0.5, "in"),
-        style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 10, text_face = NULL, text_family = "serif", text_col = "black")) +
-  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(159.9998, 163.0002), ylim = c(67.24968, 69.25023), expand = TRUE)
+  theme_bw()+
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0.1), "cm")) +
+  theme(panel.grid.major = element_line(colour = gray(0.5), linetype = "dashed", 
+         size = 0.5), panel.background = element_blank(), 
+         panel.border = element_rect(fill = NA))
 
 plot_raster
 
