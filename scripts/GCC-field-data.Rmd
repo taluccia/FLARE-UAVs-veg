@@ -98,6 +98,13 @@ cn_tr1_pt
 ```{r}
 cn_tr2_pt
 ```
+
+```{r}
+plot(cn_tr1_f15)
+plot(cn_tr1_pt , add=TRUE)
+```
+
+
 ## 25cm - extract mean pixel values
 Use 25cm buffer for GCC as  function of distance from edge
 extract(rasterA,points, buffer=150, fun=mean)
