@@ -46,7 +46,7 @@ library(mapproj)
 Russia Equal area projection
 
 ```{r}
-newproj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+ee_proj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
 # Read in shapefile boundaries
@@ -235,34 +235,67 @@ plot_raster
 f15_pt <- st_read("../data/shapefiles/cyn_f15_ee.shp") 
 ```
 
+
 ```{r}
-f15_pt
+plot(f15_pt)
+```
+
+point file bbox - xmin: 2141096 ymin: 2497337 xmax: 2141263 ymax: 2497589
+[(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_max, y_min), (x_min, y_min)]
+
+data.frame(xmin = 2141096, xmax = 2141263, ymin = 2497337, ymax = 2497589) #Replace numeric values
+
+```{r}
+coords_tr <- matrix(c(2141096, 2497337,
+               2141263, 2497337,
+                2141263, 2497589,
+               2141096, 2497589,
+               2141096, 2497337), 
+             ncol = 2, byrow = TRUE)
+
+poly_tr = Polygon(coords_tr)
+spatpoly_tr = SpatialPolygons(list(Polygons(list(poly_tr), ID = "a")), proj4string=CRS(ee_proj))
+plot(spatpoly_tr, axes = TRUE)
+
+```
+
+```{r}
+cn_tr1_f15_raster = raster("../data/rgb/CYN_TR1_FL015.tif")
+```
+
+```{r}
+cn_tr1_f15 = stack("../data/rgb/CYN_TR1_FL015.tif")
+```
+
+```{r}
+cn_tr1_f15
+```
+
+```{r}
+f15_crop <- crop(cn_tr1_f15, spatpoly_tr)
+```
+
+```{r}
+f15_raster_crop = crop(cn_tr1_f15_raster, spatpoly_tr)
+```
+
+```{r}
+plot(f15_crop)
+```
+
+```{r}
+plot(cn_tr1_f15_raster)
+plot(f15_pt, add=TRUE)
+```
+
+```{r}
+plot(cn_tr1_f15) # the plot function lets you view the maps
+plot(spatpoly_tr, add=TRUE)
 ```
 
 
 ```{r}
-cyn_f15_stack = stack("../data/ortho_stereo/CYN_TR1_FL015.tif")
-```
-
-```{r}
-cyn_f15_stack
-```
-
-```{r}
-cyn_f15_ee <- projectRaster(cyn_f15_stack, crs=newproj)
-```
-
-```{r}
-cyn_f15_ee
-```
-```{r}
-plot(cyn_f15_stack) # the plot function lets you view the maps
-plot(cyn_f15_ee, add=TRUE)
-```
-
-
-```{r}
- ggplot() + ggRGB(cyn_f15_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
+ ggplot() + ggRGB(f15_crop, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
 
 ```
 
@@ -298,4 +331,111 @@ Use `ggsave()` to export the map to a file. Note the relative path name. Multipl
 ggsave("../figures/MAP-FILE-NAMEt.png", plot = fig_manuscript, width = 6, height = 4, dpi = 600)
 ```
 
+####
+Show in New WindowClear OutputExpand/Collapse Output
+
+Regions defined for each Polygons
+R Console
+
+Show in New WindowClear OutputExpand/Collapse Output
+Reading layer `RUS_adm0' from data source `E:\AnnaTalucci\R_GitHub\FLARE-UAVs-veg\data\shapefiles\RUS_adm0.shp' using driver `ESRI Shapefile'
+Simple feature collection with 1 feature and 70 fields
+geometry type:  MULTIPOLYGON
+dimension:      XY
+bbox:           xmin: -180 ymin: 41.18887 xmax: 180 ymax: 81.85625
+epsg (SRID):    4326
+proj4string:    +proj=longlat +datum=WGS84 +no_defs
+Show in New WindowClear OutputExpand/Collapse Output
+
+Warning: closing unused connection 3 (C:/Users/atalucci/AppData/Local/Temp/Rtmpcz2q2L/raster/r_tmp_2020-05-18_110857_12584_66768.gri)
+R Console
+
+Show in New WindowClear OutputExpand/Collapse Output
+
+
+class       : SpatialPolygonsDataFrame 
+features    : 12 
+extent      : -3298407, 2506658, -3309081, 3262685  (xmin, xmax, ymin, ymax)
+crs         : +proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+variables   : 11
+names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
+min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
+max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
+class       : SpatialPolygonsDataFrame 
+features    : 12 
+extent      : -179.999, 179.999, 60, 83.57027  (xmin, xmax, ymin, ymax)
+crs         : +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 
+variables   : 11
+names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
+min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
+max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
+R Console
+class       : SpatialPolygonsDataFrame 
+features    : 12 
+extent      : -3298407, 2506658, -3309081, 3262685  (xmin, xmax, ymin, ymax)
+crs         : +proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
+variables   : 11
+names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
+min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
+max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
+class       : SpatialPolygonsDataFrame 
+features    : 12 
+extent      : -179.999, 179.999, 60, 83.57027  (xmin, xmax, ymin, ymax)
+crs         : +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 
+variables   : 11
+names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
+min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
+max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
+Show in New WindowClear OutputExpand/Collapse Output
+Reading layer `cyn_f15_ee' from data source `E:\AnnaTalucci\R_GitHub\FLARE-UAVs-veg\data\shapefiles\cyn_f15_ee.shp' using driver `ESRI Shapefile'
+Simple feature collection with 9 features and 7 fields
+geometry type:  POINT
+dimension:      XY
+bbox:           xmin: 2141096 ymin: 2497337 xmax: 2141263 ymax: 2497589
+epsg (SRID):    NA
+proj4string:    +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs
+Show in New WindowClear OutputExpand/Collapse Output
+class      : Extent 
+xmin       : 159.9998 
+xmax       : 163.0002 
+ymin       : 67.24968 
+ymax       : 69.25023 
+Show in New WindowClear OutputExpand/Collapse Output
+
+
+Ignoring unknown parameters: text_size
+R Console
+	
+Scale on map varies by more than 10%, scale bar may be inaccurate
+
+Show in New WindowClear OutputExpand/Collapse Output
+
+Show in New WindowClear OutputExpand/Collapse Output
+
+Show in New WindowClear OutputExpand/Collapse Output
+xmin
+<dbl>
+xmax
+<dbl>
+ymin
+<dbl>
+ymax
+<dbl>
+159.9998	163.0002	67.24968	69.25023	
+1 row
+Show in New WindowClear OutputExpand/Collapse Output
+Error in fortify(data) : object 'bc' not found
+Show in New WindowClear OutputExpand/Collapse Output
+
+Show in New WindowClear OutputExpand/Collapse Output
+class      : RasterStack 
+dimensions : 35602, 36482, 1298832164, 3  (nrow, ncol, ncell, nlayers)
+resolution : 0.032888, 0.032888  (x, y)
+extent     : 2140583, 2141783, 2496902, 2498073  (xmin, xmax, ymin, ymax)
+crs        : +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
+names      : CYN_TR1_FL015.1, CYN_TR1_FL015.2, CYN_TR1_FL015.3 
+min values :      0.00000000,      0.01415473,      0.05788141 
+max values :             255,             255,             255 
+
+Show in New WindowClear OutputExpand/Collapse Output
 
