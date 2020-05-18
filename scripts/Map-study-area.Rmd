@@ -82,11 +82,6 @@ ymax       : 69.25023
 # Map Making
 
 
-## British Columbia with study area bounding box
-
-This map will serve as an inset in the final map. 
-
-**Edit data!!**
 ```{r}
 laea <- "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" 
 
@@ -101,43 +96,37 @@ plot(wm_ee)
 wm_ee
 wm
 ```
-```{r}
-
-```
 
 
-```{r}
+##Worldmap fromArtic view
+label = paste0(seq(60, 90, by = 10), "°N")
+```{r fig.height=3.5, fig.width=3}
 # Defines the x axes required
 x_lines <- seq(-120,180, by = 60)
 
-ggplot() +
+map1 = ggplot() +
   geom_polygon(data = wm, aes(x = long, y = lat, group = group), fill = "wheat", colour = "black", alpha = 0.8) +
-  
   coord_map("ortho", orientation = c(90, 0, 0)) +
-  scale_y_continuous(breaks = seq(60, 90, by = 10), labels = NULL) +
-
+  scale_y_continuous(breaks = seq(60, 90, by = 10), labels = c("60", "", "","90")) +
   # Removes Axes and labels
   scale_x_continuous(breaks = NULL) +
   xlab("") + 
   ylab("") +
-
   # Adds labels
-  geom_text(aes(x = 0, y = seq(60, 90, by = 10), hjust = 0.4, vjust = -0.6, label = paste0(seq(60, 90, by = 10), "°N"))) +
+  geom_text(aes(x = 0, y = seq(60, 90, by = 10), hjust = 0.4, vjust = -0.6, label = c("60°N", "", "", "90°N"))) +
   geom_text(aes(x = x_lines, y = 54, label = c("120°W", "60°W", "0°", "60°E", "120°E", "180°W"))) +
-
   # Adds axes
   geom_hline(aes(yintercept = 60), size = 1)  +
   geom_segment(aes(y = 60, yend = 90, x = x_lines, xend = x_lines), linetype = "dashed") +
-
 # Change theme to remove axes and ticks
-  theme_void() +
+  theme_void() + 
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0), "cm")) +
 theme(panel.grid.major = element_line(size = 0.25, linetype = 'dashed', colour = "black"),
       axis.ticks=element_blank()) +
-  
   geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) 
 
 
-
+map1
   
 ```
 
@@ -164,7 +153,7 @@ Here e create a map with a legend box that is placed outside of the map along th
 
 **Edit data!!**
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 map_main = ggplot() +
   #add shapefile
   geom_sf(data = bc, aes(fill = "BC", color = "BC")) + 
@@ -268,15 +257,15 @@ cn_tr1_f15_raster = raster("../data/rgb/CYN_TR1_FL015.tif")
 ```
 
 ```{r}
-cn_tr1_f15 = stack("../data/rgb/CYN_TR1_FL015.tif")
+cn_tr1_f15_stack = stack("../data/rgb/CYN_TR1_FL015.tif")
 ```
 
 ```{r}
-cn_tr1_f15
+cn_tr1_f15_stack
 ```
 
 ```{r}
-f15_crop <- crop(cn_tr1_f15, spatpoly_tr)
+f15_stack_crop <- crop(cn_tr1_f15_stack, spatpoly_tr)
 ```
 
 ```{r}
@@ -284,7 +273,7 @@ f15_raster_crop = crop(cn_tr1_f15_raster, spatpoly_tr)
 ```
 
 ```{r}
-plot(f15_crop)
+plot(f15_stack_crop)
 plot(cn_tr1_pt, add=TRUE)
 ```
 
@@ -293,17 +282,23 @@ plot(cn_tr1_f15_raster)
 plot(cn_tr1_pt, add=TRUE)
 ```
 
-```{r}
-plot(cn_tr1_f15) # the plot function lets you view the maps
-plot(spatpoly_tr, add=TRUE)
-```
 
-
-```{r}
- ggplot() + ggRGB(f15_crop, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
+```{r eval=FALSE, include=FALSE}
+ ggplot() + ggRGB(f15_stack_crop, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
 
 ```
 
+### Holding graph for UAV
+```{r}
+bbox_sf = st_as_sf(spatpoly_tr)
+```
+
+```{r}
+uav_blank = ggplot() +
+  #add shapefile
+  geom_sf(data = bbox_sf) +
+  theme_void()
+```
 
 
 # Combining Maps
@@ -311,12 +306,21 @@ plot(spatpoly_tr, add=TRUE)
 We combine our study area map with the inset map for a final map figure
 
 
-```{r fig.height=4, fig.width=6}
+```{r fig.height=7, fig.width=6}
+ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_raster, x = 0, y = 0, width = 3, height = 7) +
+    draw_plot(map1, x = 3, y = 3.5, width = 3, height = 3.5) +
+    draw_plot(uav_blank, x = 3, y = 0, width = 3, height = 3.5) 
+
+```
+
+
+```{r fig.height=7, fig.width=6}
 fig_manuscript = ggdraw() +
   #add base map
-  draw_plot(map_main) +
+  draw_plot(plot_raster) +
   #add inset and define size and location 
-  draw_plot(map_inset, x = 0.12, y = 0.32, width = .25, height = .25) 
+  draw_plot(map1, x = 0.12, y = 0.32, width = .25, height = .25) 
  
 fig_manuscript
 ```
