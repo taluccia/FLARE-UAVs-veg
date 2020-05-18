@@ -232,19 +232,23 @@ plot_raster
 
 # UAV Transect
 ```{r}
-f15_pt <- st_read("../data/shapefiles/cyn_f15_ee.shp") 
+cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
 ```
-
 
 ```{r}
-plot(f15_pt)
+cn_tr1_pt
 ```
+
+
+
 
 point file bbox - xmin: 2141096 ymin: 2497337 xmax: 2141263 ymax: 2497589
 [(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_max, y_min), (x_min, y_min)]
 
 data.frame(xmin = 2141096, xmax = 2141263, ymin = 2497337, ymax = 2497589) #Replace numeric values
 
+
+2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
 ```{r}
 coords_tr <- matrix(c(2141096, 2497337,
                2141263, 2497337,
@@ -285,7 +289,7 @@ plot(f15_crop)
 
 ```{r}
 plot(cn_tr1_f15_raster)
-plot(f15_pt, add=TRUE)
+plot(cn_tr1_pt, add=TRUE)
 ```
 
 ```{r}
