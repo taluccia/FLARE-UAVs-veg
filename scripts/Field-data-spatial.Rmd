@@ -72,7 +72,7 @@ field_data3 = field_data %>% mutate(ID =  paste(site, burn_year, transect, plot,
 field_data3
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 merge1 = merge(field_data2, shrub_data, by="ID")
 merge2 = merge(merge1, tree_data, by="ID")
 
@@ -324,7 +324,7 @@ fd_cn_tr2_ee_10m_sf = st_as_sf(fd_cn_tr2_ee_10m)
 ## Write to shape file
 
 Points
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(fd_ans_tr2_ee_sf, "../outputs/field-data/point/ans_tr2_ee_pt.shp", driver="ESRI Shapefile") 
 st_write(fd_ans_tr3_ee_sf, "../outputs/field-data/point/ans_tr3_ee_pt.shp", driver="ESRI Shapefile") 
 st_write(fd_alnus_tr1_ee_sf, "../outputs/field-data/point/alnus_tr1_ee_pt.shp", driver="ESRI Shapefile")
@@ -336,7 +336,7 @@ st_write(fd_cn_tr2_ee_sf, "../outputs/field-data/point/cn_tr2_ee_pt.shp", driver
 ```
 
 Buffers
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(fd_ans_tr2_ee_10m_sf, "../outputs/field-data/buffer/ans_tr2_ee_10m.shp", driver="ESRI Shapefile") 
 st_write(fd_ans_tr3_ee_10m_sf, "../outputs/field-data/buffer/ans_tr3_ee_10m.shp", driver="ESRI Shapefile") 
 st_write(fd_alnus_tr1_ee_10m_sf, "../outputs/field-data/buffer/alnus_tr1_ee_10m.shp", driver="ESRI Shapefile") 
@@ -345,5 +345,35 @@ st_write(fd_bp_tr2_ee_10m_sf, "../outputs/field-data/buffer/bp_tr2_ee_10m.shp", 
 st_write(fd_cn_tr1_ee_10m_sf, "../outputs/field-data/buffer/cn_tr1_ee_10m.shp", driver="ESRI Shapefile") 
 st_write(fd_cn_tr2_ee_10m_sf , "../outputs/field-data/buffer/cn_tr2_ee_10m.shp", driver="ESRI Shapefile") 
  
+```
+
+# Create  shape file  with  only the middle plot for mapping figure
+```{r}
+ans = rbind(fd_ans_tr2, fd_ans_tr3)
+ans_alnus = rbind(ans, fd_alnus_tr1)
+bp = rbind(fd_bp_tr1, fd_bp_tr2)
+cn = rbind(fd_cn_tr1, fd_cn_tr2)
+ans_alnus_bp  = rbind(ans_alnus, bp)
+ans_alnus_bp_cn = rbind(ans_alnus_bp, cn)
+ans_alnus_bp_cn
+```
+
+```{r}
+plot100 = ans_alnus_bp_cn %>% filter(plot== 100) %>% dplyr::select(ID:latitude, region:plot)
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_plot100 = cbind(plot100$longitude, plot100$latitude)
+plot100_pt <- SpatialPointsDataFrame(coords_plot100, proj4string = CRS(wgs_proj), data = plot100)
+```
+
+Transform from sp to sf
+```{r}
+plot100_pt_sf = st_as_sf(plot100_pt)
+```
+
+```{r}
+st_write(plot100_pt_sf, "../outputs/field-data/point/plot100_pt_sf.shp", driver="ESRI Shapefile") 
 ```
 
