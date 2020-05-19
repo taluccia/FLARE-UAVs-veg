@@ -42,6 +42,7 @@ library(RStoolbox)
 library(mapproj)
 library(magick)
 ```
+
 # Projections 
 
 Russia Equal area projection
@@ -50,7 +51,46 @@ Russia Equal area projection
 ee_proj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
+```{r}
+laea <- "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" 
+```
+# Raster Data
+
+## Raster Stack for 3-band RGB Image Satellite Image
+
+```{r}
+kr_stack <- stack("../data/satellite/UAV-veg-image-sentinel.tif")
+```
+
+```{r}
+extent(kr_stack)
+```
+
 # Vector Data
+
+## World 
+```{r}
+data("wrld_simpl", package = "maptools")                                                                            
+wm <- crop(wrld_simpl, extent(-180, 180, 60, 90))                                                                   
+plot(wm) 
+
+wm_ee <- spTransform(wm, CRSobj = CRS(laea))
+plot(wm_ee)
+wm_ee
+wm
+```
+
+```{r}
+
+wrld_simpl_sf = st_as_sf(wrld_simpl)
+```
+
+
+```{r}
+wm_ru <- crop(wrld_simpl, extent(-180, -180, 40, 90))                                                                   
+plot(wrld_simpl)
+```
+
 
 We are using relative file path names here. Note the file name is preceded by the sub-folder shapefiles in the data folder.
 
@@ -118,35 +158,7 @@ ymax       : 69.25023
 ```
 
 
-# Map Making
-
-
-```{r}
-laea <- "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" 
-```
-
-```{r}
-data("wrld_simpl", package = "maptools")                                                                            
-wm <- crop(wrld_simpl, extent(-180, 180, 60, 90))                                                                   
-plot(wm) 
-
-wm_ee <- spTransform(wm, CRSobj = CRS(laea))
-plot(wm_ee)
-wm_ee
-wm
-```
-
-```{r}
-
-wrld_simpl_sf = st_as_sf(wrld_simpl)
-```
-
-
-```{r}
-wm_ru <- crop(wrld_simpl, extent(-180, -180, 40, 90))                                                                   
-plot(wrld_simpl)
-```
-
+# World Map
 
 ## Worldmap  Arctic view
 label = paste0(seq(60, 90, by = 10), "°N")
@@ -180,16 +192,12 @@ map1
   
 ```
 
-```{r}
-ggplot() +
-     geom_sf(data = wrld_simpl)
-```
-
+# Russia Map
 ```{r}
 russia_map <- ggplot() +
      geom_sf(data = wrld_simpl_sf, fill = "antiquewhite1") +
 
-     coord_sf(xlim = c(30, 170), ylim = c(40, 80)) +
+     coord_sf(xlim = c(35, 170), ylim = c(45, 75)) +
      xlab("Longitude") + 
    ylab("Latitude") +
   geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
@@ -200,77 +208,9 @@ russia_map <- ggplot() +
 russia_map
 ```
 
+# Tansect locations
 
-```{r}
-map_inset = ggplot() + 
-  geom_sf(data = ru_shp, fill = "#E8E8E8", color = "black") +
-  #Use bounding box from above
-  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
-  xlab("")+ylab("")+
-  coord_sf() +
-   theme_void() +
-  #add a bounding box so that will border the inset
-  theme(panel.background = element_rect(colour = "black", fill = "white", size = 0.5))
-
-map_inset
-```
-
-## Map with legend bottom
-
-Here e create a map with a legend box that is placed outside of the map along the bottom. 
-
-**Edit data!!**
-
-```{r eval=FALSE, include=FALSE}
-map_main = ggplot() +
-  #add shapefile
-  geom_sf(data = bc, aes(fill = "BC", color = "BC")) + 
-  #add shapefile
-  geom_sf(data = parks, aes(fill = "Parks", color = "Parks"), show.legend = TRUE) + 
-  #add shapefile
-  geom_sf(data = lakes, aes(fill = "Lakes", color = "Lakes"), show.legend = TRUE, key_glyph = draw_key_rect) + 
-  #add shapefile
-  geom_sf(data = fire1, fill = NA, aes(color = "Fire1"), size = 1, show.legend = TRUE, key_glyph = draw_key_rect) + 
-  #add shapefile
-  geom_sf(data = fire2, fill = NA, aes(color = "Fire2"), size = 1, show.legend = TRUE)  +
-  #add shapefile
-  geom_sf(data = fire3, fill = NA, aes(color = "Fire3"), size = 1, show.legend = TRUE) + 
-  #manually define colors with hexcodes 
-  scale_color_manual(values = c("BC" = "#E8E8E8", "Parks" = "#C3ECB2", "Lakes" = "#AADAFF", "Fire1" = "#b82b2b", "Fire2" = "#b06f0c", "Fire3" =  "#dd7116"), 
-                       labels = c("British Columbia", "Chelaslie fire", "Entiako fire", "Tweedsmuir fire", "Lakes", "Provincial parks"),
-                       name = "") + 
-  #manual define fill; for no fill NA
-  scale_fill_manual(values = c("BC" = "#E8E8E8", "Parks" = "#C3ECB2", "Lakes" = "#AADAFF", "Fire1" = NA, "Fire2" = NA, "Fire3" =  NA), guide=FALSE) + 
-  #define coordinates based on shapefile metadata
-  coord_sf(crs = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +datum=NAD83 +units=m +no_defs", xlim = c(983000, 1071000), ylim = c(892000, 941000), expand = FALSE)  + 
-  #add a scale bar
-  annotation_scale(location = "br", width_hint = 0.25, text_size = 12, text_face = NULL, text_family = "serif", text_col = "black") + 
-  #add North Arrow
-    annotation_north_arrow(location = "br", which_north = "true", 
-        pad_x = unit(0.4, "in"), pad_y = unit(0.5, "in"),
-        style = north_arrow_nautical(line_width = 1, line_col = "black", fill = c("black", "white"), text_size = 10, text_face = NULL, text_family = "serif", text_col = "black", text_angle = 0)) + 
-  #define theme
-  theme(axis.text.x = element_text(face = "plain", color = "black", size = 10),
-        axis.text.y = element_text(face = "plain", color = "black", size = 10),
-        legend.position= "bottom",
-        legend.key = element_rect(fill = "white")) 
-
-map_main
-```
-
-# Raster
-
-## Raster Stack for 3-band RGB Image
-
-```{r}
-kr_stack <- stack("../data/satellite/UAV-veg-image-sentinel.tif")
-```
-
-```{r}
-extent(kr_stack)
-```
-
-## Map with north arrow and scale bar
+## Option 1
 , labels = c("67.5°N", "", "", "90°N")
 ```{r fig.height=7, fig.width=3.5}
 plot_raster = ggplot() + 
@@ -292,25 +232,14 @@ plot_raster = ggplot() +
 plot_raster
 
 ```
-161.399713, 68.739907
 
-linecolors <- c("#714C02", "#01587A", "#024E37")
-fillcolors <- c("#9D6C06", "#077DAA", "#026D4E")
+# Option 2
 
-# partially transparent points by setting `alpha = 0.5`
-ggplot(mpg, aes(displ, cty, colour = drv, fill = drv)) +
-  geom_point(position=position_jitter(h=0.1, w=0.1),
-             shape = 21, alpha = 0.5, size = 3) +
-  scale_color_manual(values=linecolors) +
-  scale_fill_manual(values=fillcolors) +
-  theme_bw()
-  
-  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "
 ```{r}
 linecolors = c("#000000", "#000000", "#000000", "#000000")
 fillcolors = c("#E69F00", "#CC79A7", "#D55E00", "#F0E442")
 ```
-"#F0E442"
+
 ```{r}
 plot_transects = ggplot() + 
   ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
@@ -338,86 +267,34 @@ plot_transects
 
 ```
 
-# UAV Transect
 ```{r}
-cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
-```
+plot_transects3 = ggplot() + 
+  ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
+  geom_sf(data = cherskiy, size = 4, shape = 24, fill = "grey70") +
+     annotate(geom = "text", x = 161.75, y = 68.7, label = "Cherskiy", 
+    fontface = "bold", color = "grey70", size = 4) +
+  geom_sf(data = plot100_pt_sf, aes(fill = site, color = site),size = 4, shape = 21, alpha= .9) +
+  scale_color_manual(values=linecolors) +
+  scale_fill_manual(values=fillcolors) +
+  scale_y_continuous(breaks = seq(67.5, 69, by = .5)) +
+  scale_x_continuous(breaks = seq(160.5, 162.5, by = 1)) +
+  
+   annotation_north_arrow(location = "bl", which_north = "true", pad_x = unit(0.0, "cm"), pad_y = unit(0.7, "cm"), style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 0, text_face = NULL, text_family = "sans", text_col = "white")) +
+  
+  
+  annotation_scale(location = "bl", width_hint = 0.25, text_size = 12, text_face = "bold", text_family = "sans", text_col = "white") +
+  
+  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(160.4, 162.4), ylim = c(67.8, 68.8), expand = TRUE) +
+  
+  theme_bw()+
+  
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0.1), "cm")) +
+  theme(legend.position = "bottom")
 
-```{r}
-cn_tr1_pt
-```
-
-
-
-
-point file bbox - xmin: 2141096 ymin: 2497337 xmax: 2141263 ymax: 2497589
-[(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_max, y_min), (x_min, y_min)]
-
-data.frame(xmin = 2141096, xmax = 2141263, ymin = 2497337, ymax = 2497589) #Replace numeric values
-
-
-2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
-```{r}
-coords_tr <- matrix(c(2141096, 2497300,
-               2141280, 2497300,
-                2141280, 2497589,
-               2141096, 2497589,
-               2141096, 2497300), 
-             ncol = 2, byrow = TRUE)
-
-poly_tr = Polygon(coords_tr)
-spatpoly_tr = SpatialPolygons(list(Polygons(list(poly_tr), ID = "a")), proj4string=CRS(ee_proj))
-plot(spatpoly_tr, axes = TRUE)
+plot_transects3
 
 ```
 
-```{r}
-cn_tr1_f15_raster = raster("../data/rgb/CYN_TR1_FL015.tif")
-```
-
-```{r}
-cn_tr1_f15_stack = stack("../data/rgb/CYN_TR1_FL015.tif")
-```
-
-```{r}
-cn_tr1_f15_stack
-```
-
-```{r}
-f15_stack_crop <- crop(cn_tr1_f15_stack, spatpoly_tr)
-```
-
-```{r}
-f15_raster_crop = crop(cn_tr1_f15_raster, spatpoly_tr)
-```
-
-```{r}
-plot(f15_stack_crop)
-plot(cn_tr1_pt, add=TRUE)
-```
-
-```{r}
-plot(cn_tr1_f15_raster)
-plot(cn_tr1_pt, add=TRUE)
-```
-
-
-```{r eval=FALSE, include=FALSE}
- ggplot() + ggRGB(f15_stack_crop, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE)
-
-```
-
-### Holding graph for UAV
-```{r}
-bbox_sf = st_as_sf(spatpoly_tr)
-```
-
-```{r}
-uav_blank = ggplot() +
-  #add shapefile
-  geom_sf(data = bbox_sf) +
-  theme_void()
-```
 
 
 # Combining Maps
@@ -450,15 +327,19 @@ ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
 
 ## Option 3
 ```{r fig.height=7, fig.width=6}
-ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
-    draw_plot(plot_transects, x = 0, y = 0, width = 3, height = 3.5) +
-    draw_plot(russia_map, x = 0, y = 3.5, width = 6, height = 3.5) +      
-  draw_image("../images/2020-05-19_UAV-Veg-1Transect_CN.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
+fig_man = ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_transects, x = 0, y = 0, width = 3, height = 4) +
+    draw_plot(russia_map, x = 0, y = 4, width = 6, height = 3) +      
+  draw_image("../images/2020-05-19_UAV-Veg-Transect-CN-bottom.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 4)
 
+fig_man
 ```
 
 
 
+```{r}
+ggsave("../figures/MAP-FILE-NAME.png", plot = fig_man, width = 6, height = 7, dpi = 600)
+```
 
 
 # Save map as file
