@@ -40,6 +40,7 @@ library(ggspatial)
 library(maps)
 library(RStoolbox)
 library(mapproj)
+library(magick)
 ```
 # Projections 
 
@@ -85,9 +86,9 @@ ymax       : 69.25023
 
 ```{r}
 laea <- "+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" 
+```
 
-
-
+```{r}
 data("wrld_simpl", package = "maptools")                                                                            
 wm <- crop(wrld_simpl, extent(-180, 180, 60, 90))                                                                   
 plot(wm) 
@@ -98,8 +99,19 @@ wm_ee
 wm
 ```
 
+```{r}
 
-##Worldmap from Arctic view
+wrld_simpl_sf = st_as_sf(wrld_simpl)
+```
+
+
+```{r}
+wm_ru <- crop(wrld_simpl, extent(-180, -180, 40, 90))                                                                   
+plot(wrld_simpl)
+```
+
+
+## Worldmap  Arctic view
 label = paste0(seq(60, 90, by = 10), "°N")
 ```{r fig.height=3.5, fig.width=3}
 # Defines the x axes required
@@ -131,7 +143,25 @@ map1
   
 ```
 
+```{r}
+ggplot() +
+     geom_sf(data = wrld_simpl)
+```
 
+```{r}
+russia_map <- ggplot() +
+     geom_sf(data = wrld_simpl_sf, fill = "antiquewhite1") +
+
+     coord_sf(xlim = c(30, 170), ylim = c(40, 80)) +
+     xlab("Longitude") + 
+   ylab("Latitude") +
+  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
+  theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "aliceblue"))
+
+
+russia_map
+```
 
 
 ```{r}
@@ -259,7 +289,31 @@ plot_raster = ggplot() +
 plot_raster
 
 ```
+161.399713, 68.739907
+```{r}
+plot_transects = ggplot() + 
+  ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
+  geom_sf(data = cherskiy, size = 4, shape = 21, fill = "grey50") +
+  annotate(geom = "text", x = 161.75, y = 68.7, label = "Cherskiy", 
+    fontface = "bold", color = "grey50", size = 6) +
+     geom_sf(data = plot100_pt_sf, aes(fill = site),size = 4, shape = 23) +
+  scale_fill_manual(values = c("tomato", "turquoise", "burlywood","thistle")) +
+  scale_y_continuous(breaks = seq(67.5, 69, by = .5)) +
+  scale_x_continuous(breaks = seq(160.5, 162.5, by = 1)) +
+  
+  annotation_north_arrow(location = "bl", which_north = "true", style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 10, text_face = NULL, text_family = "serif", text_col = "black")) +
+  
+  annotation_scale(location = "bl", width_hint = 0.4) +
+  
+  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(160.4, 162.4), ylim = c(67.8, 68.8), expand = TRUE) +
+  
+  theme_void() +
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0.1), "cm")) +
+  theme(legend.position = "bottom")
 
+plot_transects
+
+```
 
 # UAV Transect
 ```{r}
@@ -347,26 +401,38 @@ uav_blank = ggplot() +
 
 We combine our study area map with the inset map for a final map figure
 
+```{r}
 
+photo1 = ggdraw() + draw_image("../img/photo_highseverity.PNG", scale = 0.9)
+```
+
+## Option 1
 ```{r fig.height=7, fig.width=6}
 ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
     draw_plot(plot_raster, x = 0, y = 0, width = 3, height = 7) +
-    draw_plot(map1, x = 3, y = 3.5, width = 3, height = 3.5) +
-    draw_plot(uav_blank, x = 3, y = 0, width = 3, height = 3.5) 
+    draw_plot(map1, x = 3, y = 3.5, width = 3, height = 3.5) +      
+  draw_image("../images/UAV-Veg-1Transect.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
 
 ```
 
-
+## Option 2
 ```{r fig.height=7, fig.width=6}
-fig_manuscript = ggdraw() +
-  #add base map
-  draw_plot(plot_raster) +
-  #add inset and define size and location 
-  draw_plot(map1, x = 0.12, y = 0.32, width = .25, height = .25) 
- 
-fig_manuscript
+ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_raster, x = 0, y = 0, width = 3, height = 3.5) +
+    draw_plot(russia_map, x = 0, y = 3.5, width = 6, height = 3.5) +      
+  draw_image("../images/UAV-Veg-1Transect.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
+
 ```
 
+
+## Option 3
+```{r fig.height=7, fig.width=6}
+ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_transects, x = 0, y = 0, width = 3, height = 3.5) +
+    draw_plot(russia_map, x = 0, y = 3.5, width = 6, height = 3.5) +      
+  draw_image("../images/UAV-Veg-1Transect.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
+
+```
 
 
 
