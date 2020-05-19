@@ -50,7 +50,7 @@ Russia Equal area projection
 ee_proj = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
-# Read in shapefile boundaries
+# Vector Data
 
 We are using relative file path names here. Note the file name is preceded by the sub-folder shapefiles in the data folder.
 
@@ -63,8 +63,45 @@ ru_shp <- st_transform(shapefile, CRS(newproj))
 
 
 ```
+## Points
+### transects
 
-# Create a bounding box 
+
+```{r}
+plot100_pt = readOGR("../data/field-spatial/point/plot100_pt_sf.shp", "plot100_pt_sf") 
+```
+
+```{r}
+plot100_pt_sf = st_as_sf(plot100_pt)
+plot100_pt_sf
+```
+
+### Cherskiy
+2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
+
+x = 161.399713, y = 68.739907,
+```{r}
+coords_ch <- matrix(c(161.399713, 68.739907), 
+             ncol = 2, byrow = TRUE)
+
+ch = Poin(coords_tr)
+spatpoly_tr = SpatialPolygons(list(Polygons(list(poly_tr), ID = "a")), proj4string=CRS(ee_proj))
+plot(spatpoly_tr, axes = TRUE)
+
+```
+
+```{r}
+cherskiy = st_point(c(161.399713, 68.739907))
+cherskiy
+```
+```{r}
+cherskiy = st_sf(geometry = st_sfc(st_point(c(161.399713, 68.739907))), crs = ("+proj=longlat +datum=WGS84 +no_defs"))
+
+cherskiy
+```
+
+
+## Create a bounding box 
 
 Use metadata from all_fires shapefile to identify `xmin`, `xmax`, `ymin`, and `ymax` to define the bounding box
 
@@ -220,40 +257,6 @@ map_main = ggplot() +
 
 map_main
 ```
-# transects
-
-```{r}
-plot100_pt = readOGR("../data/field-spatial/point/plot100_pt_sf.shp", "plot100_pt_sf") 
-```
-
-```{r}
-plot100_pt_sf = st_as_sf(plot100_pt)
-plot100_pt_sf
-```
-
-# Cherskiy
-2141125, 2141260, 2497340, 2497546  (xmin, xmax, ymin, ymax)
-
-x = 161.399713, y = 68.739907,
-```{r}
-coords_ch <- matrix(c(161.399713, 68.739907), 
-             ncol = 2, byrow = TRUE)
-
-ch = Poin(coords_tr)
-spatpoly_tr = SpatialPolygons(list(Polygons(list(poly_tr), ID = "a")), proj4string=CRS(ee_proj))
-plot(spatpoly_tr, axes = TRUE)
-
-```
-
-```{r}
-cherskiy = st_point(c(161.399713, 68.739907))
-cherskiy
-```
-```{r}
-cherskiy = st_sf(geometry = st_sfc(st_point(c(161.399713, 68.739907))), crs = ("+proj=longlat +datum=WGS84 +no_defs"))
-
-cherskiy
-```
 
 # Raster
 
@@ -290,20 +293,40 @@ plot_raster
 
 ```
 161.399713, 68.739907
+
+linecolors <- c("#714C02", "#01587A", "#024E37")
+fillcolors <- c("#9D6C06", "#077DAA", "#026D4E")
+
+# partially transparent points by setting `alpha = 0.5`
+ggplot(mpg, aes(displ, cty, colour = drv, fill = drv)) +
+  geom_point(position=position_jitter(h=0.1, w=0.1),
+             shape = 21, alpha = 0.5, size = 3) +
+  scale_color_manual(values=linecolors) +
+  scale_fill_manual(values=fillcolors) +
+  theme_bw()
+  
+  cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "
+```{r}
+linecolors = c("#000000", "#000000", "#000000", "#000000")
+fillcolors = c("#E69F00", "#CC79A7", "#D55E00", "#F0E442")
+```
+"#F0E442"
 ```{r}
 plot_transects = ggplot() + 
   ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
-  geom_sf(data = cherskiy, size = 4, shape = 21, fill = "grey50") +
-  annotate(geom = "text", x = 161.75, y = 68.7, label = "Cherskiy", 
-    fontface = "bold", color = "grey50", size = 6) +
-     geom_sf(data = plot100_pt_sf, aes(fill = site),size = 4, shape = 23) +
-  scale_fill_manual(values = c("tomato", "turquoise", "burlywood","thistle")) +
+  geom_sf(data = cherskiy, size = 4, shape = 24, fill = "grey70") +
+     annotate(geom = "text", x = 161.75, y = 68.7, label = "Cherskiy", 
+    fontface = "bold", color = "grey70", size = 4) +
+  geom_sf(data = plot100_pt_sf, aes(fill = site, color = site),size = 4, shape = 21, alpha= .9) +
+  scale_color_manual(values=linecolors) +
+  scale_fill_manual(values=fillcolors) +
   scale_y_continuous(breaks = seq(67.5, 69, by = .5)) +
   scale_x_continuous(breaks = seq(160.5, 162.5, by = 1)) +
   
-  annotation_north_arrow(location = "bl", which_north = "true", style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 10, text_face = NULL, text_family = "serif", text_col = "black")) +
+   annotation_north_arrow(location = "bl", which_north = "true", pad_x = unit(0.0, "cm"), pad_y = unit(0.7, "cm"), style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 0, text_face = NULL, text_family = "sans", text_col = "white")) +
   
-  annotation_scale(location = "bl", width_hint = 0.4) +
+  
+  annotation_scale(location = "bl", width_hint = 0.25, text_size = 12, text_face = "bold", text_family = "sans", text_col = "white") +
   
   coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(160.4, 162.4), ylim = c(67.8, 68.8), expand = TRUE) +
   
@@ -430,7 +453,7 @@ ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
 ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
     draw_plot(plot_transects, x = 0, y = 0, width = 3, height = 3.5) +
     draw_plot(russia_map, x = 0, y = 3.5, width = 6, height = 3.5) +      
-  draw_image("../images/UAV-Veg-1Transect.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
+  draw_image("../images/2020-05-19_UAV-Veg-1Transect_CN.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 3.5)
 
 ```
 
