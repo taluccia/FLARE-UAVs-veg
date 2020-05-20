@@ -202,7 +202,13 @@ cn_f20_multi = raster("../data/multispectral/RU_CYN_TR1_FL020M/RU_CYN_TR1_FL020M
 cn_f20_multi
 ```
 
+```{r}
+bp_f13_ndvi = raster("../data/pix4d_ndvi_May19/RU_BP_TR2_FL013M_index_ndvi.tif")
+```
 
+```{r}
+bp_f13_ndvi
+```
 
 # Plots
 
@@ -311,7 +317,13 @@ plot(brp_tr2_f12)
 plot(bp_1983_ee, add=TRUE)
 ```
 
+### NDVI
+```{r}
+plot(bp_f13_ndvi)
+plot(bp_1983_ee, add=TRUE)
+```
 
+### RGB
 ```{r}
 plot(brp_tr1_f09 )
 plot(bp_1983_ee, add=TRUE)
