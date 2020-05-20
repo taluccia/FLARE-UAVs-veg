@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 # Overview
 
+Analysis of field data (proportion of live trees, shrub basal area, and tree basal area)
 
 # Pakcages
 ```{r}
@@ -60,7 +61,7 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}
@@ -125,13 +126,15 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 
 # Part 3: Vegetation cover
 
-## 13. Model: GCC proportion of Live trees
+## GCC Models
+
+### 13. Model: GCC proportion of Live trees
 
 ```{r}
 mod13 = glm(mean_gcc_tree ~ prop_live, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod13.res = simulateResiduals(fittedModel = mod13, n = 500)
 mod13.res$scaledResiduals
@@ -147,12 +150,12 @@ plotSimulatedResiduals(simulationOutput = mod13.res)
 testDispersion(mod13.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod13)
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 lsmeans(mod13, ~ prop_live)
 
@@ -186,7 +189,7 @@ min(field_gcc$tree_area_sampled_m2)
 median(field_gcc$tree_area_sampled_m2)
 max(field_gcc$tree_area_sampled_m2)
 ```
-### Graph
+#### Graph
 
 ```{r}
 plot_mod13 = ggplot(data = field_gcc13, aes(x = prop_live, y = mean_gcc_tree)) + 
@@ -203,12 +206,12 @@ plot_mod13
 ```
 
 
-## 14. Model: GCC tree  BA
+### 14. Model: GCC tree  BA
 ```{r}
 mod14 = glm(mean_gcc_tree ~ tree_total_ba, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod14.res = simulateResiduals(fittedModel = mod14, n = 500)
 mod14.res$scaledResiduals
@@ -224,12 +227,12 @@ plotSimulatedResiduals(simulationOutput = mod14.res)
 testDispersion(mod14.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod14)
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 (mod14_graph = data.frame(summary(lsmeans(mod14, ~ tree_total_ba),type = "response")))
@@ -252,7 +255,7 @@ field_gcc14 = mutate(field_gcc, pred_mod14 = pred_mod14$fit,
                lcl_mod14 = LL_mod14)
 ```
 
-### Graph
+#### Graph
 
 ```{r}
 plot_mod14 = ggplot(data = field_gcc14, aes(x = tree_total_ba, y = mean_gcc_tree)) + 
@@ -268,13 +271,13 @@ plot_mod14 = ggplot(data = field_gcc14, aes(x = tree_total_ba, y = mean_gcc_tree
 plot_mod14
 ```
 
-## 15. Model: GCC shrub  BA
+### 15. Model: GCC shrub  BA
 
 ```{r}
 mod15 = glm(mean_gcc_shrub ~ shrub_total_ba, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod15.res = simulateResiduals(fittedModel = mod15, n = 500)
 mod15.res$scaledResiduals
@@ -290,12 +293,12 @@ plotSimulatedResiduals(simulationOutput = mod15.res)
 testDispersion(mod15.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod15)
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 (mod15_graph = data.frame(summary(lsmeans(mod15, ~ shrub_total_ba),type = "response")))
@@ -317,7 +320,7 @@ field_gcc15 = mutate(field_gcc, pred_mod15 = pred_mod15$fit,
                lcl_mod15 = LL_mod15)
 ```
 
-### Graph
+#### Graph
 
 ```{r}
 plot_mod15 = ggplot(data = field_gcc15, aes(x = shrub_total_ba, y = mean_gcc_tree)) +
@@ -335,13 +338,16 @@ plot_mod15
 
 
 
-## 16. Model: NDVI tree BA
+
+## NDVI Models
+
+### 16. Model: NDVI tree BA
 
 ```{r}
 mod16 = glm(mean_ndvi_tree ~ tree_total_ba, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod16.res = simulateResiduals(fittedModel = mod16, n = 500)
 mod16.res$scaledResiduals
@@ -357,12 +363,12 @@ plotSimulatedResiduals(simulationOutput = mod16.res)
 testDispersion(mod16.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod16)
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 (mod16_graph = data.frame(summary(lsmeans(mod16, ~ tree_total_ba),type = "response")))
@@ -384,7 +390,7 @@ field_gcc_ndvi16 = mutate(field_gcc_ndvi, pred_mod16 = pred_mod16$fit,
                lcl_mod16 = LL_mod16)
 ```
 
-### Graph
+#### Graph
 
 ```{r}
 plot_mod16 = ggplot(data = field_gcc_ndvi16, aes(x = tree_total_ba, y = mean_ndvi_tree)) +
@@ -400,13 +406,13 @@ plot_mod16 = ggplot(data = field_gcc_ndvi16, aes(x = tree_total_ba, y = mean_ndv
 plot_mod16
 ```
 
-## 17. Model: NDVI shrub BA
+### 17. Model: NDVI shrub BA
 
 ```{r}
 mod17 = glm(mean_ndvi_shrub ~ shrub_total_ba, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod17.res = simulateResiduals(fittedModel = mod17, n = 500)
 mod17.res$scaledResiduals
@@ -422,12 +428,12 @@ plotSimulatedResiduals(simulationOutput = mod17.res)
 testDispersion(mod17.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod17)
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 (mod17_graph = data.frame(summary(lsmeans(mod17, ~ shrub_total_ba),type = "response")))
@@ -448,7 +454,7 @@ field_gcc_ndvi17 = mutate(field_gcc_ndvi, pred_mod17 = pred_mod17$fit,
                lcl_mod17 = LL_mod17)
 ```
 
-### Graph
+#### Graph
 
 ```{r}
 plot_mod17 = ggplot(data = field_gcc_ndvi17, aes(x = shrub_total_ba, y = mean_ndvi_shrub)) + geom_point(size = 2) +
@@ -458,20 +464,19 @@ plot_mod17 = ggplot(data = field_gcc_ndvi17, aes(x = shrub_total_ba, y = mean_nd
     geom_line(aes(y=ucl_mod17), linetype='longdash', size = 1) +
     ylab("Mean NDVI") +
     xlab("Shrub total basal area" ~(m^2))  +
-    scale_y_continuous(breaks=c(0.05,0.1, 0.15)) +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod17
 ```
 
 
-## 18. Model: NDVI proportion of Live trees
+### 18. Model: NDVI proportion of Live trees
 
 ```{r}
 mod18 = glm(mean_ndvi_tree ~ prop_live, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod18.res = simulateResiduals(fittedModel = mod18, n = 500)
 mod18.res$scaledResiduals
@@ -487,12 +492,12 @@ plotSimulatedResiduals(simulationOutput = mod18.res)
 testDispersion(mod18.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod18)
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 (mod18_graph = data.frame(summary(lsmeans(mod18, ~ prop_live), type = "response")))
@@ -522,7 +527,7 @@ field_gcc_ndvi18 = mutate(field_gcc_ndvi, pred18 = pred18$fit,
 ```
 
 
-### Graph
+#### Graph
 
 ```{r}
 plot_mod18 = ggplot(data = field_gcc_ndvi18, aes(x = prop_live, y = mean_ndvi_tree)) + 
@@ -533,272 +538,9 @@ plot_mod18 = ggplot(data = field_gcc_ndvi18, aes(x = prop_live, y = mean_ndvi_tr
     geom_line(aes(y=ucl_mod18), linetype='longdash', size = 1) +
     ylab("Mean NDVI") +
     xlab("Proportion of live trees")  +
-    scale_y_continuous(breaks=c(0.05,0.1, 0.15)) +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod18
-```
-
-
-## 19. Model: GCC tree  Biomass
-```{r}
-mod19 = glm(mean_gcc_tree ~ tree_total_biomass, data = field_gcc, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod19.res = simulateResiduals(fittedModel = mod19, n = 500)
-mod19.res$scaledResiduals
-mod19.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod19.res)
-```
-
-```{r}
-testDispersion(mod19.res)
-```
-
-### Sumamry
-```{r}
-summary(mod19)
-```
-
-### Data for graph
-
-```{r}
-(mod19_graph = data.frame(summary(lsmeans(mod19, ~ tree_total_biomass),type = "response")))
-```
-
-
-
-```{r}
-preddat_mod19 = data.frame(tree_total_biomass = field_gcc$tree_total_biomass)
-
-head(preddat_mod19)
-
-pred_mod19 = predict(mod19, newdata = preddat_mod19, se.fit = TRUE)
-
-UL_mod19 = with(pred_mod19, fit + 2*se.fit)
-LL_mod19 = with(pred_mod19, fit - 2*se.fit)
-
-field_gcc19 = mutate(field_gcc, pred_mod19 = pred_mod19$fit, 
-               ucl_mod19 = UL_mod19, 
-               lcl_mod19 = LL_mod19)
-```
-
-### Graph
-
-```{r}
-plot_mod19 = ggplot(data = field_gcc19, aes(x = tree_total_biomass, y = mean_gcc_tree)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod19), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod19, ymax = ucl_mod19, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod19), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod19), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    xlab("Tree above ground biomass" ~(g))  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod19
-```
-
-## 20. Model: ndvi tree  Biomass
-```{r}
-mod20 = glm(mean_ndvi_tree ~ tree_total_biomass, data = field_gcc_ndvi, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod20.res = simulateResiduals(fittedModel = mod20, n = 500)
-mod20.res$scaledResiduals
-mod20.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod20.res)
-```
-
-```{r}
-testDispersion(mod20.res)
-```
-
-### Sumamry
-```{r}
-summary(mod20)
-```
-
-### Data for graph
-
-```{r}
-(mod20_graph = data.frame(summary(lsmeans(mod20, ~ tree_total_biomass),type = "response")))
-```
-
-
-
-```{r}
-preddat_mod20 = data.frame(tree_total_biomass = field_gcc_ndvi$tree_total_biomass)
-
-head(preddat_mod20)
-
-pred_mod20 = predict(mod20, newdata = preddat_mod20, se.fit = TRUE)
-
-UL_mod20 = with(pred_mod20, fit + 2*se.fit)
-LL_mod20 = with(pred_mod20, fit - 2*se.fit)
-
-field_gcc_ndvi20 = mutate(field_gcc_ndvi, pred_mod20 = pred_mod20$fit, 
-               ucl_mod20 = UL_mod20, 
-               lcl_mod20 = LL_mod20)
-```
-
-### Graph
-
-```{r}
-plot_mod20 = ggplot(data = field_gcc_ndvi20, aes(x = tree_total_biomass, y = mean_ndvi_tree)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod20), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod20, ymax = ucl_mod20, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod20), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod20), linetype='longdash', size = 1) +
-    ylab("Mean NDVI") +
-    xlab("Tree above ground biomass" ~(g))  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod20
-```
-
-## 21. Model: GCC shrub biomass
-
-```{r}
-mod21 = glm(mean_gcc_shrub ~ shrub_total_biomass, data = field_gcc, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod21.res = simulateResiduals(fittedModel = mod21, n = 500)
-mod21.res$scaledResiduals
-mod21.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot tofall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod21.res)
-```
-
-```{r}
-testDispersion(mod21.res)
-```
-
-### Sumamry
-```{r}
-summary(mod21)
-```
-
-### Data for graph
-
-```{r}
-(mod21_graph = data.frame(summary(lsmeans(mod21, ~ shrub_total_biomass),type = "response")))
-```
-
-
-```{r}
-preddat_mod21 = data.frame(shrub_total_biomass = field_gcc$shrub_total_biomass)
-
-head(preddat_mod21)
-
-pred_mod21 = predict(mod21, newdata = preddat_mod21, se.fit = TRUE)
-
-UL_mod21 = with(pred_mod21, fit + 2*se.fit)
-LL_mod21 = with(pred_mod21, fit - 2*se.fit)
-
-field_gcc21 = mutate(field_gcc, pred_mod21 = pred_mod21$fit, 
-               ucl_mod21 = UL_mod21, 
-               lcl_mod21 = LL_mod21)
-```
-
-### Graph
-
-```{r}
-plot_mod21 = ggplot(data = field_gcc21, aes(x = shrub_total_biomass, y = mean_gcc_tree)) +
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod21), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod21, ymax = ucl_mod21, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod21), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod21), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    xlab("Shrub total biomass" ~(g))  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod21
-```
-
-
-
-## 22. Model: NDVI shrub Biomass
-
-```{r}
-mod22 = glm(mean_ndvi_shrub ~ shrub_total_biomass, data = field_gcc_ndvi, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod22.res = simulateResiduals(fittedModel = mod22, n = 500)
-mod22.res$scaledResiduals
-mod22.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod22.res)
-```
-
-```{r}
-testDispersion(mod22.res)
-```
-
-### Sumamry
-```{r}
-summary(mod22)
-```
-
-### Data for graph
-
-```{r}
-(mod22_graph = data.frame(summary(lsmeans(mod22, ~ shrub_total_biomass),type = "response")))
-```
-
-```{r}
-preddat_mod22 = data.frame(shrub_total_biomass = field_gcc_ndvi$shrub_total_biomass)
-
-head(preddat_mod22)
-
-pred_mod22 = predict(mod22, newdata = preddat_mod22, se.fit = TRUE)
-
-UL_mod22 = with(pred_mod22, fit + 2*se.fit)
-LL_mod22 = with(pred_mod22, fit - 2*se.fit)
-
-field_gcc_ndvi22 = mutate(field_gcc_ndvi, pred_mod22 = pred_mod22$fit, 
-               ucl_mod22 = UL_mod22, 
-               lcl_mod22 = LL_mod22)
-```
-
-### Graph
-
-```{r}
-plot_mod22 = ggplot(data = field_gcc_ndvi22, aes(x = shrub_total_biomass, y = mean_ndvi_shrub)) + geom_point(size = 2) +
-    geom_line(aes(y = pred_mod22), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod22, ymax = ucl_mod22, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod22), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod22), linetype='longdash', size = 1) +
-    ylab("Mean NDVI") +
-    xlab("Shrub total biomass" ~(g))  +
-    scale_y_continuous(breaks=c(0.05,0.1, 0.15)) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod22
 ```
 
 
@@ -818,6 +560,6 @@ grid_plot_veg
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-03-27_vegcover-gcc-ndvi.jpeg", plot = grid_plot_veg, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_vegcover-gcc-ndvi.jpeg", plot = grid_plot_veg, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
