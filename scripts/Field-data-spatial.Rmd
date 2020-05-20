@@ -377,3 +377,63 @@ plot100_pt_sf = st_as_sf(plot100_pt)
 st_write(plot100_pt_sf, "../outputs/field-data/point/plot100_pt_sf.shp", driver="ESRI Shapefile") 
 ```
 
+## Manual select coords for each transect for map
+
+```{r}
+ans_alnus_bp_cn
+```
+
+```{r}
+ANS_2003_2_100 = ans_alnus_bp_cn %>% filter(ID== "ANS_2003_2_100") 
+ANS_2003_3_100 = ans_alnus_bp_cn %>% filter(ID== "ANS_2003_3_100") 
+Alnus_1984_1_100 = ans_alnus_bp_cn %>% filter(ID== "Alnus_1984_1_100") 
+BP_1983_1_25 = ans_alnus_bp_cn %>% filter(ID== "BP_1983_1_25") 
+BP_1983_2_200 = ans_alnus_bp_cn %>% filter(ID== "BP_1983_2_200") 
+CN_2001_1_25 = ans_alnus_bp_cn %>% filter(ID== "CN_2001_1_25") 
+CN_2001_2_200 = ans_alnus_bp_cn %>% filter(ID== "CN_2001_2_200") 
+```
+
+```{r}
+ans = rbind(ANS_2003_2_100, ANS_2003_3_100)
+ans_al = rbind(ans, Alnus_1984_1_100)
+bp = rbind(BP_1983_1_25, BP_1983_2_200)
+cn = rbind(CN_2001_1_25, CN_2001_2_200)
+ans_al_bp = rbind(ans_al, bp)
+ans_al_bp_cn = rbind(ans_al_bp, cn)
+```
+
+
+```{r}
+plot_spot = ans_al_bp_cn %>% dplyr::select(ID:latitude, region:plot)
+```
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_plot_spot = cbind(plot_spot$longitude, plot_spot$latitude)
+plot_spot_pt <- SpatialPointsDataFrame(coords_plot_spot, proj4string = CRS(wgs_proj), data = plot_spot)
+```
+
+Transform from sp to sf
+```{r}
+plot_spot_pt_sf = st_as_sf(plot_spot_pt)
+```
+
+```{r}
+st_write(plot_spot_pt_sf, "../outputs/field-data/point/plot_transect_map_pt.shp", driver="ESRI Shapefile") 
+```
+
+
+Define coordinates and generate spatial point data frame with attributes
+```{r}
+coords_plot_all = cbind(ans_al_bp_cn$longitude, ans_al_bp_cn$latitude)
+plot_all_pt <- SpatialPointsDataFrame(coords_plot_all, proj4string = CRS(wgs_proj), data = ans_al_bp_cn)
+```
+
+Transform from sp to sf
+```{r}
+plot_all_pt_sf = st_as_sf(plot_all_pt)
+```
+
+```{r}
+st_write(plot_all_pt_sf, "../outputs/field-data/point/plot_all_transect_map_pt.shp", driver="ESRI Shapefile") 
+```
