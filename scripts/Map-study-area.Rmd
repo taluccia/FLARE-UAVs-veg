@@ -192,9 +192,59 @@ map1
   
 ```
 
-# Russia Map
+
+coord_map( , orientation = c(latitude,longitude,rotation)
+```{r fig.height=3.5, fig.width=3}
+# Defines the x axes required
+x_lines <- seq(-120,180, by = 60)
+
+map2 = ggplot() +
+  geom_polygon(data = wm, aes(x = long, y = lat, group = group), fill = "wheat", colour = "black", alpha = 0.8) +
+  coord_map("ortho", orientation = c(40, 90, 0)) +
+  scale_y_continuous(breaks = seq(60, 90, by = 10), labels = c("60", "", "","90")) +
+  # Removes Axes and labels
+  scale_x_continuous(breaks = NULL) +
+  xlab("") + 
+  ylab("") +
+  # Adds labels
+  geom_text(aes(x = 0, y = seq(60, 90, by = 10), hjust = 0.4, vjust = -0.6, label = c("60°N", "", "", "90°N"))) +
+  geom_text(aes(x = x_lines, y = 54, label = c("120°W", "60°W", "0°", "60°E", "120°E", "180°W"))) +
+  # Adds axes
+  geom_hline(aes(yintercept = 60), size = 1)  +
+  geom_segment(aes(y = 60, yend = 90, x = x_lines, xend = x_lines), linetype = "dashed") +
+# Change theme to remove axes and ticks
+  theme_void() + 
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0), "cm")) +
+theme(panel.grid.major = element_line(size = 0.25, linetype = 'dashed', colour = "black"),
+      axis.ticks=element_blank()) +
+  
+  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) 
+
+
+map2
+  
+```
+
+## Russia Map
+
 ```{r}
-russia_map <- ggplot() +
+russia_map1 <- ggplot() +
+     geom_sf(data = wrld_simpl_sf, fill = "antiquewhite1") +
+
+     coord_sf(xlim = c(30, 170), ylim = c(40, 80)) +
+     xlab("Longitude") + 
+   ylab("Latitude") +
+  geom_rect(data = insetrect, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax), alpha = 0, colour = "#000080", size = 1.5, linetype = 1) +
+  theme(panel.grid.major = element_line(color = gray(0.5), linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "aliceblue"))
+
+
+russia_map1
+```
+
+
+```{r}
+russia_map2 <- ggplot() +
      geom_sf(data = wrld_simpl_sf, fill = "antiquewhite1") +
 
      coord_sf(xlim = c(35, 170), ylim = c(45, 75)) +
@@ -205,8 +255,11 @@ russia_map <- ggplot() +
         size = 0.5), panel.background = element_rect(fill = "aliceblue"))
 
 
-russia_map
+russia_map2
 ```
+
+
+
 
 # Tansect locations
 
@@ -233,7 +286,7 @@ plot_raster
 
 ```
 
-# Option 2
+## Option 2
 
 ```{r}
 linecolors = c("#000000", "#000000", "#000000", "#000000")
@@ -266,7 +319,7 @@ plot_transects = ggplot() +
 plot_transects
 
 ```
-
+## Option 3
 ```{r}
 plot_transects3 = ggplot() + 
   ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
@@ -276,8 +329,8 @@ plot_transects3 = ggplot() +
   geom_sf(data = plot100_pt_sf, aes(fill = site, color = site),size = 4, shape = 21, alpha= .9) +
   scale_color_manual(values=linecolors) +
   scale_fill_manual(values=fillcolors) +
-  scale_y_continuous(breaks = seq(67.5, 69, by = .5)) +
-  scale_x_continuous(breaks = seq(160.5, 162.5, by = 1)) +
+  scale_y_continuous(breaks = seq(67.5, 69, by = .5), name = "") +
+  scale_x_continuous(breaks = seq(161), name = "") +
   
    annotation_north_arrow(location = "bl", which_north = "true", pad_x = unit(0.0, "cm"), pad_y = unit(0.7, "cm"), style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 0, text_face = NULL, text_family = "sans", text_col = "white")) +
   
@@ -295,6 +348,34 @@ plot_transects3
 
 ```
 
+## Option 4
+```{r}
+plot_transects4 = ggplot() + 
+  ggRGB(kr_stack, r=1, g=2, b=3, ggLayer = TRUE, coord_equal = TRUE) +
+  geom_sf(data = cherskiy, size = 4, shape = 24, fill = "grey70") +
+     annotate(geom = "text", x = 161.75, y = 68.7, label = "Cherskiy", 
+    fontface = "bold", color = "grey70", size = 4) +
+  geom_sf(data = plot100_pt_sf, aes(fill = site, color = site),size = 4, shape = 21, alpha= .9) +
+  scale_color_manual(values=linecolors) +
+  scale_fill_manual(values=fillcolors) +
+  scale_y_continuous(breaks = seq(67.5, 69, by = .5), name = "") +
+  scale_x_continuous(breaks = seq(161, 162), name = "") +
+  
+   annotation_north_arrow(location = "bl", which_north = "true", pad_x = unit(0.0, "cm"), pad_y = unit(0.7, "cm"), style = north_arrow_minimal(line_width = 1, line_col = "white", fill = "white", text_size = 0, text_face = NULL, text_family = "sans", text_col = "white")) +
+  
+  
+  annotation_scale(location = "bl", width_hint = 0.25, text_size = 12, text_face = "bold", text_family = "sans", text_col = "white") +
+  
+  coord_sf(crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0", xlim = c(160.4, 162.4), ylim = c(67.8, 68.8), expand = TRUE) +
+  
+  theme_bw()+
+  
+  theme(plot.margin = unit(c(t = 0, r = 0, b = 0.1, l = 0.1), "cm")) +
+  theme(legend.position = "none")
+
+plot_transects4
+
+```
 
 
 # Combining Maps
@@ -329,7 +410,7 @@ ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
 ```{r fig.height=7, fig.width=6}
 fig_man = ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
     draw_plot(plot_transects, x = 0, y = 0, width = 3, height = 4) +
-    draw_plot(russia_map, x = 0, y = 4, width = 6, height = 3) +      
+    draw_plot(russia_map1, x = 0, y = 4, width = 6, height = 3) +      
   draw_image("../images/2020-05-19_UAV-Veg-Transect-CN-bottom.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 4)
 
 fig_man
@@ -342,6 +423,44 @@ ggsave("../figures/MAP-FILE-NAME.png", plot = fig_man, width = 6, height = 7, dp
 ```
 
 
+## Option 4
+```{r fig.height=7, fig.width=6}
+fig_man = ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_transects3, x = 0, y = 0, width = 3, height = 4) +
+    draw_plot(russia_map2, x = 0, y = 4, width = 6, height = 3) +      
+  draw_image("../images/2020-05-19_UAV-Veg-Transect-CN-bottom.PNG", scale = 0.9, x = 3, y = 0, width = 3, height = 4) +
+  draw_label("Russia", 5, 6)
+
+fig_man
+```
+
+## Option 5
+
+, angle = 45
+```{r fig.height=7, fig.width=6}
+fig_maps5 = ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_transects4, x = 0, y = 0, width = 3, height = 4) +
+    draw_plot(russia_map2, x = 0, y = 4, width = 6, height = 3) +      
+  draw_image("../images/2020-05-19_UAV-Veg-Transect-CN-bottom.PNG", scale = 0.85, x = 3, y = 0.1, width = 3, height = 4) +
+  draw_label("Russia", x = 3.25, y = 6, fontfamily = "sans", fontface = "bold", color = "black", size = 12) +
+  draw_label("Alnus", x = 2.55, y = 1, fontfamily = "sans", fontface = "bold", color = "white", size = 10) +
+  draw_label("ANS", x = 1.95, y = 1.85, fontfamily = "sans", fontface = "bold", color = "white", size = 10) +
+  draw_label("BP", x = 1.25, y = 2.45, fontfamily = "sans", fontface = "bold", color = "white", size = 10) +
+  draw_label("CN", x = 2.1, y = 3.7, fontfamily = "sans", fontface = "bold", color = "white", size = 10) +
+  draw_label("N", x = 5.7, y = 0.6, fontfamily = "sans", fontface = "bold", color = "black", size = 10) +
+  draw_label("Plots", x = 3.75, y = 0.6, fontfamily = "sans", fontface = "bold", color = "black", size = 10) +
+  draw_label("100 m", x = 4.7, y = 0.725, fontfamily = "sans", fontface = "bold", color = "black", size = 10) +
+  draw_label("A", x = 0.16, y = 6.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("B", x = 0.16, y = 3.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("C", x = 3.14, y = 3.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) 
+
+fig_maps5
+```
+
+```{r}
+ggsave("../figures/2020-05-19_Figure-Map.png", plot = fig_maps5, width = 6, height = 7, dpi = 600)
+```
+
 # Save map as file
 
 Use `ggsave()` to export the map to a file. Note the relative path name. Multiple extensions are available. Width and height are defined for this figure, but should be adjusted for future figures.
@@ -351,112 +470,4 @@ Use `ggsave()` to export the map to a file. Note the relative path name. Multipl
 ```{r}
 ggsave("../figures/MAP-FILE-NAMEt.png", plot = fig_manuscript, width = 6, height = 4, dpi = 600)
 ```
-
-####
-Show in New WindowClear OutputExpand/Collapse Output
-
-Regions defined for each Polygons
-R Console
-
-Show in New WindowClear OutputExpand/Collapse Output
-Reading layer `RUS_adm0' from data source `E:\AnnaTalucci\R_GitHub\FLARE-UAVs-veg\data\shapefiles\RUS_adm0.shp' using driver `ESRI Shapefile'
-Simple feature collection with 1 feature and 70 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -180 ymin: 41.18887 xmax: 180 ymax: 81.85625
-epsg (SRID):    4326
-proj4string:    +proj=longlat +datum=WGS84 +no_defs
-Show in New WindowClear OutputExpand/Collapse Output
-
-Warning: closing unused connection 3 (C:/Users/atalucci/AppData/Local/Temp/Rtmpcz2q2L/raster/r_tmp_2020-05-18_110857_12584_66768.gri)
-R Console
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-
-class       : SpatialPolygonsDataFrame 
-features    : 12 
-extent      : -3298407, 2506658, -3309081, 3262685  (xmin, xmax, ymin, ymax)
-crs         : +proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
-variables   : 11
-names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
-min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
-max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
-class       : SpatialPolygonsDataFrame 
-features    : 12 
-extent      : -179.999, 179.999, 60, 83.57027  (xmin, xmax, ymin, ymax)
-crs         : +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 
-variables   : 11
-names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
-min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
-max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
-R Console
-class       : SpatialPolygonsDataFrame 
-features    : 12 
-extent      : -3298407, 2506658, -3309081, 3262685  (xmin, xmax, ymin, ymax)
-crs         : +proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
-variables   : 11
-names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
-min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
-max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
-class       : SpatialPolygonsDataFrame 
-features    : 12 
-extent      : -179.999, 179.999, 60, 83.57027  (xmin, xmax, ymin, ymax)
-crs         : +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0 
-variables   : 11
-names       : FIPS, ISO2, ISO3,  UN,           NAME,    AREA,   POP2005, REGION, SUBREGION,      LON,    LAT 
-min values  :     ,   AX,  ALA, 124, Aaland Islands,       0,         0,     19,        21, -109.433, 39.622 
-max values  :   US,   US,  USA, 840,  United States, 1638094, 299846449,    150,       154,   96.689,  78.83 
-Show in New WindowClear OutputExpand/Collapse Output
-Reading layer `cyn_f15_ee' from data source `E:\AnnaTalucci\R_GitHub\FLARE-UAVs-veg\data\shapefiles\cyn_f15_ee.shp' using driver `ESRI Shapefile'
-Simple feature collection with 9 features and 7 fields
-geometry type:  POINT
-dimension:      XY
-bbox:           xmin: 2141096 ymin: 2497337 xmax: 2141263 ymax: 2497589
-epsg (SRID):    NA
-proj4string:    +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs
-Show in New WindowClear OutputExpand/Collapse Output
-class      : Extent 
-xmin       : 159.9998 
-xmax       : 163.0002 
-ymin       : 67.24968 
-ymax       : 69.25023 
-Show in New WindowClear OutputExpand/Collapse Output
-
-
-Ignoring unknown parameters: text_size
-R Console
-	
-Scale on map varies by more than 10%, scale bar may be inaccurate
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-xmin
-<dbl>
-xmax
-<dbl>
-ymin
-<dbl>
-ymax
-<dbl>
-159.9998	163.0002	67.24968	69.25023	
-1 row
-Show in New WindowClear OutputExpand/Collapse Output
-Error in fortify(data) : object 'bc' not found
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-class      : RasterStack 
-dimensions : 35602, 36482, 1298832164, 3  (nrow, ncol, ncell, nlayers)
-resolution : 0.032888, 0.032888  (x, y)
-extent     : 2140583, 2141783, 2496902, 2498073  (xmin, xmax, ymin, ymax)
-crs        : +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 
-names      : CYN_TR1_FL015.1, CYN_TR1_FL015.2, CYN_TR1_FL015.3 
-min values :      0.00000000,      0.01415473,      0.05788141 
-max values :             255,             255,             255 
-
-Show in New WindowClear OutputExpand/Collapse Output
 
