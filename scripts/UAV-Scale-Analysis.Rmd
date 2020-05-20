@@ -61,7 +61,7 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}
@@ -394,7 +394,7 @@ plot_mod4 = ggplot(data = field_gcc_ndvi4, aes(x = mean_gcc_3m, y = mean_ndvi_3m
     xlab("Mean GCC (3m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1, 0.2))
+  scale_y_continuous(breaks = seq(0.6, 0.9, by = .05), labels = c("0.6", "", "0.7", "", "0.8", "", ""))
 
 plot_mod4
 ```
@@ -463,7 +463,7 @@ plot_mod5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m
     xlab("Mean GCC (5m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1))
+    scale_y_continuous(breaks = seq(0.6, 0.8, by = .05), labels = c("0.6", "", "0.7", "", "0.8"))
 
 plot_mod5
 ```
@@ -532,7 +532,7 @@ plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_1
     xlab("Mean GCC (10m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-    scale_y_continuous(breaks=c(0.0, 0.1))
+  scale_y_continuous(breaks = seq(0.6, 0.8, by = .05), labels = c("0.6", "", "0.7", "", "0.8"))
 
 plot_mod6
 ```
@@ -549,5 +549,5 @@ grid_plot_vi
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-03-31_VI-gcc-ndvi.jpeg", plot = grid_plot_vi, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_VI-gcc-ndvi.jpeg", plot = grid_plot_vi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
