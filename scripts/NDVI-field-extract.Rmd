@@ -36,8 +36,16 @@ alnus_tr1_f08
 cn_tr2_f17
 cn_tr1_f20 
 
+# NDVI rasters (Pix4D calcualted)
 
-# NDVI rasters
+```{r}
+alnus_tr1_f08_ndvi = raster("../data/pix4d_ndvi_May19/RU_ALN_TR1_FL008M_index_ndvi.tif")
+bp_tr2_f13_ndvi = raster("../data/pix4d_ndvi_May19/RU_BP_TR2_FL013M_index_ndvi.tif")
+cn_tr2_f17_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR2_FL017B_index_ndvi.tif")
+cn_tr1_f20_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR1_FL020M_index_ndvi.tif")
+```
+
+# NDVI rasters (R calculated)
 
 ```{r}
 alnus_tr1_f08 = raster("../data/ndvi/alnus_f08_NDVI.tif")
@@ -50,11 +58,367 @@ cn_tr1_f20 = raster("../data/ndvi/cn_f20_NDVI.tif")
 
 ```{r}
 alnus_tr1_pt = readOGR("../data/field-spatial/point/alnus_tr1_ee_pt.shp", "alnus_tr1_ee_pt")
+bp_tr2_pt = readOGR("../data/field-spatial/point/bp_tr2_ee_pt.shp", "bp_tr2_ee_pt") 
 cn_tr1_pt = readOGR("../data/field-spatial/point/cn_tr1_ee_pt.shp", "cn_tr1_ee_pt") 
 cn_tr2_pt = readOGR("../data/field-spatial/point/cn_tr2_ee_pt.shp", "cn_tr2_ee_pt") 
 ```
 
+# Extract NDVI with Pix4D
+## 25cm - extract mean pixel values
 
+```{r}
+extract_alnus_tr1_25cm = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=.25, fun=mean, df=TRUE)
+extract_bp_tr2_25cm = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=.25, fun=mean,  df=TRUE)
+extract_cn_tr1_25cm = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=.25, fun=mean,  df=TRUE)
+extract_cn_tr2_25cm = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=.25, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_25cm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_alnus_tr1_25cm
+```
+
+```{r}
+extract_bp_tr2_25cm$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_bp_tr2_25cm
+```
+
+```{r}
+extract_cn_tr1_25cm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_cn_tr1_25cm
+```
+
+```{r}
+extract_cn_tr2_25cm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_25cm) = c('ID', 'mean_ndvi_25cm', 'plot_id')
+extract_cn_tr2_25cm
+```
+
+
+```{r}
+ndvi_25cm = bind_rows(extract_alnus_tr1_25cm,extract_bp_tr2_25cm, extract_cn_tr1_25cm, extract_cn_tr2_25cm) %>% dplyr::select(plot_id, mean_ndvi_25cm) %>% rename(ID = plot_id)
+length(unique(ndvi_25cm$ID))
+ndvi_25cm
+```
+
+## 50cm - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_50cm = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=.50, fun=mean, df=TRUE)
+extract_bp_tr2_50cm = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=.50, fun=mean,  df=TRUE)
+extract_cn_tr1_50cm = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=.50, fun=mean,  df=TRUE)
+extract_cn_tr2_50cm = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=.50, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_50cm$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_alnus_tr1_50cm
+```
+
+
+```{r}
+extract_bp_tr2_50cm$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_bp_tr2_50cm
+```
+
+```{r}
+extract_cn_tr1_50cm$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_cn_tr1_50cm
+```
+
+```{r}
+extract_cn_tr2_50cm$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_50cm) = c('ID', 'mean_ndvi_50cm', 'plot_id')
+extract_cn_tr2_50cm
+```
+
+
+```{r}
+ndvi_50cm = bind_rows(extract_alnus_tr1_50cm, extract_bp_tr2_50cm, extract_cn_tr1_50cm, extract_cn_tr2_50cm) %>% dplyr::select(plot_id, mean_ndvi_50cm) %>% rename(ID = plot_id)
+length(unique(ndvi_50cm$ID))
+ndvi_50cm
+```
+
+## 1m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_1m = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=1, fun=mean, df=TRUE)
+extract_bp_tr2_1m = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=1, fun=mean,  df=TRUE)
+extract_cn_tr1_1m = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=1, fun=mean,  df=TRUE)
+extract_cn_tr2_1m = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=1, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_1m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_1m) = c('ID', 'mean_ndvi_1m', 'plot_id')
+extract_alnus_tr1_1m
+```
+
+```{r}
+extract_bp_tr2_1m$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_1m) = c('ID', 'mean_ndvi_1m', 'plot_id')
+extract_bp_tr2_1m
+```
+
+```{r}
+extract_cn_tr1_1m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_1m) = c('ID', 'mean_ndvi_1m', 'plot_id')
+extract_cn_tr1_1m
+```
+
+```{r}
+extract_cn_tr2_1m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_1m) = c('ID', 'mean_ndvi_1m', 'plot_id')
+extract_cn_tr2_1m
+```
+
+
+```{r}
+ndvi_1m = bind_rows(extract_alnus_tr1_1m, extract_bp_tr2_1m, extract_cn_tr1_1m, extract_cn_tr2_1m) %>% dplyr::select(plot_id, mean_ndvi_1m) %>% rename(ID = plot_id)
+length(unique(ndvi_1m$ID))
+ndvi_1m
+```
+
+
+
+## 3m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_3m = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=3, fun=mean, df=TRUE)
+extract_bp_tr2_3m = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=3, fun=mean,  df=TRUE)
+extract_cn_tr1_3m = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=3, fun=mean,  df=TRUE)
+extract_cn_tr2_3m = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=3, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_3m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
+extract_alnus_tr1_3m
+```
+
+```{r}
+extract_bp_tr2_3m$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
+extract_bp_tr2_3m
+```
+
+```{r}
+extract_cn_tr1_3m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
+extract_cn_tr1_3m
+```
+
+```{r}
+extract_cn_tr2_3m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_3m) = c('ID', 'mean_ndvi_3m', 'plot_id')
+extract_cn_tr2_3m
+```
+
+
+```{r}
+ndvi_3m = bind_rows(extract_alnus_tr1_3m, extract_bp_tr2_3m, extract_cn_tr1_3m, extract_cn_tr2_3m) %>% dplyr::select(plot_id, mean_ndvi_3m) %>% rename(ID = plot_id)
+length(unique(ndvi_3m$ID))
+ndvi_3m
+```
+
+
+## 5m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_5m = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=5, fun=mean, df=TRUE)
+extract_bp_tr2_5m = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=5, fun=mean,  df=TRUE)
+extract_cn_tr1_5m = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=5, fun=mean,  df=TRUE)
+extract_cn_tr2_5m = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=5, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_5m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_alnus_tr1_5m
+```
+
+```{r}
+extract_bp_tr2_5m$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_bp_tr2_5m
+```
+
+```{r}
+extract_cn_tr1_5m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_cn_tr1_5m
+```
+
+```{r}
+extract_cn_tr2_5m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_5m) = c('ID', 'mean_ndvi_5m', 'plot_id')
+extract_cn_tr2_5m
+```
+
+
+```{r}
+ndvi_5m = bind_rows(extract_alnus_tr1_5m, extract_bp_tr2_5m,extract_cn_tr1_5m, extract_cn_tr2_5m) %>% dplyr::select(plot_id, mean_ndvi_5m) %>% rename(ID = plot_id)
+length(unique(ndvi_5m$ID))
+ndvi_5m
+```
+
+
+## 10m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_10m = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=10, fun=mean, df=TRUE)
+extract_bp_tr2_10m = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=10, fun=mean,  df=TRUE)
+extract_cn_tr1_10m = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=10, fun=mean,  df=TRUE)
+extract_cn_tr2_10m = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=10, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_10m$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_alnus_tr1_10m
+```
+
+```{r}
+extract_bp_tr2_10m$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_bp_tr2_10m
+```
+
+```{r}
+extract_cn_tr1_10m$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_cn_tr1_10m
+```
+
+```{r}
+extract_cn_tr2_10m$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_10m) = c('ID', 'mean_ndvi_10m', 'plot_id')
+extract_cn_tr2_10m
+```
+
+```{r}
+ndvi_10m = bind_rows(extract_alnus_tr1_10m, extract_bp_tr2_10m, extract_cn_tr1_10m, extract_cn_tr2_10m) %>% dplyr::select(plot_id, mean_ndvi_10m) %>% rename(ID = plot_id)
+length(unique(ndvi_10m$ID))
+ndvi_10m
+```
+
+## Tree - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_tree = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=alnus_tr1_pt$radius, fun=mean, df=TRUE)
+extract_bp_tr2_tree = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=bp_tr2_pt$radius, fun=mean,  df=TRUE)
+extract_cn_tr1_tree = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=cn_tr1_pt$radius, fun=mean,  df=TRUE)
+extract_cn_tr2_tree = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=cn_tr2_pt$radius, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_tree$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_alnus_tr1_tree
+```
+
+```{r}
+extract_bp_tr2_tree$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_bp_tr2_tree
+```
+
+```{r}
+extract_cn_tr1_tree$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_cn_tr1_tree
+```
+
+```{r}
+extract_cn_tr2_tree$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_tree) = c('ID', 'mean_ndvi_tree', 'plot_id')
+extract_cn_tr2_tree
+```
+
+
+```{r}
+ndvi_tree = bind_rows(extract_alnus_tr1_tree, extract_bp_tr2_tree, extract_cn_tr1_tree, extract_cn_tr2_tree) %>% dplyr::select(plot_id, mean_ndvi_tree) %>% rename(ID = plot_id)
+length(unique(ndvi_tree$ID))
+ndvi_tree
+```
+
+## shrub - extract mean pixel values
+```{r}
+extract_alnus_tr1_shrub = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=alnus_tr1_pt$plt_lng, fun=mean, df=TRUE)
+extract_bp_tr2_shrub = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=cn_tr2_pt$plt_lng, fun=mean,  df=TRUE)
+extract_cn_tr1_shrub = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=cn_tr1_pt$plt_lng, fun=mean,  df=TRUE)
+extract_cn_tr2_shrub = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=cn_tr2_pt$plt_lng, fun=mean,  df=TRUE)
+```
+
+
+```{r}
+extract_alnus_tr1_shrub$plot_id = alnus_tr1_pt$ID
+names(extract_alnus_tr1_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_alnus_tr1_shrub
+```
+
+```{r}
+extract_bp_tr2_shrub$plot_id = bp_tr2_pt$ID
+names(extract_bp_tr2_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_bp_tr2_shrub
+```
+
+```{r}
+extract_cn_tr1_shrub$plot_id = cn_tr1_pt$ID
+names(extract_cn_tr1_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_cn_tr1_shrub
+```
+
+```{r}
+extract_cn_tr2_shrub$plot_id = cn_tr2_pt$ID
+names(extract_cn_tr2_shrub) = c('ID', 'mean_ndvi_shrub', 'plot_id')
+extract_cn_tr2_shrub
+```
+
+
+```{r}
+ndvi_shrub = bind_rows(extract_alnus_tr1_shrub, extract_bp_tr2_shrub, extract_cn_tr1_shrub, extract_cn_tr2_shrub) %>% dplyr::select(plot_id, mean_ndvi_shrub) %>% rename(ID = plot_id)
+length(unique(ndvi_shrub$ID))
+ndvi_shrub
+```
+
+
+## Combine ndvi data
+
+```{r}
+ndvi_merge1 = merge(ndvi_25cm, ndvi_50cm,  by= "ID")
+ndvi_merge2 = merge(ndvi_1m, ndvi_3m,  by= "ID")
+ndvi_merge3 = merge(ndvi_5m, ndvi_10m,  by= "ID")
+ndvi_merge4 = merge(ndvi_tree, ndvi_shrub,  by="ID")
+ndvi_merge5 = merge(ndvi_merge1, ndvi_merge2, by="ID")
+ndvi_merge6 = merge(ndvi_merge3, ndvi_merge4, by="ID")
+ndvi_all = merge(ndvi_merge5, ndvi_merge6,  by="ID")
+ndvi_all
+```
+
+
+```{r}
+write.csv(ndvi_all,"../outputs/extracted_data/2020-05-20_ndvi_all_pix4D.csv", row.names = FALSE)
+```
+
+
+
+
+
+# Extract with r calculated NDVI
 ## 25cm - extract mean pixel values
 
 ```{r}
