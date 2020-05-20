@@ -61,7 +61,7 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}
@@ -399,7 +399,7 @@ mod11 = glm(mean_gcc_10m ~ plot_dis, data = field_gcc, family = gaussian)
 
 ### Residuals with DHARMa
 ```{r, include=FALSE}
-mod11.res = simulateResiduals(fittedModel = mod1, n = 500)
+mod11.res = simulateResiduals(fittedModel = mod11, n = 500)
 mod11.res$scaledResiduals
 mod11.res$scaledResidualsNormal
 ```
@@ -535,7 +535,7 @@ grid_plot_burn
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-03-31_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
 
 ### Boxplots burn/unburn
@@ -547,7 +547,7 @@ grid_boxplot_burn
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-04-02_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
 ### Distance from unburned edge
 
@@ -559,6 +559,6 @@ grid_plot_edge
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-03-31_distance_edge_pts.jpeg", plot = grid_plot_edge, width = 6, height = 3, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_distance_edge_pts.jpeg", plot = grid_plot_edge, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
