@@ -63,7 +63,7 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/ndvi_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}
@@ -183,18 +183,16 @@ field_gcc1 = mutate(field_gcc, pred_mod1 = pred_mod1$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod1 = ggplot(data = field_gcc1, aes(x = shrub_biomass_g_m, y = mean_gcc_25cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod1), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
-    
-    ylab("Mean GCC (25cm)") +
-    xlab("AGB (g per m^2)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
+    scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")+
+    xlab("Biomass")  +
+    reg_theme
 plot_mod1
 ```
 
@@ -251,7 +249,7 @@ field_gcc2 = mutate(field_gcc, pred_mod2 = pred_mod2$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod2 = ggplot(data = field_gcc2, aes(x = shrub_biomass_g_m, y = mean_gcc_50cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod2), linetype = 1, size = 2) + 
@@ -259,10 +257,9 @@ plot_mod2 = ggplot(data = field_gcc2, aes(x = shrub_biomass_g_m, y = mean_gcc_50
     geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
     
-    ylab("Mean GCC (50cm)") +
+    scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (50cm)") +
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
+    reg_theme 
 plot_mod2
 ```
 
@@ -318,7 +315,7 @@ field_gcc3 = mutate(field_gcc, pred_mod3 = pred_mod3$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod3 = ggplot(data = field_gcc3, aes(x = shrub_biomass_g_m, y = mean_gcc_1m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod3), linetype = 1, size = 2) + 
@@ -326,9 +323,9 @@ plot_mod3 = ggplot(data = field_gcc3, aes(x = shrub_biomass_g_m, y = mean_gcc_1m
     geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
     
-    ylab("Mean GCC (1m)") +
-    xlab("biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+    scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (1m)")+
+    xlab("Biomass")  +
+    reg_theme  
 
 plot_mod3
 ```
@@ -385,7 +382,7 @@ field_gcc4 = mutate(field_gcc, pred_mod4 = pred_mod4$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod4 = ggplot(data = field_gcc4, aes(x = shrub_biomass_g_m, y = mean_gcc_3m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod4), linetype = 1, size = 2) + 
@@ -393,9 +390,9 @@ plot_mod4 = ggplot(data = field_gcc4, aes(x = shrub_biomass_g_m, y = mean_gcc_3m
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
     
-    ylab("Mean GCC (3m)") +
+    scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (3m)")+
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+    reg_theme 
 
 plot_mod4
 ```
@@ -452,7 +449,7 @@ field_gcc5 = mutate(field_gcc, pred_mod5 = pred_mod5$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod5 = ggplot(data = field_gcc5, aes(x =shrub_biomass_g_m, y = mean_gcc_5m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod5), linetype = 1, size = 2) + 
@@ -460,9 +457,9 @@ plot_mod5 = ggplot(data = field_gcc5, aes(x =shrub_biomass_g_m, y = mean_gcc_5m)
     geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (5m)") +
+    scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (5m)")+
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+    reg_theme  
 plot_mod5
 ```
 
@@ -519,7 +516,7 @@ field_gcc6 = mutate(field_gcc, pred_mod6 = pred_mod6$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod6 = ggplot(data = field_gcc6, aes(x = shrub_biomass_g_m, y = mean_gcc_10m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
@@ -527,10 +524,9 @@ plot_mod6 = ggplot(data = field_gcc6, aes(x = shrub_biomass_g_m, y = mean_gcc_10
     geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
     
-    ylab("Mean GCC  (10m)") +
+   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (10m)")+
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
+    reg_theme 
 plot_mod6
 ```
 
@@ -538,7 +534,7 @@ plot_mod6
 compareGLM(mod1, mod2, mod3, mod4, mod5, mod6)
 ```
 
-## 7. Model: NDVIas  function of GCC
+## 7. Model: NDVI
 ```{r}
 mod7 = glm(mean_ndvi_25cm ~ shrub_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
@@ -590,7 +586,7 @@ field_gcc_ndvi7 = mutate(field_gcc_ndvi, pred_mod7 = pred_mod7$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod7 = ggplot(data = field_gcc_ndvi7, aes(x = shrub_biomass_g_m, y = mean_ndvi_25cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod7), linetype = 1, size = 2) + 
@@ -598,10 +594,9 @@ plot_mod7 = ggplot(data = field_gcc_ndvi7, aes(x = shrub_biomass_g_m, y = mean_n
     geom_line(aes(y= lcl_mod7), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod7), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (25cm)") +
+    scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (25cm)") +
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
+    reg_theme 
 plot_mod7
 ```
 
@@ -658,7 +653,7 @@ field_gcc_ndvi8 = mutate(field_gcc_ndvi, pred_mod8 = pred_mod8$fit,
 
 ### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod8 = ggplot(data = field_gcc_ndvi8, aes(x = shrub_biomass_g_m, y = mean_ndvi_50cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod8), linetype = 1, size = 2) + 
@@ -666,10 +661,9 @@ plot_mod8 = ggplot(data = field_gcc_ndvi8, aes(x = shrub_biomass_g_m, y = mean_n
     geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
     
-    ylab("Mean NDVI (50cm)") +
+   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (50cm)") +
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
+    reg_theme 
 plot_mod8
 ```
 
@@ -955,7 +949,7 @@ grid_biomass_gcc
 
 ```
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-13_Biomass-shrub-gcc.jpeg", plot = grid_biomass_gcc, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_Biomass-shrub-gcc.jpeg", plot = grid_biomass_gcc, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
 ```{r fig.height=7, fig.width=6}
@@ -965,16 +959,15 @@ grid_biomass_ndvi
 
 ```
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-13_Biomass-shrub-ndvi.jpeg", plot = grid_biomass_ndvi, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-20_Biomass-shrub-ndvi.jpeg", plot = grid_biomass_ndvi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
+
+### Axis labels 3 columns
 ```{r fig.height=7, fig.width=6}
 
-grid_biomass = cowplot::plot_grid(plot_mod1, plot_mod7, plot_mod2, plot_mod8, plot_mod3, plot_mod9, plot_mod4, plot_mod10, plot_mod5, plot_mod11, plot_mod6, plot_mod12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", ncol= 2) 
-grid_biomass
+fig1 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
+  theme(plot.margin = margin(0, 0, 0, 0))
 
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-13_Biomass-gcc.jpeg", plot = , width = 6, height = 7, units = c("in"), dpi=600 )
+fig1
 ```
