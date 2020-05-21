@@ -111,10 +111,10 @@ theme(panel.grid = element_blank(),
 
 reg_theme = theme_bw() + theme(legend.position = "none") +
   theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
+  theme(axis.title.x = element_text(size = 10, hjust = 0.5, vjust = -0.2),
+        axis.title.y = element_text(size = 10, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 9, color = "black"),
+        axis.text.y = element_text(size = 9, color = "black"),
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))
 
@@ -250,7 +250,8 @@ plot1 = ggplot(data = field_gcc1, aes(x = woody_biomass_C_g_m, y = mean_gcc_25cm
     geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    
+  labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")
 
@@ -330,7 +331,7 @@ plot2 = ggplot(data = field_gcc2, aes(x = woody_biomass_C_g_m, y = mean_gcc_50cm
     geom_ribbon( aes(ymin = lcl_mod2, ymax = ucl_mod2, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
-   xlab("Biomass") +
+   labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name  = "GCC (50cm)")
 
@@ -424,7 +425,7 @@ plot3 = ggplot(data = field_gcc3, aes(x = woody_biomass_C_g_m, y = mean_gcc_1m))
     geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
-   reg_theme +  xlab("Biomass") +
+   reg_theme +  labs(x=expression(AGB~(g~C~m^-2))) +
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (1m)")
 
 plot3
@@ -504,7 +505,7 @@ plot4 = ggplot(data = field_gcc4, aes(x = woody_biomass_C_g_m, y = mean_gcc_3m))
     geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
    reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name="GCC (3m)")
 
@@ -585,7 +586,7 @@ plot5 = ggplot(data = field_gcc5, aes(x =woody_biomass_C_g_m, y = mean_gcc_5m)) 
     geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05),  name = "GCC (5m)")
 plot5
@@ -667,7 +668,7 @@ plot6 = ggplot(data = field_gcc6, aes(x = woody_biomass_C_g_m, y = mean_gcc_10m)
     geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+   labs(x=expression(AGB~(g~C~m^-2))) +
   reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (10m)")
 
@@ -758,7 +759,7 @@ plot7 = ggplot(data = field_gcc_ndvi7, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod7, ymax = ucl_mod7, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod7), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod7), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (25cm)")
 plot7
@@ -838,7 +839,7 @@ plot8 = ggplot(data = field_gcc_ndvi8, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod8, ymax = ucl_mod8, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (50cm)")
 
@@ -920,7 +921,7 @@ plot9 = ggplot(data = field_gcc_ndvi9, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod9, ymax = ucl_mod9, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod9), linetype='longdash', size = 1) +
-   xlab("Biomass") +
+   labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (1m)")
 
@@ -1002,7 +1003,7 @@ plot10 = ggplot(data = field_gcc_ndvi10, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod10, ymax = ucl_mod10, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod10), linetype='longdash', size = 1) +
-      xlab("Biomass") +
+      labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1),name = "NDVI (3m)")
 
@@ -1083,7 +1084,7 @@ plot11 = ggplot(data = field_gcc_ndvi11, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme + 
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (5m)")
 
@@ -1160,7 +1161,7 @@ plot12 = ggplot(data = field_gcc_ndvi12, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
-    xlab("Biomass") +
+    labs(x=expression(AGB~(g~C~m^-2))) +
     reg_theme + 
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (10m)")
 
@@ -1203,13 +1204,14 @@ ggsave("../figures/2020-05-20_Biomass-all-woody-ndvi.jpeg", plot = grid_biomass_
 ```{r fig.height=7, fig.width=6}
 
 fig1 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
-  theme(plot.margin = margin(0, 0, 0, 0))
+  theme(plot.margin = margin(0, 0, 0, 0)) 
+  
 
 fig1
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-20_Biomass-all-woody-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-21_Biomass-all-woody-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
 ```{r fig.height=7, fig.width=6}
