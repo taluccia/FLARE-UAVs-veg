@@ -182,6 +182,8 @@ geom_point(size = 3, position = position_dodge(width = .75)) +
 plot_mod7 
 ```
 
+#### Box plot
+
 ```{r}
 boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn, fill=burn_unburn) ) + # define plot axes
 geom_boxplot(fill = "white") +

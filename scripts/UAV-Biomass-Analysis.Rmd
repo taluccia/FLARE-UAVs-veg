@@ -105,7 +105,8 @@ comp_theme = theme_bw() + theme(legend.position = "none") +
         axis.text.y = element_text(size = 10, color = "black"),
         axis.line = element_line(colour = "black"))
 ```
- 
+theme(panel.grid = element_blank(),
+        panel.border = element_blank())
 ```{r}
 
 reg_theme = theme_bw() + theme(legend.position = "none") +
@@ -114,6 +115,48 @@ reg_theme = theme_bw() + theme(legend.position = "none") +
         axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
         axis.text.x = element_text(size = 10, color = "black"),
         axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+```{r}
+
+blank_xy_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.1, r = 0.1, b = 0.6, l = 0.6), "cm")) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+
+```
+
+ 
+```{r}
+
+blank_x_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+ 
+```{r}
+
+blank_y_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_blank(),
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))
 
@@ -131,12 +174,14 @@ head(field_gcc)
 
 # Part 4: Biomass as it relates to GCC and NDVI
 
-## 1. Model: Woody Biomass function of GCC
+## GCC
+
+### 1. Model: Woody Biomass function of GCC 25 cm
 ```{r}
 mod1 = glm(mean_gcc_25cm ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod1.res = simulateResiduals(fittedModel = mod1, n = 500)
 mod1.res$scaledResiduals
@@ -152,7 +197,7 @@ plotSimulatedResiduals(simulationOutput = mod1.res)
 testDispersion(mod1.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod1)
 ```
@@ -165,7 +210,7 @@ with(summary(mod1), 1 - (deviance/null.deviance))
 data.frame(summary(lsmeans(mod1, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 preddat_mod1 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
@@ -182,30 +227,42 @@ field_gcc1 = mutate(field_gcc, pred_mod1 = pred_mod1$fit,
                lcl_mod1 = LL_mod1)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod1 = ggplot(data = field_gcc1, aes(x = woody_biomass_g_m, y = mean_gcc_25cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod1), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
-    
-    ylab("Mean GCC (25cm)") +
-    xlab("AGB (g per m^2)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""),name = "")
 
 plot_mod1
 ```
 
+```{r}
+plot1 = ggplot(data = field_gcc1, aes(x = woody_biomass_g_m, y = mean_gcc_25cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod1), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod1, ymax = ucl_mod1, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
 
-## 2. Model: NDVIas  function of GCC
+    reg_theme +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""))
+
+plot1
+```
+
+### 2. Model: GCC Biomass 50cm
 ```{r}
 mod2 = glm(mean_gcc_50cm ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod2.res = simulateResiduals(fittedModel = mod2, n = 500)
 mod2.res$scaledResiduals
@@ -221,7 +278,7 @@ plotSimulatedResiduals(simulationOutput = mod2.res)
 testDispersion(mod2.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod2)
 ```
@@ -234,7 +291,7 @@ with(summary(mod2), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod2, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod2 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
@@ -250,9 +307,9 @@ field_gcc2 = mutate(field_gcc, pred_mod2 = pred_mod2$fit,
                lcl_mod2 = LL_mod2)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod2 = ggplot(data = field_gcc2, aes(x = woody_biomass_g_m, y = mean_gcc_50cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod2), linetype = 1, size = 2) + 
@@ -260,19 +317,32 @@ plot_mod2 = ggplot(data = field_gcc2, aes(x = woody_biomass_g_m, y = mean_gcc_50
     geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
     
-    ylab("Mean GCC (50cm)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+    blank_xy_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""),  name = "")
 
 plot_mod2
 ```
 
-## 3. Model: NDVIas  function of GCC
+```{r}
+plot2 = ggplot(data = field_gcc2, aes(x = woody_biomass_g_m, y = mean_gcc_50cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod2), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod2, ymax = ucl_mod2, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
+
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA)))  + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""))
+
+plot2
+```
+
+### 3. Model: GCC Biomass 1m
 ```{r}
 mod3 = glm(mean_gcc_1m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod3.res = simulateResiduals(fittedModel = mod3, n = 500)
 mod3.res$scaledResiduals
@@ -288,7 +358,7 @@ plotSimulatedResiduals(simulationOutput = mod3.res)
 testDispersion(mod3.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod3)
 ```
@@ -301,7 +371,7 @@ with(summary(mod3), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod3, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod3 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
@@ -317,29 +387,43 @@ field_gcc3 = mutate(field_gcc, pred_mod3 = pred_mod3$fit,
                lcl_mod3 = LL_mod3)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod3 = ggplot(data = field_gcc3, aes(x = woody_biomass_g_m, y = mean_gcc_1m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod3), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
-    
-    ylab("Mean GCC (1m)") +
-    xlab("biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""), name = "")
 
 plot_mod3
 ```
 
-## 4. Model: NDVIas  function of GCC
+```{r}
+plot3 = ggplot(data = field_gcc3, aes(x = woody_biomass_g_m, y = mean_gcc_1m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod3), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
+   reg_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""))
+
+plot3
+```
+
+### 4. Model: GCC Biomass 3m
 ```{r}
 mod4 = glm(mean_gcc_3m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod4.res = simulateResiduals(fittedModel = mod4, n = 500)
 mod4.res$scaledResiduals
@@ -355,7 +439,7 @@ plotSimulatedResiduals(simulationOutput = mod4.res)
 testDispersion(mod4.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod4)
 ```
@@ -368,7 +452,7 @@ with(summary(mod4), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod4, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod4 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
@@ -384,29 +468,43 @@ field_gcc4 = mutate(field_gcc, pred_mod4 = pred_mod4$fit,
                lcl_mod4 = LL_mod4)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod4 = ggplot(data = field_gcc4, aes(x = woody_biomass_g_m, y = mean_gcc_3m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod4), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
-    
-    ylab("Mean GCC (3m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05),labels = c("0.3", "0.35", "0.4", ""), name = "")
 
 plot_mod4
 ```
+```{r}
+plot4 = ggplot(data = field_gcc4, aes(x = woody_biomass_g_m, y = mean_gcc_3m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod4), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
 
-## 5. Model: NDVIas  function of GCC
+   reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "0.35", "0.4", "0.45"))
+
+plot4
+```
+
+### 5. Model: GCC Biomass 5m
 ```{r}
 mod5 = glm(mean_gcc_5m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod5.res = simulateResiduals(fittedModel = mod5, n = 500)
 mod5.res$scaledResiduals
@@ -422,7 +520,7 @@ plotSimulatedResiduals(simulationOutput = mod5.res)
 testDispersion(mod5.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod5)
 ```
@@ -435,7 +533,7 @@ with(summary(mod5), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod5, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod5 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
 
@@ -451,28 +549,43 @@ field_gcc5 = mutate(field_gcc, pred_mod5 = pred_mod5$fit,
                lcl_mod5 = LL_mod5)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod5 = ggplot(data = field_gcc5, aes(x =woody_biomass_g_m, y = mean_gcc_5m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod5), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI (5m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "0.35", "0.4", ""),  name="")
+
 plot_mod5
 ```
 
-## 6. Model: NDVIas  function of GCC
+```{r}
+plot5 = ggplot(data = field_gcc5, aes(x =woody_biomass_g_m, y = mean_gcc_5m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod5), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
+    
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""))
+plot5
+```
+
+### 6. Model: GCC Biomass 10m
 ```{r}
 mod6 = glm(mean_gcc_10m ~ woody_biomass_g_m, data = field_gcc, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod6.res = simulateResiduals(fittedModel = mod6, n = 500)
 mod6.res$scaledResiduals
@@ -488,7 +601,7 @@ plotSimulatedResiduals(simulationOutput = mod6.res)
 testDispersion(mod6.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod6)
 ```
@@ -501,7 +614,7 @@ with(summary(mod6), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod6, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 
 ```{r}
 preddat_mod6 = data.frame(woody_biomass_g_m = field_gcc$woody_biomass_g_m)
@@ -518,33 +631,52 @@ field_gcc6 = mutate(field_gcc, pred_mod6 = pred_mod6$fit,
                lcl_mod6 = LL_mod6)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod6 = ggplot(data = field_gcc6, aes(x = woody_biomass_g_m, y = mean_gcc_10m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
-    
-    ylab("Mean GCC  (10m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""), name = "", expand = c(0,0))
 
 plot_mod6
+```
+
+
+```{r}
+plot6 = ggplot(data = field_gcc6, aes(x = woody_biomass_g_m, y = mean_gcc_10m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), labels = c("0.3", "", "0.4", ""), expand = c(0,0))
+
+plot6
 ```
 
 ```{r}
 compareGLM(mod1, mod2, mod3, mod4, mod5, mod6)
 ```
 
-## 7. Model: NDVIas  function of GCC
+
+## NDVI
+
+### 7. Model: NDVI Biomass 25cm
 ```{r}
 mod7 = glm(mean_ndvi_25cm ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod7.res = simulateResiduals(fittedModel = mod7, n = 500)
 mod7.res$scaledResiduals
@@ -560,7 +692,7 @@ plotSimulatedResiduals(simulationOutput = mod7.res)
 testDispersion(mod7.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod7)
 ```
@@ -573,7 +705,7 @@ with(summary(mod7), 1 - (deviance/null.deviance))
 data.frame(summary(lsmeans(mod7, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod7 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -589,9 +721,9 @@ field_gcc_ndvi7 = mutate(field_gcc_ndvi, pred_mod7 = pred_mod7$fit,
                lcl_mod7 = LL_mod7)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod7 = ggplot(data = field_gcc_ndvi7, aes(x = woody_biomass_g_m, y = mean_ndvi_25cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod7), linetype = 1, size = 2) + 
@@ -601,18 +733,32 @@ plot_mod7 = ggplot(data = field_gcc_ndvi7, aes(x = woody_biomass_g_m, y = mean_n
     
     ylab("Mean NDVI (25cm)") +
     xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "")
 
 plot_mod7
 ```
 
+```{r}
+plot7 = ggplot(data = field_gcc_ndvi7, aes(x = woody_biomass_g_m, y = mean_ndvi_25cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod7), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod7, ymax = ucl_mod7, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod7), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod7), linetype='longdash', size = 1) +
+    reg_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+plot7
+```
 
-## 8. Model: NDVIas  function of GCC
+### 8. Model: NDVI Biomass 50cm
 ```{r}
 mod8 = glm(mean_ndvi_50cm ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod8.res = simulateResiduals(fittedModel = mod8, n = 500)
 mod8.res$scaledResiduals
@@ -628,7 +774,7 @@ plotSimulatedResiduals(simulationOutput = mod8.res)
 testDispersion(mod8.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod8)
 ```
@@ -641,7 +787,7 @@ with(summary(mod8), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod8, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod8 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -657,29 +803,42 @@ field_gcc_ndvi8 = mutate(field_gcc_ndvi, pred_mod8 = pred_mod8$fit,
                lcl_mod8 = LL_mod8)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod8 = ggplot(data = field_gcc_ndvi8, aes(x = woody_biomass_g_m, y = mean_ndvi_50cm)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod8), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod8, ymax = ucl_mod8, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI (50cm)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme + 
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "") 
 
 plot_mod8
 ```
 
-## 9. Model: NDVIas  function of GCC
+```{r}
+plot8 = ggplot(data = field_gcc_ndvi8, aes(x = woody_biomass_g_m, y = mean_ndvi_50cm)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod8), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod8, ymax = ucl_mod8, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+
+plot8
+```
+
+### 9. Model: NDVI Biomass 1m
 ```{r}
 mod9 = glm(mean_ndvi_1m ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod9.res = simulateResiduals(fittedModel = mod9, n = 500)
 mod9.res$scaledResiduals
@@ -695,7 +854,7 @@ plotSimulatedResiduals(simulationOutput = mod9.res)
 testDispersion(mod9.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod9)
 ```
@@ -708,7 +867,7 @@ with(summary(mod9), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod9, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod9 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -724,29 +883,43 @@ field_gcc_ndvi9 = mutate(field_gcc_ndvi, pred_mod9 = pred_mod9$fit,
                lcl_mod9 = LL_mod9)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod9 = ggplot(data = field_gcc_ndvi9, aes(x = woody_biomass_g_m, y = mean_ndvi_1m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod9), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod9, ymax = ucl_mod9, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod9), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI (1m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "")
 
 plot_mod9
 ```
 
-## 10. Model: NDVIas  function of GCC
+
+```{r}
+plot9 = ggplot(data = field_gcc_ndvi9, aes(x = woody_biomass_g_m, y = mean_ndvi_1m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod9), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod9, ymax = ucl_mod9, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod9), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+
+plot9
+```
+
+### 10. Model: NDVI Biomass 3m
 ```{r}
 mod10 = glm(mean_ndvi_3m ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod10.res = simulateResiduals(fittedModel = mod10, n = 500)
 mod10.res$scaledResiduals
@@ -762,7 +935,7 @@ plotSimulatedResiduals(simulationOutput = mod10.res)
 testDispersion(mod10.res)
 ```
 
-### Sumamry
+#### Summary
 ```{r}
 summary(mod10)
 ```
@@ -775,7 +948,7 @@ with(summary(mod10), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod10, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod10 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -791,29 +964,43 @@ field_gcc_ndvi10 = mutate(field_gcc_ndvi, pred_mod10 = pred_mod10$fit,
                lcl_mod10 = LL_mod10)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod10 = ggplot(data = field_gcc_ndvi10, aes(x = woody_biomass_g_m, y = mean_ndvi_3m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod10), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod10, ymax = ucl_mod10, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod10), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI (3m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name="") 
 
 plot_mod10
 ```
 
-## 11. Model: NDVIas  function of GCC
+
+```{r}
+plot10 = ggplot(data = field_gcc_ndvi10, aes(x = woody_biomass_g_m, y = mean_ndvi_3m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod10), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod10, ymax = ucl_mod10, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod10), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+
+plot10
+```
+
+### 11. Model: NDVI Biomass 5m
 ```{r}
 mod11 = glm(mean_ndvi_5m ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod11.res = simulateResiduals(fittedModel = mod11, n = 500)
 mod11.res$scaledResiduals
@@ -829,7 +1016,7 @@ plotSimulatedResiduals(simulationOutput = mod11.res)
 testDispersion(mod11.res)
 ```
 
-### Sumamry
+#### Sumamry
 ```{r}
 summary(mod11)
 ```
@@ -842,7 +1029,7 @@ with(summary(mod11), 1 - deviance/null.deviance)
 data.frame(summary(lsmeans(mod11, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod11 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -858,29 +1045,42 @@ field_gcc_ndvi11 = mutate(field_gcc_ndvi, pred_mod11 = pred_mod11$fit,
                lcl_mod11 = LL_mod11)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod11 = ggplot(data = field_gcc_ndvi11, aes(x = woody_biomass_g_m, y = mean_ndvi_5m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod11), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI (5m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+    blank_xy_theme +  
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name="")
 
 plot_mod11
 ```
 
-## 12. Model: NDVIas  function of GCC
+
+```{r}
+plot11 = ggplot(data = field_gcc_ndvi11, aes(x = woody_biomass_g_m, y = mean_ndvi_5m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod11), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+
+plot11
+```
+
+### 12. Model: NDVI Biomass 10m
 ```{r}
 mod12 = glm(mean_ndvi_10m ~ woody_biomass_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
-### Residuals with DHARMa
+#### Residuals with DHARMa
 ```{r, include=FALSE}
 mod12.res = simulateResiduals(fittedModel = mod12, n = 500)
 mod12.res$scaledResiduals
@@ -896,7 +1096,7 @@ plotSimulatedResiduals(simulationOutput = mod12.res)
 testDispersion(mod12.res)
 ```
 
-### Sumamry
+#### Sumamry
 
 ```{r}
 summary(mod12)
@@ -906,7 +1106,7 @@ summary(mod12)
 data.frame(summary(lsmeans(mod12, ~ woody_biomass_g_m), type = "response"))
 ```
 
-### Data for graph
+#### Data for graph
 ```{r}
 preddat_mod12 = data.frame(woody_biomass_g_m = field_gcc_ndvi$woody_biomass_g_m)
 
@@ -922,33 +1122,43 @@ field_gcc_ndvi12 = mutate(field_gcc_ndvi, pred_mod12 = pred_mod12$fit,
                lcl_mod12 = LL_mod12)
 ```
 
-### Graph 
+#### Graph 
 
-```{r fig.height=3, fig.width=3}
+```{r}
 plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = woody_biomass_g_m, y = mean_ndvi_10m)) + 
     geom_point(size = 2) +  
     geom_line(aes(y = pred_mod12), linetype = 1, size = 2) + 
     geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI  (10m)") +
-    xlab("Biomass")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+  
+    blank_xy_theme +  
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "")
 
 plot_mod12
 ```
 
+```{r}
+plot12 = ggplot(data = field_gcc_ndvi12, aes(x = woody_biomass_g_m, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+    geom_line(aes(y = pred_mod12), linetype = 1, size = 2) + 
+    geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
+    geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
+    geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1))
+
+plot12
+```
 
 
 ```{r}
 compareGLM(mod7, mod8, mod9, mod10, mod11, mod12)
 ```
 
+
 # Manuscript Figures 
-
-
-
+## GCC only
 ```{r fig.height=7, fig.width=6}
 
 grid_biomass_gcc = cowplot::plot_grid(plot_mod1, plot_mod2, plot_mod3, plot_mod4, plot_mod5, plot_mod6,   labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
@@ -959,7 +1169,7 @@ grid_biomass_gcc
 ggsave("../figures/2020-05-20_Biomass-woody-gcc.jpeg", plot = grid_biomass_gcc, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
-
+## NDVI Only
 ```{r fig.height=7, fig.width=6}
 
 grid_biomass_ndvi = cowplot::plot_grid(plot_mod7, plot_mod8, plot_mod9, plot_mod10, plot_mod11, plot_mod12, labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
@@ -971,12 +1181,72 @@ grid_biomass_ndvi
 ggsave("../figures/2020-05-20_Biomass-woody-ndvi.jpeg", plot = grid_biomass_ndvi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
+## GCC and NDVI
 ```{r fig.height=7, fig.width=6}
 
-grid_biomass = cowplot::plot_grid(plot_mod1, plot_mod7, plot_mod2, plot_mod8, plot_mod3, plot_mod9, plot_mod4, plot_mod10, plot_mod5, plot_mod11, plot_mod6, plot_mod12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", ncol= 2) 
+grid_biomass = cowplot::plot_grid(plot_mod1, plot_mod7, plot_mod2, plot_mod8, plot_mod3, plot_mod9, plot_mod4, plot_mod10, plot_mod5, plot_mod11, plot_mod6, plot_mod12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", rel_heights = c(0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9), ncol= 2) 
 grid_biomass
 
 ```
+## GCC & NDVI 3 columns
+```{r fig.height=7, fig.width=6}
+
+cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", rel_heights = c(0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9), ncol= 3) + 
+  theme(plot.margin = margin(0, 0, 0, 7))
+
+
+```
+
+
+```{r fig.height=7, fig.width=6}
+
+cowplot::plot_grid(plot_mod1, plot_mod2, plot_mod3, plot_mod4, plot_mod5, plot_mod6, plot_mod7, plot_mod8, plot_mod9, plot_mod10, plot_mod11, plot_mod12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", rel_heights = c(0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9), ncol= 3) +
+  
+   draw_label("0", x = 0.057, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+  draw_label("5", x = 0.145, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+draw_label("10", x = 0.23, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10)+
+draw_label("15", x = 0.32, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+  
+  draw_label("0", x = 0.39, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+  draw_label("5", x = 0.48, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+draw_label("10", x = 0.56, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10)+
+draw_label("15", x = 0.65, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+  
+  draw_label("0", x = 0.725, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+  draw_label("5", x = 0.81, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
+draw_label("10", x = 0.90, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10)+
+draw_label("15", x = 0.98, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10)
+
+
+```
+
+
+```{r}
+ggdraw(xlim = c(0, 6), ylim = c(0, 7)) +
+    draw_plot(plot_mod1, x = 0, y = 4.9, width = 2, height = 2) +
+    draw_plot(plot_mod2, x = 2.0, y = 4.9, width =1.9, height = 2) + 
+  draw_plot(plot_mod3, x = 4.0, y = 4.9, width = 2, height = 2) +
+    draw_plot(plot_mod4, x = 0, y = 2.9, width = 2, height = 2) +
+  
+  draw_label("A", x = 0.1, y = 6.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("B", x = 2.1, y = 6.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("C", x = 4.1, y = 6.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+    draw_label("D", x = 0.1, y = 5.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("E", x = 2.1, y = 5.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("F", x = 4.1, y = 5.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+    draw_label("G", x = 0.1, y = 3.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("H", x = 2.1, y = 3.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("I", x = 4.1, y = 3.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+    draw_label("J", x = 0.1, y = 1.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("K", x = 2.1, y = 1.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) +
+   draw_label("L", x = 4.1, y = 1.8, fontfamily = "sans", fontface = "bold", color = "black", size = 14) 
+
+
+
+  
+
+```
+
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-05-20_Biomass-gcc.jpeg", plot = , width = 6, height = 7, units = c("in"), dpi=600 )
