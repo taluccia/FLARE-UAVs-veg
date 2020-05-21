@@ -186,6 +186,7 @@ Summarise tree info to plot
 
 ### Biomass
 
+Biomass in  grams ber squared meter
 Equation: M=ax^b	[x=BD or DBH]
 
 Genus    |	latin	  | BD 	      |   a	  |    b
@@ -197,7 +198,8 @@ Genus    |	latin	  |  	 DBH    |   a	  |    b
 ---------|----------|-----------|-------|---------			
 Larch	   |          |	0.08-29.3	| 179.2	|  2.01
 
-
+For biomass in grams of carbon follow
+"Tree biomass was converted to C mass using a C concentration of 46 % for foliage (live trees only), 47 % for stemwood/bark and snag, and 48 % for branches (Alexander et al., 2012)."
 
 Add coefficients for biomass calculation
 ```{r}
@@ -218,7 +220,8 @@ tree_biomass
 ```{r}
 tree_total_biomass = tree_biomass %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(tree_total_biomass = sum(tree_biomass)) 
+    summarise(tree_total_biomass = sum(tree_biomass)) %>% 
+  mutate(tree_total_biomass_C = tree_total_biomass*.46)
 tree_total_biomass  
 ```
 
@@ -363,6 +366,7 @@ Summarise tree info to plot
 
 ### Biomass
 
+Biomass as grams per square meter calculated as
 Equation: M=ax^b	[x=BD or DBH]
 
 Genus    |	latin	  | BD 	      |   a	  |    b
@@ -371,7 +375,8 @@ Alder    |	alnus   |	0.18-9.52 |	23.7  |	 2.68
 birch    |	betual  |	0.09-2.53	| 28.1	|  2.97
 willow   |	salix	  | 0.10-6.30	| 23.53 |	 2.83
 
-
+For biomass as grams of carbon per square meter
+"We converted live understory biomass values to C pools by multiplying biomass by 48 % C content  (webb et al. 2017)."
 
 Add coefficients for biomass calculation
 ```{r}
@@ -396,7 +401,8 @@ Calculate total shrub biomass per plot
 ```{r}
 shrub_total_biomass = shrub_biomass %>%
     group_by(ID, site, transect, plot) %>%
-    summarise(shrub_total_biomass = sum(shrub_biomass)) 
+    summarise(shrub_total_biomass = sum(shrub_biomass)) %>%
+  mutate(shrub_total_biomass_C = shrub_total_biomass*.48)
 shrub_total_biomass  
 ```
 
@@ -528,7 +534,12 @@ field_data = field_data %>%
   mutate(tree_biomass_g_m = tree_total_biomass/tree_plot_area) %>% 
   mutate(shrub_biomass_g_m = shrub_total_biomass/shrub_plot_area) %>% 
   mutate(woody_biomass_g_m = tree_biomass_g_m + shrub_biomass_g_m) %>%
-  dplyr::select(ID,transect_ID,  site:woody_biomass_g_m)
+
+  mutate(woody_total_biomass_C = (tree_total_biomass_C + shrub_total_biomass_C)) %>% 
+  mutate(tree_biomass_C_g_m = tree_total_biomass_C/tree_plot_area) %>% 
+  mutate(shrub_biomass_C_g_m = shrub_total_biomass_C/shrub_plot_area) %>% 
+  mutate(woody_biomass_C_g_m = tree_biomass_C_g_m + shrub_biomass_C_g_m) %>%
+  dplyr::select(ID,transect_ID,  site:woody_biomass_C_g_m)
   
   
 
