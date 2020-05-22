@@ -109,10 +109,10 @@ comp_theme = theme_bw() + theme(legend.position = "none") +
 
 reg_theme = theme_bw() + theme(legend.position = "none") +
   theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
+  theme(axis.title.x = element_text(size = 10, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 10, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 9, color = "black"),
+        axis.text.y = element_text(size = 9, color = "black"),
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black"))
 
@@ -191,7 +191,7 @@ plot_mod1 = ggplot(data = field_gcc1, aes(x = tree_biomass_C_g_m, y = mean_gcc_2
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
     
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 plot_mod1
 ```
@@ -258,7 +258,7 @@ plot_mod2 = ggplot(data = field_gcc2, aes(x = tree_biomass_C_g_m, y = mean_gcc_5
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
     
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (50cm)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod2
@@ -325,7 +325,7 @@ plot_mod3 = ggplot(data = field_gcc3, aes(x = tree_biomass_C_g_m, y = mean_gcc_1
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
     
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (1m)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 plot_mod3
 ```
@@ -390,7 +390,7 @@ plot_mod4 = ggplot(data = field_gcc4, aes(x = tree_biomass_C_g_m, y = mean_gcc_3
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (3m)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod4
@@ -457,7 +457,7 @@ plot_mod5 = ggplot(data = field_gcc5, aes(x =tree_biomass_C_g_m, y = mean_gcc_5m
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
     
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (5m)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod5
@@ -525,7 +525,7 @@ plot_mod6 = ggplot(data = field_gcc6, aes(x = tree_biomass_C_g_m, y = mean_gcc_1
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
     
     scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (10m)")+
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod6
@@ -595,7 +595,7 @@ plot_mod7 = ggplot(data = field_gcc_ndvi7, aes(x = tree_biomass_C_g_m, y = mean_
     geom_line(aes(y= lcl_mod7), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod7), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (25cm)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod7
@@ -662,7 +662,7 @@ plot_mod8 = ggplot(data = field_gcc_ndvi8, aes(x = tree_biomass_C_g_m, y = mean_
     geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI 50cm)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod8
@@ -728,7 +728,7 @@ plot_mod9 = ggplot(data = field_gcc_ndvi9, aes(x = tree_biomass_C_g_m, y = mean_
     geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod9), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (1m)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod9
@@ -794,7 +794,7 @@ plot_mod10 = ggplot(data = field_gcc_ndvi10, aes(x = tree_biomass_C_g_m, y = mea
     geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod10), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (3m)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod10
@@ -860,7 +860,7 @@ plot_mod11 = ggplot(data = field_gcc_ndvi11, aes(x = tree_biomass_C_g_m, y = mea
     geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (5m)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod11
@@ -923,7 +923,7 @@ plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = tree_biomass_C_g_m, y = mea
     geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
     scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (10m)") +
-    xlab("Biomass")  +
+    labs(x=expression(Tree~biomass~(g~C~m^-2)))   +
     reg_theme 
 
 plot_mod12
@@ -970,5 +970,5 @@ fig1
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-21_Biomass-shrub-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-21_Biomass-Tree-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
