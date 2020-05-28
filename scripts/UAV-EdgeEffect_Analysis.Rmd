@@ -23,6 +23,7 @@ library(cowplot)
 library(lme4)
 library(lsmeans)
 library(DHARMa)
+
 ```
 
 
@@ -148,12 +149,18 @@ testDispersion(mod7.res)
 ```{r}
 summary(mod7)
 ```
+```{r}
+mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
+mod7_df = mod7_df %>% mutate(model="mod7") %>% mutate(response = "GCC") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
+```
 
 ### Data for graph
 
 ```{r}
 (mod7_graph = data.frame(summary(lsmeans(mod7, pairwise ~ burn_unburn),type = "response")))
 ```
+
+
 
 ```{r}
 levels(mod7_graph$lsmeans.burn_unburn)[levels(mod7_graph$lsmeans.burn_unburn)=="burned"] = "Burned"
@@ -220,15 +227,27 @@ plotSimulatedResiduals(simulationOutput = mod8.res)
 testDispersion(mod8.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod8)
+```
+
+#### Summary Dataframe
+```{r}
+mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
+mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
+mod8_df
 ```
 
 ### Data for graph
 
 ```{r}
 (mod8_graph = data.frame(summary(lsmeans(mod8, pairwise ~ burn_unburn),type = "response")))
+```
+```{r}
+mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
+mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
+mod8_df
 ```
 
 ```{r}
@@ -415,14 +434,41 @@ plotSimulatedResiduals(simulationOutput = mod11.res)
 testDispersion(mod11.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod11)
 ```
+```{r}
+coef(mod11)
+coefficients(mod11)
+```
+```{r}
+df <- tibble::rownames_to_column(df, "VALUE")
+```
+
+#### Summary Dataframe
 
 ```{r}
-(mod11_sum = data.frame(summary(lsmeans(mod11, ~ plot_dis),type = "response")))
+data.frame(summary(mod11)$coefficients[,], confint(mod11))
 ```
+```{r}
+mod11_df = data.frame(summary(mod11)$coefficients[,], confint(mod11))
+mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
+mod11_df2
+```
+
+
+```{r}
+mod11_df = data.frame(summary(mod11)$coefficients[,], confint(mod11))
+mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
+mod11_df3 = mod11_df2 %>% 
+  mutate(model = "mod11") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod11_df3
+```
+
 
 ### Predicted data for for graph
 ```{r}
@@ -482,14 +528,25 @@ plotSimulatedResiduals(simulationOutput = mod12.res)
 testDispersion(mod12.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod12)
 ```
 
+#### Summary Dataframe
+
 ```{r}
-(mod12_sum = data.frame(summary(lsmeans(mod12, ~ plot_dis),type = "response")))
+mod12_df = data.frame(summary(mod12)$coefficients[,], confint(mod12))
+mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
+mod12_df3 = mod12_df2 %>% 
+  mutate(model = "mod12") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod12_df3
 ```
+
+
 
 ```{r}
 preddat_mod12 = data.frame(plot_dis = field_gcc_ndvi$plot_dis)
@@ -524,6 +581,22 @@ plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = plot_dis, y = mean_ndvi_10m
 plot_mod12
 ```
 
+# Summary output Combine
+## Burned-Unburned
+
+```{r}
+burn_unburn_sum = rbind(mod7_df, mod8_df)
+write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summary.csv', row.names = F)
+
+```
+
+```{r}
+edge_sum = rbind(mod11_df3, mod12_df3)
+write.csv(edge_sum, '../outputs/model_summary/2020-05-27_distance-edge-summary.csv', row.names = F)
+
+```
+
+
 # Manuscript figures
 
 ## Part 2: Post-fire
@@ -540,6 +613,19 @@ grid_plot_burn
 ggsave("../figures/2020-05-20_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
 
+## Burn and unburned only
+```{r fig.height=3, fig.width=6}
+
+grid_plot_burn_un = cowplot::plot_grid(plot_mod7, plot_mod8, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_plot_burn_un
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-27_burn-unburn-only.jpeg", plot = grid_plot_burn_un, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
+
 ### Boxplots burn/unburn
 ```{r fig.height=6, fig.width=6}
 
@@ -551,6 +637,19 @@ grid_boxplot_burn
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-05-20_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
+
+### Boxplots burn/unburn
+```{r fig.height=3, fig.width=6}
+
+grid_boxplot_burn_un = cowplot::plot_grid(boxplot_mod7, boxplot_mod8, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
+grid_boxplot_burn_un
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-27_BOX-burn-unburn-only.jpeg", plot = grid_boxplot_burn_un, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
 ### Distance from unburned edge
 
 ```{r fig.height=3, fig.width=6}
