@@ -150,9 +150,16 @@ testDispersion(mod7.res)
 summary(mod7)
 ```
 #### Summary Data Frame
+
 ```{r}
 mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
-mod7_df = mod7_df %>% mutate(model="mod7") %>% mutate(response = "GCC") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
+mod7_df 
+mod7_df1 = mod7_df %>% 
+  mutate(model="mod7") %>% 
+  mutate(response = "GCC") %>% 
+  rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
+  select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
+mod7_df1
 ```
 
 ### Data for graph
@@ -236,8 +243,13 @@ summary(mod8)
 #### Summary Dataframe
 ```{r}
 mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
-mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
 mod8_df
+mod8_df1 = mod8_df %>% 
+  mutate(model="mod8") %>% 
+  mutate(response = "NDVI") %>% 
+  rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
+  select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
+mod8_df1
 ```
 
 ### Data for graph
@@ -568,7 +580,7 @@ plot_mod12
 ## Burned-Unburned
 
 ```{r}
-burn_unburn_sum = rbind(mod7_df, mod8_df)
+burn_unburn_sum = rbind(mod7_df1, mod8_df1)
 write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summary.csv', row.names = F)
 
 ```
