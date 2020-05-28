@@ -166,23 +166,16 @@ with(summary(mod1), 1 - (deviance/null.deviance))
 #### Summary Dataframe
 
 ```{r}
-mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1))
+mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1), deviance(mod1), summary(mod1)$null.deviance, extractAIC(mod1))
+mod1_df
 mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
 mod1_df3 = mod1_df2 %>% 
   mutate(model = "mod1") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% select(model:response, coefficent:AIC)
 mod1_df3
 ```
 
-```{r}
-lsmeans(mod1, ~ mean_gcc_25cm)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod1, ~ mean_gcc_25cm), type = "response"))
-```
 
 ### Data for graph
 ```{r}
@@ -251,17 +244,14 @@ with(summary(mod2), 1 - deviance/null.deviance)
 #### Summary Dataframe
 
 ```{r}
-mod2_df = data.frame(summary(mod2)$coefficients[,], confint(mod2))
+mod2_df = data.frame(summary(mod2)$coefficients[,], confint(mod2), deviance(mod2), summary(mod2)$null.deviance, extractAIC(mod2))
+mod2_df
 mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
 mod2_df3 = mod2_df2 %>% 
   mutate(model = "mod2") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% select(model:response, coefficent:AIC)
 mod2_df3
-```
-```{r}
-data.frame(summary(lsmeans(mod2, ~ mean_gcc_50cm), type = "response"))
 ```
 
 ### Data for graph
@@ -327,15 +317,14 @@ summary(mod3)
 with(summary(mod3), 1 - deviance/null.deviance)
 ```
 #### Summary Dataframe
-
 ```{r}
-mod3_df = data.frame(summary(mod3)$coefficients[,], confint(mod3))
+mod3_df = data.frame(summary(mod3)$coefficients[,], confint(mod3), deviance(mod3), summary(mod3)$null.deviance, extractAIC(mod3))
+mod3_df
 mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
 mod3_df3 = mod3_df2 %>% 
   mutate(model = "mod3") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% select(model:response, coefficent:AIC)
 mod3_df3
 ```
 
@@ -410,19 +399,16 @@ with(summary(mod4), 1 - deviance/null.deviance)
 #### Summary Dataframe
 
 ```{r}
-mod4_df = data.frame(summary(mod4)$coefficients[,], confint(mod4))
+mod4_df = data.frame(summary(mod4)$coefficients[,], confint(mod4), deviance(mod4), summary(mod4)$null.deviance, extractAIC(mod4))
+mod4_df
 mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
 mod4_df3 = mod4_df2 %>% 
   mutate(model = "mod4") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% select(model:response, coefficent:AIC)
 mod4_df3
 ```
 
-```{r}
-data.frame(summary(lsmeans(mod4, ~ mean_gcc_3m), type = "response"))
-```
 
 ### Data for graph
 ```{r}
@@ -491,19 +477,16 @@ with(summary(mod5), 1 - deviance/null.deviance)
 #### Summary Dataframe
 
 ```{r}
-mod5_df = data.frame(summary(mod5)$coefficients[,], confint(mod5))
+mod5_df = data.frame(summary(mod5)$coefficients[,], confint(mod5), deviance(mod5), summary(mod5)$null.deviance, extractAIC(mod5))
+mod5_df
 mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
 mod5_df3 = mod5_df2 %>% 
-  mutate(model = "mod1") %>% 
+  mutate(model = "mod5") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% select(model:response, coefficent:AIC)
 mod5_df3
 ```
 
-```{r}
-data.frame(summary(lsmeans(mod5, ~ mean_gcc_5m), type = "response"))
-```
 
 ### Data for graph
 ```{r}
@@ -570,21 +553,21 @@ summary(mod6)
 with(summary(mod6), 1 - deviance/null.deviance)
 ```
 #### Summary Dataframe
+```{r}
+summary(mod6)$null.deviance
+```
 
 ```{r}
-mod6_df = data.frame(summary(mod6)$coefficients[,], confint(mod6))
+mod6_df = data.frame(summary(mod6)$coefficients[,], confint(mod6), deviance(mod6), summary(mod6)$null.deviance, extractAIC(mod6))
+mod6_df
 mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
 mod6_df3 = mod6_df2 %>% 
   mutate(model = "mod6") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
-  select(model:response, coefficent:ucl)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% select(model:response, coefficent:AIC)
 mod6_df3
 ```
 
-```{r}
-data.frame(summary(lsmeans(mod6, ~ mean_gcc_10m), type = "response"))
-```
 
 ### Data for graph
 ```{r}
