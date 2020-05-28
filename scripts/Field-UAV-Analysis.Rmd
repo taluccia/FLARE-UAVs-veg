@@ -150,22 +150,24 @@ plotSimulatedResiduals(simulationOutput = mod13.res)
 testDispersion(mod13.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod13)
 ```
+##### Summary Dataframe
+
+```{r}
+mod13_df = data.frame(summary(mod13)$coefficients[,], confint(mod13), deviance(mod13), summary(mod13)$null.deviance, extractAIC(mod13))
+mod13_df
+mod13_df2 = tibble::rownames_to_column(mod13_df, "coefficent")
+mod13_df3 = mod13_df2 %>% 
+  mutate(model = "mod13") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod13., null_deviance= summary.mod13..null.deviance, AIC = extractAIC.mod13.) %>% select(model:response, coefficent:AIC)
+mod13_df3
+```
 
 #### Data for graph
-```{r}
-lsmeans(mod13, ~ prop_live)
-
-```
-
-```{r}
-(mod13_graph = data.frame(summary(lsmeans(mod13, ~ prop_live), type = "response")))
-```
-
-
 
 ```{r}
 preddat13 = data.frame(prop_live = field_gcc$prop_live)
@@ -227,18 +229,25 @@ plotSimulatedResiduals(simulationOutput = mod14.res)
 testDispersion(mod14.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod14)
 ```
 
-#### Data for graph
+##### Summary Dataframe
 
 ```{r}
-(mod14_graph = data.frame(summary(lsmeans(mod14, ~ tree_total_ba),type = "response")))
+mod14_df = data.frame(summary(mod14)$coefficients[,], confint(mod14), deviance(mod14), summary(mod14)$null.deviance, extractAIC(mod14))
+mod14_df
+mod14_df2 = tibble::rownames_to_column(mod14_df, "coefficent")
+mod14_df3 = mod14_df2 %>% 
+  mutate(model = "mod14") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod14., null_deviance= summary.mod14..null.deviance, AIC = extractAIC.mod14.) %>% select(model:response, coefficent:AIC)
+mod14_df3
 ```
 
-
+#### Data for graph
 
 ```{r}
 preddat_mod14 = data.frame(tree_total_ba = field_gcc$tree_total_ba)
@@ -293,17 +302,25 @@ plotSimulatedResiduals(simulationOutput = mod15.res)
 testDispersion(mod15.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod15)
 ```
 
-#### Data for graph
+##### Summary Dataframe
 
 ```{r}
-(mod15_graph = data.frame(summary(lsmeans(mod15, ~ shrub_total_ba),type = "response")))
+mod15_df = data.frame(summary(mod15)$coefficients[,], confint(mod15), deviance(mod15), summary(mod15)$null.deviance, extractAIC(mod15))
+mod15_df
+mod15_df2 = tibble::rownames_to_column(mod15_df, "coefficent")
+mod15_df3 = mod15_df2 %>% 
+  mutate(model = "mod15") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod15., null_deviance= summary.mod15..null.deviance, AIC = extractAIC.mod15.) %>% select(model:response, coefficent:AIC)
+mod15_df3
 ```
 
+#### Data for graph
 
 ```{r}
 preddat_mod15 = data.frame(shrub_total_ba = field_gcc$shrub_total_ba)
@@ -363,17 +380,24 @@ plotSimulatedResiduals(simulationOutput = mod16.res)
 testDispersion(mod16.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod16)
 ```
-
-#### Data for graph
+##### Summary Dataframe
 
 ```{r}
-(mod16_graph = data.frame(summary(lsmeans(mod16, ~ tree_total_ba),type = "response")))
+mod16_df = data.frame(summary(mod16)$coefficients[,], confint(mod16), deviance(mod16), summary(mod16)$null.deviance, extractAIC(mod16))
+mod16_df
+mod16_df2 = tibble::rownames_to_column(mod16_df, "coefficent")
+mod16_df3 = mod16_df2 %>% 
+  mutate(model = "mod16") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod16., null_deviance= summary.mod16..null.deviance, AIC = extractAIC.mod16.) %>% select(model:response, coefficent:AIC)
+mod16_df3
 ```
 
+#### Data for graph
 
 ```{r}
 preddat_mod16 = data.frame(tree_total_ba = field_gcc_ndvi$tree_total_ba)
@@ -428,16 +452,25 @@ plotSimulatedResiduals(simulationOutput = mod17.res)
 testDispersion(mod17.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod17)
 ```
 
-#### Data for graph
+##### Summary Dataframe
 
 ```{r}
-(mod17_graph = data.frame(summary(lsmeans(mod17, ~ shrub_total_ba),type = "response")))
+mod17_df = data.frame(summary(mod17)$coefficients[,], confint(mod17), deviance(mod17), summary(mod17)$null.deviance, extractAIC(mod17))
+mod17_df
+mod17_df2 = tibble::rownames_to_column(mod17_df, "coefficent")
+mod17_df3 = mod17_df2 %>% 
+  mutate(model = "mod17") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod17., null_deviance= summary.mod17..null.deviance, AIC = extractAIC.mod17.) %>% select(model:response, coefficent:AIC)
+mod17_df3
 ```
+#### Data for graph
+
 
 ```{r}
 preddat_mod17 = data.frame(shrub_total_ba = field_gcc_ndvi$shrub_total_ba)
@@ -492,24 +525,25 @@ plotSimulatedResiduals(simulationOutput = mod18.res)
 testDispersion(mod18.res)
 ```
 
-#### Sumamry
+#### Summary
 ```{r}
 summary(mod18)
 ```
 
+##### Summary Dataframe
+
+```{r}
+mod18_df = data.frame(summary(mod18)$coefficients[,], confint(mod18), deviance(mod18), summary(mod18)$null.deviance, extractAIC(mod18))
+mod18_df
+mod18_df2 = tibble::rownames_to_column(mod18_df, "coefficent")
+mod18_df3 = mod18_df2 %>% 
+  mutate(model = "mod18") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod18., null_deviance= summary.mod18..null.deviance, AIC = extractAIC.mod18.) %>% select(model:response, coefficent:AIC)
+mod18_df3
+```
+
 #### Data for graph
-
-```{r}
-(mod18_graph = data.frame(summary(lsmeans(mod18, ~ prop_live), type = "response")))
-```
-
-```{r}
-
-names(mod18_graph)[5:6] = c("lcl", "ucl")
-mod18_graph1 = data.frame(mod18_graph)
-mod18_graph1
-
-```
 
 ```{r}
 preddat18 = data.frame(prop_live = field_gcc_ndvi$prop_live)
@@ -545,6 +579,21 @@ plot_mod18
 
 
 
+# Combine Summary output 
+
+```{r}
+model_sum1 = rbind(mod13_df3, mod14_df3)
+model_sum2 = rbind(mod15_df3, mod16_df3)
+model_sum3 = rbind(mod17_df3, mod18_df3)
+model_sum4 = rbind(model_sum1, model_sum2)
+model_sum5 = rbind(model_sum4, model_sum3)
+model_sum5
+```
+
+```{r}
+write.csv(model_sum5, '../outputs/model_summary/2020-05-27_vegetation-cover-gcc-ndvi.csv', row.names = F)
+
+```
 
 
 # Manuscript Figures 
