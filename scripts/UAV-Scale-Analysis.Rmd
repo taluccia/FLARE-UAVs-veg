@@ -148,13 +148,36 @@ plotSimulatedResiduals(simulationOutput = mod1.res)
 testDispersion(mod1.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod1)
 ```
 
+
+```{r}
+coef(mod1)
+
+```
+
 ```{r}
 with(summary(mod1), 1 - (deviance/null.deviance))
+```
+
+#### Summary Dataframe
+
+```{r}
+mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1))
+mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
+mod1_df3 = mod1_df2 %>% 
+  mutate(model = "mod1") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod1_df3
+```
+
+```{r}
+lsmeans(mod1, ~ mean_gcc_25cm)
 ```
 
 ```{r}
@@ -217,7 +240,7 @@ plotSimulatedResiduals(simulationOutput = mod2.res)
 testDispersion(mod2.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod2)
 ```
@@ -225,7 +248,18 @@ summary(mod2)
 ```{r}
 with(summary(mod2), 1 - deviance/null.deviance)
 ```
+#### Summary Dataframe
 
+```{r}
+mod2_df = data.frame(summary(mod2)$coefficients[,], confint(mod2))
+mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
+mod2_df3 = mod2_df2 %>% 
+  mutate(model = "mod2") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod2_df3
+```
 ```{r}
 data.frame(summary(lsmeans(mod2, ~ mean_gcc_50cm), type = "response"))
 ```
@@ -284,7 +318,7 @@ plotSimulatedResiduals(simulationOutput = mod3.res)
 testDispersion(mod3.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod3)
 ```
@@ -292,6 +326,19 @@ summary(mod3)
 ```{r}
 with(summary(mod3), 1 - deviance/null.deviance)
 ```
+#### Summary Dataframe
+
+```{r}
+mod3_df = data.frame(summary(mod3)$coefficients[,], confint(mod3))
+mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
+mod3_df3 = mod3_df2 %>% 
+  mutate(model = "mod3") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod3_df3
+```
+
 
 ```{r}
 data.frame(summary(lsmeans(mod3, ~ mean_gcc_1m), type = "response"))
@@ -351,13 +398,26 @@ plotSimulatedResiduals(simulationOutput = mod4.res)
 testDispersion(mod4.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod4)
 ```
 
 ```{r}
 with(summary(mod4), 1 - deviance/null.deviance)
+```
+
+#### Summary Dataframe
+
+```{r}
+mod4_df = data.frame(summary(mod4)$coefficients[,], confint(mod4))
+mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
+mod4_df3 = mod4_df2 %>% 
+  mutate(model = "mod4") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod4_df3
 ```
 
 ```{r}
@@ -420,13 +480,25 @@ plotSimulatedResiduals(simulationOutput = mod5.res)
 testDispersion(mod5.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod5)
 ```
 
 ```{r}
 with(summary(mod5), 1 - deviance/null.deviance)
+```
+#### Summary Dataframe
+
+```{r}
+mod5_df = data.frame(summary(mod5)$coefficients[,], confint(mod5))
+mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
+mod5_df3 = mod5_df2 %>% 
+  mutate(model = "mod1") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod5_df3
 ```
 
 ```{r}
@@ -489,13 +561,25 @@ plotSimulatedResiduals(simulationOutput = mod6.res)
 testDispersion(mod6.res)
 ```
 
-### Sumamry
+### Summary
 ```{r}
 summary(mod6)
 ```
 
 ```{r}
 with(summary(mod6), 1 - deviance/null.deviance)
+```
+#### Summary Dataframe
+
+```{r}
+mod6_df = data.frame(summary(mod6)$coefficients[,], confint(mod6))
+mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
+mod6_df3 = mod6_df2 %>% 
+  mutate(model = "mod6") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>%
+  select(model:response, coefficent:ucl)
+mod6_df3
 ```
 
 ```{r}
@@ -536,6 +620,22 @@ plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_1
 
 plot_mod6
 ```
+# Combine Summary output 
+
+```{r}
+model_sum1 = rbind(mod1_df3, mod2_df3)
+model_sum2 = rbind(mod3_df3, mod4_df3)
+model_sum3 = rbind(mod5_df3, mod6_df3)
+model_sum4 = rbind(model_sum1, model_sum2)
+model_sum5 = rbind(model_sum4, model_sum3)
+model_sum5
+```
+
+```{r}
+write.csv(model_sum5, '../outputs/model_summary/2020-05-27_spatial-res-gcc-ndvi.csv', row.names = F)
+
+```
+
 
 # Manuscript Figures 
 
@@ -551,3 +651,29 @@ grid_plot_vi
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-05-20_VI-gcc-ndvi.jpeg", plot = grid_plot_vi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
+
+
+```{r}
+
+x1=c(56.1, 26.8, 23.9, 46.8, 34.8, 42.1, 22.9, 55.5, 56.1, 46.9, 26.7, 33.9, 
+     37.0, 57.6, 27.2, 25.7, 37.0, 44.4, 44.7, 67.2, 48.7, 20.4, 45.2, 22.4, 23.2, 
+     39.9, 51.3, 24.1, 56.3, 58.9, 62.2, 37.7, 36.0, 63.9, 62.5, 44.1, 46.9, 45.4, 
+     23.7, 36.5, 56.1, 69.6, 40.3, 26.2, 67.1, 33.8, 29.9, 25.7, 40.0, 27.5)
+
+x2=c(12.29, 11.42, 13.59, 8.64, 12.77, 9.9, 13.2, 7.34, 10.67, 18.8, 9.84, 16.72, 
+     10.32, 13.67, 7.65, 9.44, 14.52, 8.24, 14.14, 17.2, 16.21, 6.01, 14.23, 15.63, 
+     10.83, 13.39, 10.5, 10.01, 13.56, 11.26, 4.8, 9.59, 11.87, 11, 12.02, 10.9, 9.5, 
+     10.63, 19.03, 16.71, 15.11, 7.22, 12.6, 15.35, 8.77, 9.81, 9.49, 15.82, 10.94, 6.53)
+
+y = c(1.54, 0.81, 1.39, 1.09, 1.3, 1.16, 0.95, 1.29, 1.35, 1.86, 1.1, 0.96,
+      1.03, 1.8, 0.7, 0.88, 1.24, 0.94, 1.41, 2.13, 1.63, 0.78, 1.55, 1.5, 0.96, 
+      1.21, 1.4, 0.66, 1.55, 1.37, 1.19, 0.88, 0.97, 1.56, 1.51, 1.09, 1.23, 1.2, 
+      1.62, 1.52, 1.64, 1.77, 0.97, 1.12, 1.48, 0.83, 1.06, 1.1, 1.21, 0.75)
+
+lm(y ~ x1 + x2)
+glm(y ~ x1 + x2, family=gaussian) 
+glm(y ~ x1 + x2, family=gaussian(link="log")) 
+nls(y ~ exp(b0+b1*x1+b2*x2), start=list(b0=-1,b1=0.01,b2=0.1))
+
+```
+
