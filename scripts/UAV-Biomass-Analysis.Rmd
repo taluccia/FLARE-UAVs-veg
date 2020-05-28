@@ -197,17 +197,21 @@ plotSimulatedResiduals(simulationOutput = mod1.res)
 testDispersion(mod1.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod1)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod1), 1 - (deviance/null.deviance))
-```
-
-```{r}
-data.frame(summary(lsmeans(mod1, ~ woody_biomass_C_g_m), type = "response"))
+mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1), deviance(mod1), summary(mod1)$null.deviance, extractAIC(mod1))
+mod1_df
+mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
+mod1_df3 = mod1_df2 %>% 
+  mutate(model = "mod1") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% select(model:response, coefficent:AIC)
+mod1_df3
 ```
 
 #### Data for graph
@@ -279,17 +283,21 @@ plotSimulatedResiduals(simulationOutput = mod2.res)
 testDispersion(mod2.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod2)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod2), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod2, ~ woody_biomass_C_g_m), type = "response"))
+mod2_df = data.frame(summary(mod2)$coefficients[,], confint(mod2), deviance(mod2), summary(mod2)$null.deviance, extractAIC(mod2))
+mod2_df
+mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
+mod2_df3 = mod2_df2 %>% 
+  mutate(model = "mod2") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% select(model:response, coefficent:AIC)
+mod2_df3
 ```
 
 #### Data for graph
@@ -373,17 +381,21 @@ plotSimulatedResiduals(simulationOutput = mod3.res)
 testDispersion(mod3.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod3)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod3), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod3, ~ woody_biomass_C_g_m), type = "response"))
+mod3_df = data.frame(summary(mod3)$coefficients[,], confint(mod3), deviance(mod3), summary(mod3)$null.deviance, extractAIC(mod3))
+mod3_df
+mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
+mod3_df3 = mod3_df2 %>% 
+  mutate(model = "mod3") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% select(model:response, coefficent:AIC)
+mod3_df3
 ```
 
 #### Data for graph
@@ -453,17 +465,21 @@ plotSimulatedResiduals(simulationOutput = mod4.res)
 testDispersion(mod4.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod4)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod4), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod4, ~ woody_biomass_C_g_m), type = "response"))
+mod4_df = data.frame(summary(mod4)$coefficients[,], confint(mod4), deviance(mod4), summary(mod4)$null.deviance, extractAIC(mod4))
+mod4_df
+mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
+mod4_df3 = mod4_df2 %>% 
+  mutate(model = "mod4") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% select(model:response, coefficent:AIC)
+mod4_df3
 ```
 
 #### Data for graph
@@ -533,17 +549,22 @@ plotSimulatedResiduals(simulationOutput = mod5.res)
 testDispersion(mod5.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod5)
 ```
 
-```{r}
-with(summary(mod5), 1 - deviance/null.deviance)
-```
+##### Summary Dataframe
 
 ```{r}
-data.frame(summary(lsmeans(mod5, ~ woody_biomass_C_g_m), type = "response"))
+mod5_df = data.frame(summary(mod5)$coefficients[,], confint(mod5), deviance(mod5), summary(mod5)$null.deviance, extractAIC(mod5))
+mod5_df
+mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
+mod5_df3 = mod5_df2 %>% 
+  mutate(model = "mod5") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% select(model:response, coefficent:AIC)
+mod5_df3
 ```
 
 #### Data for graph
@@ -613,17 +634,21 @@ plotSimulatedResiduals(simulationOutput = mod6.res)
 testDispersion(mod6.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod6)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod6), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod6, ~ woody_biomass_C_g_m), type = "response"))
+mod6_df = data.frame(summary(mod6)$coefficients[,], confint(mod6), deviance(mod6), summary(mod6)$null.deviance, extractAIC(mod6))
+mod6_df
+mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
+mod6_df3 = mod6_df2 %>% 
+  mutate(model = "mod6") %>% 
+  mutate(response = "GCC" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% select(model:response, coefficent:AIC)
+mod6_df3
 ```
 
 #### Data for graph
@@ -704,18 +729,24 @@ plotSimulatedResiduals(simulationOutput = mod7.res)
 testDispersion(mod7.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod7)
 ```
 
-```{r}
-with(summary(mod7), 1 - (deviance/null.deviance))
-```
+##### Summary Dataframe
 
 ```{r}
-data.frame(summary(lsmeans(mod7, ~ woody_biomass_C_g_m), type = "response"))
+mod7_df = data.frame(summary(mod7)$coefficients[,], confint(mod7), deviance(mod7), summary(mod7)$null.deviance, extractAIC(mod7))
+mod7_df
+mod7_df2 = tibble::rownames_to_column(mod7_df, "coefficent")
+mod7_df3 = mod7_df2 %>% 
+  mutate(model = "mod7") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod7., null_deviance= summary.mod7..null.deviance, AIC = extractAIC.mod7.) %>% select(model:response, coefficent:AIC)
+mod7_df3
 ```
+
 
 #### Data for graph
 ```{r}
@@ -786,17 +817,21 @@ plotSimulatedResiduals(simulationOutput = mod8.res)
 testDispersion(mod8.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod8)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod8), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod8, ~ woody_biomass_C_g_m), type = "response"))
+mod8_df = data.frame(summary(mod8)$coefficients[,], confint(mod8), deviance(mod8), summary(mod8)$null.deviance, extractAIC(mod8))
+mod8_df
+mod8_df2 = tibble::rownames_to_column(mod8_df, "coefficent")
+mod8_df3 = mod8_df2 %>% 
+  mutate(model = "mod8") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod8., null_deviance= summary.mod8..null.deviance, AIC = extractAIC.mod8.) %>% select(model:response, coefficent:AIC)
+mod8_df3
 ```
 
 #### Data for graph
@@ -867,17 +902,21 @@ plotSimulatedResiduals(simulationOutput = mod9.res)
 testDispersion(mod9.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod9)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod9), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod9, ~ woody_biomass_C_g_m), type = "response"))
+mod9_df = data.frame(summary(mod9)$coefficients[,], confint(mod9), deviance(mod9), summary(mod9)$null.deviance, extractAIC(mod9))
+mod9_df
+mod9_df2 = tibble::rownames_to_column(mod9_df, "coefficent")
+mod9_df3 = mod9_df2 %>% 
+  mutate(model = "mod9") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod9., null_deviance= summary.mod9..null.deviance, AIC = extractAIC.mod9.) %>% select(model:response, coefficent:AIC)
+mod9_df3
 ```
 
 #### Data for graph
@@ -954,12 +993,18 @@ testDispersion(mod10.res)
 summary(mod10)
 ```
 
-```{r}
-with(summary(mod10), 1 - deviance/null.deviance)
-```
+
+##### Summary Dataframe
 
 ```{r}
-data.frame(summary(lsmeans(mod10, ~ woody_biomass_C_g_m), type = "response"))
+mod10_df = data.frame(summary(mod10)$coefficients[,], confint(mod10), deviance(mod10), summary(mod10)$null.deviance, extractAIC(mod10))
+mod10_df
+mod10_df2 = tibble::rownames_to_column(mod10_df, "coefficent")
+mod10_df3 = mod10_df2 %>% 
+  mutate(model = "mod10") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod10., null_deviance= summary.mod10..null.deviance, AIC = extractAIC.mod10.) %>% select(model:response, coefficent:AIC)
+mod10_df3
 ```
 
 #### Data for graph
@@ -1031,17 +1076,21 @@ plotSimulatedResiduals(simulationOutput = mod11.res)
 testDispersion(mod11.res)
 ```
 
-#### Sumamry
+#### summary
 ```{r}
 summary(mod11)
 ```
+##### Summary Dataframe
 
 ```{r}
-with(summary(mod11), 1 - deviance/null.deviance)
-```
-
-```{r}
-data.frame(summary(lsmeans(mod11, ~ woody_biomass_C_g_m), type = "response"))
+mod11_df = data.frame(summary(mod11)$coefficients[,], confint(mod11), deviance(mod11), summary(mod11)$null.deviance, extractAIC(mod11))
+mod11_df
+mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
+mod11_df3 = mod11_df2 %>% 
+  mutate(model = "mod11") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% select(model:response, coefficent:AIC)
+mod11_df3
 ```
 
 #### Data for graph
@@ -1112,14 +1161,23 @@ plotSimulatedResiduals(simulationOutput = mod12.res)
 testDispersion(mod12.res)
 ```
 
-#### Sumamry
+#### summary
 
 ```{r}
 summary(mod12)
 ```
 
+##### Summary Dataframe
+
 ```{r}
-data.frame(summary(lsmeans(mod12, ~ woody_biomass_C_g_m), type = "response"))
+mod12_df = data.frame(summary(mod12)$coefficients[,], confint(mod12), deviance(mod12), summary(mod12)$null.deviance, extractAIC(mod12))
+mod12_df
+mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
+mod12_df3 = mod12_df2 %>% 
+  mutate(model = "mod12") %>% 
+  mutate(response = "NDVI" ) %>%  
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% select(model:response, coefficent:AIC)
+mod12_df3
 ```
 
 #### Data for graph
@@ -1173,6 +1231,27 @@ plot12
 compareGLM(mod7, mod8, mod9, mod10, mod11, mod12)
 ```
 
+# Combine Summary output 
+
+```{r}
+model_sum1 = rbind(mod1_df3, mod2_df3)
+model_sum2 = rbind(mod3_df3, mod4_df3)
+model_sum3 = rbind(mod5_df3, mod6_df3)
+model_sum4 = rbind(mod7_df3, mod8_df3)
+model_sum5 = rbind(mod9_df3, mod10_df3)
+model_sum6 = rbind(mod11_df3, mod12_df3)
+model_sum7 = rbind(model_sum1, model_sum2)
+model_sum8 = rbind(model_sum3, model_sum4)
+model_sum9 = rbind(model_sum5, model_sum6)
+model_sum10 = rbind(model_sum7, model_sum8)
+model_sum11 = rbind(model_sum10, model_sum9)
+model_sum11
+```
+
+```{r}
+write.csv(model_sum11, '../outputs/model_summary/2020-05-27_all-woody-biomass-gcc-ndvi.csv', row.names = F)
+
+```
 
 # Manuscript Figures 
 ## GCC only
