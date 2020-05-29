@@ -1308,6 +1308,25 @@ ggsave("../figures/2020-05-29_Biomass-all-woody-ndvi-gcc.jpeg", plot = fig1, wid
 
 ```{r fig.height=7, fig.width=6}
 
+fig2 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
+  theme(plot.margin = margin(0, 0, 0, 0)) +
+  draw_label("*", x = .30, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .30, y = .84, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .84, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .84, size = 36, fontface = "bold") 
+  
+
+fig2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-29_Biomass-all-woody-ndvi-gcc_sig.jpeg", plot = fig2, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+```{r fig.height=7, fig.width=6}
+
 cowplot::plot_grid(plot_mod1, plot_mod2, plot_mod3, plot_mod4, plot_mod5, plot_mod6, plot_mod7, plot_mod8, plot_mod9, plot_mod10, plot_mod11, plot_mod12, labels = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"), align = "hv", rel_heights = c(0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.9), ncol= 3) +
   
    draw_label("0", x = 0.057, y = 0.02, fontfamily = "sans", fontface = "plain", color = "black", size = 10) +
