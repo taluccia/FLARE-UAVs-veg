@@ -163,7 +163,7 @@ mod13_df2 = tibble::rownames_to_column(mod13_df, "coefficent")
 mod13_df3 = mod13_df2 %>% 
   mutate(model = "mod13") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod13., null_deviance= summary.mod13..null.deviance, AIC = extractAIC.mod13.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod13., null_deviance= summary.mod13..null.deviance, AIC = extractAIC.mod13.) %>% dplyr::select(model:response, coefficent:AIC)
 mod13_df3
 ```
 
@@ -243,7 +243,7 @@ mod14_df2 = tibble::rownames_to_column(mod14_df, "coefficent")
 mod14_df3 = mod14_df2 %>% 
   mutate(model = "mod14") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod14., null_deviance= summary.mod14..null.deviance, AIC = extractAIC.mod14.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod14., null_deviance= summary.mod14..null.deviance, AIC = extractAIC.mod14.) %>% dplyr::select(model:response, coefficent:AIC)
 mod14_df3
 ```
 
@@ -316,7 +316,7 @@ mod15_df2 = tibble::rownames_to_column(mod15_df, "coefficent")
 mod15_df3 = mod15_df2 %>% 
   mutate(model = "mod15") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod15., null_deviance= summary.mod15..null.deviance, AIC = extractAIC.mod15.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod15., null_deviance= summary.mod15..null.deviance, AIC = extractAIC.mod15.) %>% dplyr::select(model:response, coefficent:AIC)
 mod15_df3
 ```
 
@@ -393,7 +393,7 @@ mod16_df2 = tibble::rownames_to_column(mod16_df, "coefficent")
 mod16_df3 = mod16_df2 %>% 
   mutate(model = "mod16") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod16., null_deviance= summary.mod16..null.deviance, AIC = extractAIC.mod16.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod16., null_deviance= summary.mod16..null.deviance, AIC = extractAIC.mod16.) %>% dplyr::select(model:response, coefficent:AIC)
 mod16_df3
 ```
 
@@ -466,7 +466,7 @@ mod17_df2 = tibble::rownames_to_column(mod17_df, "coefficent")
 mod17_df3 = mod17_df2 %>% 
   mutate(model = "mod17") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod17., null_deviance= summary.mod17..null.deviance, AIC = extractAIC.mod17.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod17., null_deviance= summary.mod17..null.deviance, AIC = extractAIC.mod17.) %>% dplyr::select(model:response, coefficent:AIC)
 mod17_df3
 ```
 #### Data for graph
@@ -539,7 +539,7 @@ mod18_df2 = tibble::rownames_to_column(mod18_df, "coefficent")
 mod18_df3 = mod18_df2 %>% 
   mutate(model = "mod18") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod18., null_deviance= summary.mod18..null.deviance, AIC = extractAIC.mod18.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod18., null_deviance= summary.mod18..null.deviance, AIC = extractAIC.mod18.) %>% dplyr::select(model:response, coefficent:AIC)
 mod18_df3
 ```
 
@@ -612,3 +612,17 @@ grid_plot_veg
 ggsave("../figures/2020-05-20_vegcover-gcc-ndvi.jpeg", plot = grid_plot_veg, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
+
+```{r fig.height=7, fig.width=6}
+
+grid_plot_veg1 = cowplot::plot_grid(plot_mod13, plot_mod18, plot_mod14, plot_mod16, plot_mod15, plot_mod17,    labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) +
+  draw_label("*", x = .95, y = .76, size = 36, fontface = "bold") +
+  draw_label("*", x = .45, y = .76, size = 36, fontface = "bold") +
+  draw_label("*", x = .45, y = .10, size = 36, fontface = "bold")
+grid_plot_veg1
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-29_vegcover-gcc-ndvi_sig.jpeg", plot = grid_plot_veg1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
