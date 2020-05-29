@@ -23,6 +23,7 @@ library(cowplot)
 library(lme4)
 library(lsmeans)
 library(DHARMa)
+library(multcomp)
 
 ```
 
@@ -151,14 +152,24 @@ summary(mod7)
 ```
 #### Summary Data Frame
 
+( dcodds.prefire = data.frame(summary(lsmeans(prefirepyromod2, revpairwise ~ prefire|burncon),type = "response", infer = TRUE)$contrasts) )
+
+mutate(ucl_contrast = with(mod7, fit + 2*se.fit)
+LL_mod11 = with(pred_mod11, fit - 2*se.fit)
+
+
+
+  
 ```{r}
-mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
+mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE)))
 mod7_df 
 mod7_df1 = mod7_df %>% 
   mutate(model="mod7") %>% 
   mutate(response = "GCC") %>% 
   rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
-  select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
+  
+  
+  dplyr::select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
 mod7_df1
 ```
 
@@ -248,7 +259,7 @@ mod8_df1 = mod8_df %>%
   mutate(model="mod8") %>% 
   mutate(response = "NDVI") %>% 
   rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
-  select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
+  dplyr::select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
 mod8_df1
 ```
 
@@ -259,7 +270,7 @@ mod8_df1
 ```
 ```{r}
 mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
-mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% select(model:response, explanatory:se, lcl:contrasts.SE)
+mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% dplyr::select(model:response, explanatory:se, lcl:contrasts.SE)
 mod8_df
 ```
 
@@ -461,7 +472,7 @@ mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
 mod11_df3 = mod11_df2 %>% 
   mutate(model = "mod11") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% dplyr::select(model:response, coefficent:AIC)
 mod11_df3
 ```
 
@@ -537,7 +548,7 @@ mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
 mod12_df3 = mod12_df2 %>% 
   mutate(model = "mod12") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% dplyr::select(model:response, coefficent:AIC)
 mod12_df3
 ```
 
@@ -658,3 +669,16 @@ grid_plot_edge
 ggsave("../figures/2020-05-20_distance_edge_pts.jpeg", plot = grid_plot_edge, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
+
+```{r fig.height=3, fig.width=6}
+
+grid_plot_edge1 = cowplot::plot_grid(plot_mod11, plot_mod12, labels = c("A", "B"), align = "hv", ncol= 2) +
+  draw_label("*", x = .95, y = .87, size = 36, fontface = "bold") +
+  draw_label("*", x = .45, y = .87, size = 36, fontface = "bold") 
+grid_plot_edge1
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-29_distance_edge_pts_sig.jpeg", plot = grid_plot_edge1, width = 6, height = 3, units = c("in"), dpi=600 )
+```
