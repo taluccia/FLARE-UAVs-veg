@@ -207,10 +207,12 @@ summary(mod1)
 mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1), deviance(mod1), summary(mod1)$null.deviance, extractAIC(mod1))
 mod1_df
 mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
+mod1_df2
 mod1_df3 = mod1_df2 %>% 
   mutate(model = "mod1") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod1_df3
 ```
 
@@ -255,7 +257,7 @@ plot1 = ggplot(data = field_gcc1, aes(x = woody_biomass_C_g_m, y = mean_gcc_25cm
     geom_line(aes(y= lcl_mod1), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod1), linetype='longdash', size = 1) +
     
-  labs(x=expression(AGWB~(g~C~m^-2))) +
+  labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")
 
@@ -296,7 +298,8 @@ mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
 mod2_df3 = mod2_df2 %>% 
   mutate(model = "mod2") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod2_df3
 ```
 
@@ -339,7 +342,7 @@ plot2 = ggplot(data = field_gcc2, aes(x = woody_biomass_C_g_m, y = mean_gcc_50cm
     geom_ribbon( aes(ymin = lcl_mod2, ymax = ucl_mod2, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod2), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod2), linetype='longdash', size = 1) +
-   labs(x=expression(AGWB~(g~C~m^-2))) +
+   labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name  = "GCC (50cm)")
 
@@ -394,7 +397,8 @@ mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
 mod3_df3 = mod3_df2 %>% 
   mutate(model = "mod3") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod3_df3
 ```
 
@@ -437,7 +441,7 @@ plot3 = ggplot(data = field_gcc3, aes(x = woody_biomass_C_g_m, y = mean_gcc_1m))
     geom_ribbon( aes(ymin = lcl_mod3, ymax = ucl_mod3, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod3), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod3), linetype='longdash', size = 1) +
-   reg_theme +  labs(x=expression(AGWB~(g~C~m^-2))) +
+   reg_theme +  labs(x=expression(C~mass~(g~C~m^-2))) +
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (1m)")
 
 plot3
@@ -478,7 +482,8 @@ mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
 mod4_df3 = mod4_df2 %>% 
   mutate(model = "mod4") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod4_df3
 ```
 
@@ -521,7 +526,7 @@ plot4 = ggplot(data = field_gcc4, aes(x = woody_biomass_C_g_m, y = mean_gcc_3m))
     geom_ribbon( aes(ymin = lcl_mod4, ymax = ucl_mod4, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod4), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod4), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
    reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name="GCC (3m)")
 
@@ -563,7 +568,8 @@ mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
 mod5_df3 = mod5_df2 %>% 
   mutate(model = "mod5") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod5_df3
 ```
 
@@ -607,7 +613,7 @@ plot5 = ggplot(data = field_gcc5, aes(x =woody_biomass_C_g_m, y = mean_gcc_5m)) 
     geom_ribbon( aes(ymin = lcl_mod5, ymax = ucl_mod5, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod5), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod5), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05),  name = "GCC (5m)")
 plot5
@@ -647,7 +653,8 @@ mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
 mod6_df3 = mod6_df2 %>% 
   mutate(model = "mod6") %>% 
   mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod6_df3
 ```
 
@@ -693,7 +700,7 @@ plot6 = ggplot(data = field_gcc6, aes(x = woody_biomass_C_g_m, y = mean_gcc_10m)
     geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
-   labs(x=expression(AGWB~(g~C~m^-2))) +
+   labs(x=expression(C~mass~(g~C~m^-2))) +
   reg_theme +  
   scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (10m)")
 
@@ -743,7 +750,8 @@ mod7_df2 = tibble::rownames_to_column(mod7_df, "coefficent")
 mod7_df3 = mod7_df2 %>% 
   mutate(model = "mod7") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod7., null_deviance= summary.mod7..null.deviance, AIC = extractAIC.mod7.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod7., null_deviance= summary.mod7..null.deviance, AIC = extractAIC.mod7.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod7_df3
 ```
 
@@ -790,7 +798,7 @@ plot7 = ggplot(data = field_gcc_ndvi7, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod7, ymax = ucl_mod7, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod7), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod7), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (25cm)")
 plot7
@@ -830,7 +838,8 @@ mod8_df2 = tibble::rownames_to_column(mod8_df, "coefficent")
 mod8_df3 = mod8_df2 %>% 
   mutate(model = "mod8") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod8., null_deviance= summary.mod8..null.deviance, AIC = extractAIC.mod8.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod8., null_deviance= summary.mod8..null.deviance, AIC = extractAIC.mod8.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod8_df3
 ```
 
@@ -874,7 +883,7 @@ plot8 = ggplot(data = field_gcc_ndvi8, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod8, ymax = ucl_mod8, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod8), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod8), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (50cm)")
 
@@ -915,7 +924,8 @@ mod9_df2 = tibble::rownames_to_column(mod9_df, "coefficent")
 mod9_df3 = mod9_df2 %>% 
   mutate(model = "mod9") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod9., null_deviance= summary.mod9..null.deviance, AIC = extractAIC.mod9.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod9., null_deviance= summary.mod9..null.deviance, AIC = extractAIC.mod9.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod9_df3
 ```
 
@@ -960,7 +970,7 @@ plot9 = ggplot(data = field_gcc_ndvi9, aes(x = woody_biomass_C_g_m, y = mean_ndv
     geom_ribbon( aes(ymin = lcl_mod9, ymax = ucl_mod9, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod9), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod9), linetype='longdash', size = 1) +
-   labs(x=expression(AGWB~(g~C~m^-2))) +
+   labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (1m)")
 
@@ -1003,7 +1013,8 @@ mod10_df2 = tibble::rownames_to_column(mod10_df, "coefficent")
 mod10_df3 = mod10_df2 %>% 
   mutate(model = "mod10") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod10., null_deviance= summary.mod10..null.deviance, AIC = extractAIC.mod10.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod10., null_deviance= summary.mod10..null.deviance, AIC = extractAIC.mod10.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod10_df3
 ```
 
@@ -1048,7 +1059,7 @@ plot10 = ggplot(data = field_gcc_ndvi10, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod10, ymax = ucl_mod10, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod10), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod10), linetype='longdash', size = 1) +
-      labs(x=expression(AGWB~(g~C~m^-2))) +
+      labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme +  
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1),name = "NDVI (3m)")
 
@@ -1089,7 +1100,8 @@ mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
 mod11_df3 = mod11_df2 %>% 
   mutate(model = "mod11") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod11_df3
 ```
 
@@ -1133,7 +1145,7 @@ plot11 = ggplot(data = field_gcc_ndvi11, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme + 
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (5m)")
 
@@ -1176,7 +1188,8 @@ mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
 mod12_df3 = mod12_df2 %>% 
   mutate(model = "mod12") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% select(model:response, coefficent:AIC)
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% 
+  dplyr::select(model:response, coefficent:AIC)
 mod12_df3
 ```
 
@@ -1219,7 +1232,7 @@ plot12 = ggplot(data = field_gcc_ndvi12, aes(x = woody_biomass_C_g_m, y = mean_n
     geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
     geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
     geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
-    labs(x=expression(AGWB~(g~C~m^-2))) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
     reg_theme + 
   scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (10m)")
 
@@ -1290,7 +1303,7 @@ fig1
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-21_Biomass-all-woody-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-05-29_Biomass-all-woody-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
 ```{r fig.height=7, fig.width=6}
