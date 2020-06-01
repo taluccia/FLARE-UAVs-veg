@@ -165,7 +165,7 @@ mod7_df1
 ```
 
 ```{r}
-( mod7_contrast = data.frame(summary(lsmeans(mod7, pairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
+( mod7_contrast = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
 
 mod7_contrast1 = mod7_contrast %>%  mutate(response = "GCC")  
  
@@ -261,7 +261,7 @@ mod8_df1
 ```
 
 ```{r}
-( mod8_contrast = data.frame(summary(lsmeans(mod8, pairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
+( mod8_contrast = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
 mod8_contrast1 = mod8_contrast %>%  mutate(response = "NDVI") 
 ```
 
@@ -600,7 +600,7 @@ write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summ
 
 
 ```{r}
-burn_unburn_contrast = rbind(mod7_contrast, mod8_contrast)
+burn_unburn_contrast = rbind(mod7_contrast1, mod8_contrast1)
 write.csv(burn_unburn_contrast, '../outputs/model_summary/2020-06-01_burn-unburn-contrast.csv', row.names = F)
 
 ```
