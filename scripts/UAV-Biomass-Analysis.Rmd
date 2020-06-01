@@ -166,6 +166,11 @@ blank_y_theme = theme_bw() + theme(legend.position = "none") +
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
+```{r}
+min(field_gcc$woody_biomass_C_g_m)
+max(field_gcc$woody_biomass_C_g_m)
+```
+
 
 # Analysis: 
 ```{r}
