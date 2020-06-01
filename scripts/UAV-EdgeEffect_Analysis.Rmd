@@ -122,6 +122,14 @@ reg_theme = theme_bw() + theme(legend.position = "none") +
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
+# Summary stats
+```{r}
+field_gcc %>% group_by(burn_unburn) %>% summarise(mean=mean(mean_gcc_10m), sd=sd(mean_gcc_10m), min=min(mean_gcc_10m), max=max(mean_gcc_10m))
+```
+
+```{r}
+field_gcc_ndvi %>% group_by(burn_unburn) %>% summarise(mean=mean(mean_ndvi_10m), sd=sd(mean_ndvi_10m), min=min(mean_ndvi_10m), max=max(mean_ndvi_10m))
+```
 
 # Part 2:  Post-fire
 
