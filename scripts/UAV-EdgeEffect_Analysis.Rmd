@@ -24,6 +24,7 @@ library(lme4)
 library(lsmeans)
 library(DHARMa)
 library(multcomp)
+library(car)
 
 ```
 
@@ -159,7 +160,9 @@ testDispersion(mod7.res)
 summary(mod7)
 ```
 #### Summary Data Frame
+
 ```{r}
+
 mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE)))
 mod7_df 
 mod7_df1 = mod7_df %>% 
@@ -602,6 +605,10 @@ plot_mod12
 
 ```{r}
 burn_unburn_sum = rbind(mod7_df1, mod8_df1)
+burn_unburn_sum
+```
+
+```{r eval=FALSE, include=FALSE}
 write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summary.csv', row.names = F)
 
 ```
@@ -609,12 +616,20 @@ write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summ
 
 ```{r}
 burn_unburn_contrast = rbind(mod7_contrast1, mod8_contrast1)
+burn_unburn_contrast
+```
+
+```{r eval=FALSE, include=FALSE}
 write.csv(burn_unburn_contrast, '../outputs/model_summary/2020-06-01_burn-unburn-contrast.csv', row.names = F)
 
 ```
 
 ```{r}
 edge_sum = rbind(mod11_df3, mod12_df3)
+edge_sum
+```
+
+```{r eval=FALSE, include=FALSE}
 write.csv(edge_sum, '../outputs/model_summary/2020-05-27_distance-edge-summary.csv', row.names = F)
 
 ```
