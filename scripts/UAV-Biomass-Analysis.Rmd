@@ -1263,6 +1263,20 @@ compareGLM(mod7, mod8, mod9, mod10, mod11, mod12)
 ```
 
 # Combine Summary output 
+```{r}
+model_sum1 = rbind(mod1_df3, mod2_df3)
+model_sum2 = rbind(mod3_df3, mod4_df3)
+model_sum3 = rbind(mod5_df3, mod6_df3)
+model_sum4 = rbind(mod7_df3, mod8_df3)
+model_sum5 = rbind(mod9_df3, mod10_df3)
+model_sum6 = rbind(mod11_df3, mod12_df3)
+model_sum7 = rbind(model_sum1, model_sum2)
+model_sum8 = rbind(model_sum3, model_sum4)
+model_sum9 = rbind(model_sum5, model_sum6)
+model_sum10 = rbind(model_sum7, model_sum8)
+model_sum11 = rbind(model_sum10, model_sum9)
+model_sum11
+```
 
 
 ```{r eval=FALSE, include=FALSE}
@@ -1271,28 +1285,26 @@ write.csv(model_sum11, '../outputs/model_summary/2020-05-27_all-woody-biomass-gc
 
 ## GCC models
 ```{r}
-model_sum1 = rbind(mod1_df3, mod2_df3)
-model_sum2 = rbind(mod3_df3, mod4_df3)
-model_sum3 = rbind(mod5_df3, mod6_df3)
+gcc_sum1 = rbind(mod1_df3, mod2_df3)
+gcc_sum2 = rbind(mod3_df3, mod4_df3)
+gcc_sum3 = rbind(mod5_df3, mod6_df3)
 
-combo1 = rbind(model_sum1, model_sum2)
-combo2 = rbind(combo1, model_sum3)
+gcc_combo1 = rbind(gcc_sum1, gcc_sum2)
+gcc_combo2 = rbind(gcc_combo1, gcc_sum3)
 
-model_sum8 = rbind(model_sum3, model_sum4)
-model_sum9 = rbind(model_sum5, model_sum6)
-model_sum10 = rbind(model_sum7, model_sum8)
-model_sum11 = rbind(model_sum10, model_sum9)
-model_sum11
+gcc_combo2
+
 ```
 ## NDVI models
 
 ```{r}
-model_sum4 = rbind(mod7_df3, mod8_df3)
-model_sum5 = rbind(mod9_df3, mod10_df3)
-model_sum6 = rbind(mod11_df3, mod12_df3)
+ndvi_sum4 = rbind(mod7_df3, mod8_df3)
+ndvi_sum5 = rbind(mod9_df3, mod10_df3)
+ndvi_sum6 = rbind(mod11_df3, mod12_df3)
 
-combo_ndvi1 = rbind(model_sum4, model_sum5)
-combo_ndvi2 = rbind(combo_ndvi1, model_sum6)
+combo_ndvi1 = rbind(ndvi_sum4, ndvi_sum5)
+combo_ndvi2 = rbind(combo_ndvi1, ndvi_sum6)
+combo_ndvi2
 ```
 
 ### Save to  csv
