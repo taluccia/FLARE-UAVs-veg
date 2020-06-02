@@ -624,5 +624,5 @@ grid_plot_veg1
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-29_vegcover-gcc-ndvi_sig.jpeg", plot = grid_plot_veg1, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-06-02_vegcover-gcc-ndvi_sig.jpeg", plot = grid_plot_veg1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
