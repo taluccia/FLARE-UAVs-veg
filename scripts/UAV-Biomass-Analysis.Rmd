@@ -26,6 +26,7 @@ library(lme4)
 library(lsmeans)
 library(DHARMa)
 library(rcompanion)
+library(qpcR)
 ```
 
 
@@ -215,9 +216,10 @@ mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
 mod1_df2
 mod1_df3 = mod1_df2 %>% 
   mutate(model = "mod1") %>% 
-  mutate(response = "GCC" ) %>%  
+  mutate(response = "GCC" ) %>% 
+  mutate(rmse = RMSE(mod1)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod1_df3
 ```
 
@@ -302,9 +304,10 @@ mod2_df
 mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
 mod2_df3 = mod2_df2 %>% 
   mutate(model = "mod2") %>% 
-  mutate(response = "GCC" ) %>%  
+  mutate(response = "GCC" ) %>% 
+  mutate(rmse = RMSE(mod2)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod2_df3
 ```
 
@@ -401,9 +404,10 @@ mod3_df
 mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
 mod3_df3 = mod3_df2 %>% 
   mutate(model = "mod3") %>% 
-  mutate(response = "GCC" ) %>%  
+  mutate(response = "GCC" ) %>% 
+  mutate(rmse = RMSE(mod3)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod3_df3
 ```
 
@@ -486,9 +490,10 @@ mod4_df
 mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
 mod4_df3 = mod4_df2 %>% 
   mutate(model = "mod4") %>% 
-  mutate(response = "GCC" ) %>%  
+  mutate(response = "GCC" ) %>% 
+  mutate(rmse = RMSE(mod4)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod4_df3
 ```
 
@@ -573,8 +578,9 @@ mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
 mod5_df3 = mod5_df2 %>% 
   mutate(model = "mod5") %>% 
   mutate(response = "GCC" ) %>%  
+  mutate(rmse = RMSE(mod5)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod5_df3
 ```
 
@@ -658,8 +664,9 @@ mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
 mod6_df3 = mod6_df2 %>% 
   mutate(model = "mod6") %>% 
   mutate(response = "GCC" ) %>%  
+  mutate(rmse = RMSE(mod6)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod6_df3
 ```
 
@@ -755,8 +762,9 @@ mod7_df2 = tibble::rownames_to_column(mod7_df, "coefficent")
 mod7_df3 = mod7_df2 %>% 
   mutate(model = "mod7") %>% 
   mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(mod7)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod7., null_deviance= summary.mod7..null.deviance, AIC = extractAIC.mod7.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod7_df3
 ```
 
@@ -843,8 +851,9 @@ mod8_df2 = tibble::rownames_to_column(mod8_df, "coefficent")
 mod8_df3 = mod8_df2 %>% 
   mutate(model = "mod8") %>% 
   mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(mod8)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod8., null_deviance= summary.mod8..null.deviance, AIC = extractAIC.mod8.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod8_df3
 ```
 
@@ -929,8 +938,9 @@ mod9_df2 = tibble::rownames_to_column(mod9_df, "coefficent")
 mod9_df3 = mod9_df2 %>% 
   mutate(model = "mod9") %>% 
   mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(mod9)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod9., null_deviance= summary.mod9..null.deviance, AIC = extractAIC.mod9.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod9_df3
 ```
 
@@ -1018,8 +1028,9 @@ mod10_df2 = tibble::rownames_to_column(mod10_df, "coefficent")
 mod10_df3 = mod10_df2 %>% 
   mutate(model = "mod10") %>% 
   mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(mod10)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod10., null_deviance= summary.mod10..null.deviance, AIC = extractAIC.mod10.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod10_df3
 ```
 
@@ -1105,8 +1116,9 @@ mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
 mod11_df3 = mod11_df2 %>% 
   mutate(model = "mod11") %>% 
   mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(mod11)) %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod11_df3
 ```
 
@@ -1192,9 +1204,10 @@ mod12_df
 mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
 mod12_df3 = mod12_df2 %>% 
   mutate(model = "mod12") %>% 
-  mutate(response = "NDVI" ) %>%  
+  mutate(response = "NDVI" ) %>% 
+  mutate(rmse = RMSE(mod12)) %>% 
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% 
-  dplyr::select(model:response, coefficent:AIC)
+  dplyr::select(model:response, coefficent:rmse)
 mod12_df3
 ```
 
@@ -1251,22 +1264,39 @@ compareGLM(mod7, mod8, mod9, mod10, mod11, mod12)
 
 # Combine Summary output 
 
+
+```{r eval=FALSE, include=FALSE}
+write.csv(model_sum11, '../outputs/model_summary/2020-05-27_all-woody-biomass-gcc-ndvi.csv', row.names = F)
+```
+
+## GCC models
 ```{r}
 model_sum1 = rbind(mod1_df3, mod2_df3)
 model_sum2 = rbind(mod3_df3, mod4_df3)
 model_sum3 = rbind(mod5_df3, mod6_df3)
-model_sum4 = rbind(mod7_df3, mod8_df3)
-model_sum5 = rbind(mod9_df3, mod10_df3)
-model_sum6 = rbind(mod11_df3, mod12_df3)
-model_sum7 = rbind(model_sum1, model_sum2)
+
+combo1 = rbind(model_sum1, model_sum2)
+combo2 = rbind(combo1, model_sum3)
+
 model_sum8 = rbind(model_sum3, model_sum4)
 model_sum9 = rbind(model_sum5, model_sum6)
 model_sum10 = rbind(model_sum7, model_sum8)
 model_sum11 = rbind(model_sum10, model_sum9)
 model_sum11
 ```
+## NDVI models
 
 ```{r}
+model_sum4 = rbind(mod7_df3, mod8_df3)
+model_sum5 = rbind(mod9_df3, mod10_df3)
+model_sum6 = rbind(mod11_df3, mod12_df3)
+
+combo_ndvi1 = rbind(model_sum4, model_sum5)
+combo_ndvi2 = rbind(combo_ndvi1, model_sum6)
+```
+
+### Save to  csv
+```{r eval=FALSE, include=FALSE}
 write.csv(model_sum11, '../outputs/model_summary/2020-05-27_all-woody-biomass-gcc-ndvi.csv', row.names = F)
 
 ```
