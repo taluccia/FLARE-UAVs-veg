@@ -23,6 +23,7 @@ library(cowplot)
 library(lme4)
 library(lsmeans)
 library(DHARMa)
+library(qpcR)
 ```
 
 
@@ -159,9 +160,6 @@ coef(mod1)
 
 ```
 
-```{r}
-with(summary(mod1), 1 - (deviance/null.deviance))
-```
 
 #### Summary Dataframe
 
@@ -172,7 +170,8 @@ mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
 mod1_df3 = mod1_df2 %>% 
   mutate(model = "mod1") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% select(model:response, coefficent:AIC)
+  mutate(rmse = RMSE(mod1)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% dplyr::select(model:response, coefficent:rmse)
 mod1_df3
 ```
 
@@ -241,6 +240,12 @@ summary(mod2)
 ```{r}
 with(summary(mod2), 1 - deviance/null.deviance)
 ```
+
+
+```{r}
+RMSE(mod2)
+```
+
 #### Summary Dataframe
 
 ```{r}
@@ -249,8 +254,9 @@ mod2_df
 mod2_df2 = tibble::rownames_to_column(mod2_df, "coefficent")
 mod2_df3 = mod2_df2 %>% 
   mutate(model = "mod2") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% select(model:response, coefficent:AIC)
+  mutate(response = "NDVI" ) %>% 
+  mutate(rmse = RMSE(mod2)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod2., null_deviance= summary.mod2..null.deviance, AIC = extractAIC.mod2.) %>% dplyr::select(model:response, coefficent:rmse)
 mod2_df3
 ```
 
@@ -316,6 +322,12 @@ summary(mod3)
 ```{r}
 with(summary(mod3), 1 - deviance/null.deviance)
 ```
+
+
+```{r}
+RMSE(mod3)
+```
+
 #### Summary Dataframe
 ```{r}
 mod3_df = data.frame(summary(mod3)$coefficients[,], confint(mod3), deviance(mod3), summary(mod3)$null.deviance, extractAIC(mod3))
@@ -324,7 +336,8 @@ mod3_df2 = tibble::rownames_to_column(mod3_df, "coefficent")
 mod3_df3 = mod3_df2 %>% 
   mutate(model = "mod3") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% select(model:response, coefficent:AIC)
+  mutate(rmse = RMSE(mod3)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% dplyr::select(model:response, coefficent:rmse)
 mod3_df3
 ```
 
@@ -392,9 +405,6 @@ testDispersion(mod4.res)
 summary(mod4)
 ```
 
-```{r}
-with(summary(mod4), 1 - deviance/null.deviance)
-```
 
 #### Summary Dataframe
 
@@ -405,7 +415,8 @@ mod4_df2 = tibble::rownames_to_column(mod4_df, "coefficent")
 mod4_df3 = mod4_df2 %>% 
   mutate(model = "mod4") %>% 
   mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% select(model:response, coefficent:AIC)
+  mutate(rmse = RMSE(mod4)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% dplyr::select(model:response, coefficent:rmse)
 mod4_df3
 ```
 
@@ -471,9 +482,7 @@ testDispersion(mod5.res)
 summary(mod5)
 ```
 
-```{r}
-with(summary(mod5), 1 - deviance/null.deviance)
-```
+
 #### Summary Dataframe
 
 ```{r}
@@ -482,8 +491,9 @@ mod5_df
 mod5_df2 = tibble::rownames_to_column(mod5_df, "coefficent")
 mod5_df3 = mod5_df2 %>% 
   mutate(model = "mod5") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% select(model:response, coefficent:AIC)
+  mutate(response = "NDVI" ) %>% 
+  mutate(rmse = RMSE(mod5)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod5., null_deviance= summary.mod5..null.deviance, AIC = extractAIC.mod5.) %>% dplyr::select(model:response, coefficent:rmse)
 mod5_df3
 ```
 
@@ -552,10 +562,12 @@ summary(mod6)
 ```{r}
 with(summary(mod6), 1 - deviance/null.deviance)
 ```
+
+
+
+
 #### Summary Dataframe
-```{r}
-summary(mod6)$null.deviance
-```
+
 
 ```{r}
 mod6_df = data.frame(summary(mod6)$coefficients[,], confint(mod6), deviance(mod6), summary(mod6)$null.deviance, extractAIC(mod6))
@@ -563,8 +575,11 @@ mod6_df
 mod6_df2 = tibble::rownames_to_column(mod6_df, "coefficent")
 mod6_df3 = mod6_df2 %>% 
   mutate(model = "mod6") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% select(model:response, coefficent:AIC)
+  mutate(response = "NDVI" ) %>% 
+  mutate(rmse = RMSE(mod6)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod6., null_deviance= summary.mod6..null.deviance, AIC = extractAIC.mod6.) %>% 
+  dplyr::select(model:response, coefficent:rmse)
+
 mod6_df3
 ```
 
@@ -614,8 +629,21 @@ model_sum5 = rbind(model_sum4, model_sum3)
 model_sum5
 ```
 
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+
 ```{r}
-write.csv(model_sum5, '../outputs/model_summary/2020-05-27_spatial-res-gcc-ndvi.csv', row.names = F)
+model_sum5_data = model_sum5 %>%
+  mutate(min_AIC = -99.82819) %>%
+  mutate(dAIC = round((AIC-min_AIC), 6))
+
+model_sum5_data
+```
+
+
+
+```{r}
+write.csv(model_sum5_data, '../outputs/model_summary/2020-06-02_spatial-res-gcc-ndvi.csv', row.names = F)
 
 ```
 
