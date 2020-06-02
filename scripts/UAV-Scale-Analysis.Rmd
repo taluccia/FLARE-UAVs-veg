@@ -619,25 +619,6 @@ plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_1
 plot_mod6
 ```
 
-labs(x=expression(C~mass~(g~C~m^-2))) +
-
-```{r fig.height=3, fig.width=3}
-plot_mod6_aic = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_10m)) + 
-    geom_point(size = 2) +  
-    geom_line(aes(y = pred_mod6), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod6, ymax = ucl_mod6, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod6), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod6), linetype='longdash', size = 1) +
-    
-    ylab("Mean NDVI  (10m)") +
-    xlab("Mean GCC (10m)")  +
-  geom_text(x=0.4, y=0.6, label=(expression(Delta~AIC))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
-  scale_y_continuous(breaks = seq(0.6, 0.8, by = .05), labels = c("0.6", "", "0.7", "", "0.8"))
-
-plot_mod6_aic
-```
 
 # Combine Summary output 
 
