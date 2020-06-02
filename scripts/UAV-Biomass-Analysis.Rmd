@@ -1295,6 +1295,17 @@ gcc_combo2 = rbind(gcc_combo1, gcc_sum3)
 gcc_combo2
 
 ```
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+
+```{r}
+gcc_combo2_data = gcc_combo2 %>%
+  mutate(min_AIC = -239.7317) %>%
+  mutate(dAIC = round((AIC-min_AIC), 4))
+
+gcc_combo2_data
+```
+
 ## NDVI models
 
 ```{r}
@@ -1306,11 +1317,27 @@ combo_ndvi1 = rbind(ndvi_sum4, ndvi_sum5)
 combo_ndvi2 = rbind(combo_ndvi1, ndvi_sum6)
 combo_ndvi2
 ```
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+```{r}
+ndvi_combo2_data = combo_ndvi2 %>%
+  mutate(min_AIC = -89.28772) %>%
+  mutate(dAIC = round((AIC-min_AIC), 4))
+
+ndvi_combo2_data
+```
+
+### Combine NDVI and GCC
+
+```{r}
+gcc_ndvi_data = rbind(gcc_combo2_data ,ndvi_combo2_data)
+gcc_ndvi_data
+```
+
 
 ### Save to  csv
 ```{r eval=FALSE, include=FALSE}
-write.csv(model_sum11, '../outputs/model_summary/2020-05-27_all-woody-biomass-gcc-ndvi.csv', row.names = F)
-
+write.csv(gcc_ndvi_data, '../outputs/model_summary/2020-06-02_all-woody-biomass-gcc-ndvi-dAIC.csv', row.names = F)
 ```
 
 # Manuscript Figures 
