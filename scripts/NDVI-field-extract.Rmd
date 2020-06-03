@@ -45,6 +45,15 @@ cn_tr2_f17_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR2_FL017B_index_ndvi.
 cn_tr1_f20_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR1_FL020M_index_ndvi.tif")
 ```
 
+view raster meta data
+```{r}
+alnus_tr1_f08_ndvi
+bp_tr2_f13_ndvi
+cn_tr2_f17_ndvi
+cn_tr1_f20_ndvi
+```
+
+
 # NDVI rasters (R calculated)
 
 ```{r}
@@ -53,6 +62,12 @@ cn_tr2_f17 = raster("../data/ndvi/cn_f17_NDVI.tif")
 cn_tr1_f20 = raster("../data/ndvi/cn_f20_NDVI.tif")
 ```
 
+view raster meta data
+```{r}
+alnus_tr1_f08
+cn_tr2_f17
+cn_tr1_f20
+```
 
 # Field point data
 
