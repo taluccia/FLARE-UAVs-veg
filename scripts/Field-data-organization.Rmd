@@ -54,7 +54,8 @@ Larch	   |          |	0.08-29.3	| 179.2	|  2.01
 
 # Pakcages
 ```{r}
-library(tidyverse)
+library(tidyr)
+library(dplyr)
 library(stringr)
 ```
 
@@ -549,4 +550,24 @@ field_data
 
 ```{r eval=FALSE, include=FALSE}
 write.csv(field_data,"../outputs/field_subset/field_data_all.csv", row.names = FALSE)
+```
+
+# Field data summary ranges
+
+Prop Live
+```{r}
+min(field_data$prop_live)
+max(field_data$prop_live)
+```
+
+Tree Basal Area
+```{r}
+min(field_data$tree_total_ba)
+max(field_data$tree_total_ba)
+```
+
+shrub Basal Area
+```{r}
+min(field_data$shrub_total_ba)
+max(field_data$shrub_total_ba)
 ```
