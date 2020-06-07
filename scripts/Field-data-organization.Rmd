@@ -212,19 +212,36 @@ tree_info_drones = tree_info_drones %>% dplyr::mutate(a = ifelse(basal_breast ==
 tree_info_drones
 ```
 
-Calculate biomass
+Filter for live trees only
+
+```{r}
+tree_info_drones_live = tree_info_drones %>% filter(live=="live")
+tree_info_drones_live
+```
+
+
+Calculate all tree biomass
 ```{r}
 tree_biomass = tree_info_drones %>% dplyr::mutate(tree_biomass = a*diameter_cm^b)
 tree_biomass
 ```
 
+Biomass by plot
+
 ```{r}
 tree_total_biomass = tree_biomass %>%
-    group_by(ID, site, transect, plot) %>%
+    group_by(ID, site, transect, plot, live) %>%
     summarise(tree_total_biomass = sum(tree_biomass)) %>% 
-  mutate(tree_total_biomass_C = tree_total_biomass*.46)
+    spread(live, tree_total_biomass, fill = 0) %>%
+    rename(live_tree_biomass = live, dead_tree_biomass = dead) %>%
+    mutate(tree_total_biomass = live_tree_biomass + dead_tree_biomass) %>%
+    mutate(tree_total_biomass_C = tree_total_biomass*.46) %>%
+    mutate(live_tree_biomass_c = live_tree_biomass*.46) %>%
+    mutate(dead_tree_biomass_c = dead_tree_biomass*.46)
+    
 tree_total_biomass  
 ```
+
 
 ### Basal Area
 
@@ -233,16 +250,22 @@ basal area for each tree
 tree_ba = dplyr::mutate(tree_info_drones, tree_ba = ((diameter_cm^2)*0.00007854))
 ```
 
-Total basal area per plot
+
+
+Basal area per plot
 
 ```{r}
 tree_total_ba = tree_ba %>%
-    group_by(ID, site, transect, plot) %>%
-    summarise(tree_total_ba = sum(tree_ba)) 
+    group_by(ID, site, transect, plot, live) %>%
+    summarise(tree_total_ba = sum(tree_ba)) %>%
+    spread(live, tree_total_ba, fill = 0) %>%
+    mutate(tree_total_ba = live + dead) %>%
+    rename(live_tree_ba = live, dead_tree_ba = dead)
 tree_total_ba  
 ```
 
-### Tree plot
+
+### Tree plot area
 ```{r}
 tree_plot = tree_info_drones %>%
     group_by(ID, site, transect, plot) %>%
