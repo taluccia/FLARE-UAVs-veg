@@ -553,17 +553,28 @@ field_data
 field_data = field_data %>% 
   mutate(transect_ID =  paste(site, burn_year, transect, sep = '_'))  %>%
   mutate(prop_live = (live/stems*100)) %>%
-  mutate(woody_biomass = (tree_total_biomass + shrub_total_biomass)) %>% 
   mutate(woody_ba = (tree_total_ba + shrub_total_ba)) %>% 
+  
   mutate(tree_biomass_g_m = tree_total_biomass/tree_plot_area) %>% 
+  mutate(tree_biomass_C_g_m = tree_total_biomass_C/tree_plot_area) %>%
+  
+  mutate(live_tree_biomass_g_m = live_tree_biomass/tree_plot_area) %>% 
+  mutate(live_tree_biomass_C_g_m = live_tree_biomass_c/tree_plot_area) %>%
+  
   mutate(shrub_biomass_g_m = shrub_total_biomass/shrub_plot_area) %>% 
-  mutate(woody_biomass_g_m = tree_biomass_g_m + shrub_biomass_g_m) %>%
-
-  mutate(woody_total_biomass_C = (tree_total_biomass_C + shrub_total_biomass_C)) %>% 
-  mutate(tree_biomass_C_g_m = tree_total_biomass_C/tree_plot_area) %>% 
   mutate(shrub_biomass_C_g_m = shrub_total_biomass_C/shrub_plot_area) %>% 
+  
+  mutate(woody_biomass = (tree_total_biomass + shrub_total_biomass)) %>% 
+  mutate(woody_biomass_g_m = tree_biomass_g_m + shrub_biomass_g_m) %>%
+  mutate(woody_total_biomass_C = (tree_total_biomass_C + shrub_total_biomass_C)) %>%
   mutate(woody_biomass_C_g_m = tree_biomass_C_g_m + shrub_biomass_C_g_m) %>%
-  dplyr::select(ID,transect_ID,  site:woody_biomass_C_g_m)
+ 
+  
+  
+  mutate(live_woody_biomass = (live_tree_biomass + shrub_total_biomass)) %>% 
+  mutate(live_woody_biomass_g_m = live_tree_biomass_g_m + shrub_biomass_g_m) %>%
+  mutate(live_woodytotal_biomass_C = (live_tree_biomass_c + shrub_total_biomass_C)) %>%
+  mutate(live_woody_biomass_C_g_m = live_tree_biomass_C_g_m + shrub_biomass_C_g_m) 
   
   
 
