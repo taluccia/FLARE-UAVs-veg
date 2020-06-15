@@ -555,6 +555,21 @@ field_data = field_data %>%
   mutate(prop_live = (live/stems*100)) %>%
   mutate(woody_ba = (tree_total_ba + shrub_total_ba)) %>% 
   
+  mutate(shrub_ba_m2 =  shrub_total_ba/shrub_plot_area) %>%
+  mutate(shrub_ba_314m2 = shrub_ba_m2*314 ) %>%
+  mutate(shrub_ba_ha = shrub_ba_m2*10000) %>%
+  mutate(shrub_ba_100m2 = shrub_ba_m2*100) %>%
+  
+  mutate(live_tree_ba_m2 =  live_tree_ba/tree_plot_area) %>%
+  mutate(live_tree_ba_314m2 = live_tree_ba_m2*314 ) %>%
+  mutate(live_tree_ba_ha = live_tree_ba_m2*10000) %>%
+  mutate(live_tree_ba_100m2 = live_tree_ba_m2*100) %>%
+  
+  mutate(dead_tree_ba_m2 =  dead_tree_ba/tree_plot_area) %>%
+  mutate(dead_tree_ba_314m2 = dead_tree_ba_m2*314 ) %>%
+  mutate(dead_tree_ba_ha = dead_tree_ba_m2*10000) %>%
+  mutate(dead_tree_ba_100m2 = dead_tree_ba_m2*100) %>%
+  
   mutate(tree_biomass_g_m = tree_total_biomass/tree_plot_area) %>% 
   mutate(tree_biomass_C_g_m = tree_total_biomass_C/tree_plot_area) %>%
   
