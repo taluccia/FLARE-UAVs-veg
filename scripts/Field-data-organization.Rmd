@@ -615,8 +615,24 @@ min(field_data$tree_total_ba)
 max(field_data$tree_total_ba)
 ```
 
+```{r}
+min(field_data$live_tree_ba)
+max(field_data$live_tree_ba)
+```
+
+```{r}
+min(field_data$live_tree_ba_ha)
+max(field_data$live_tree_ba_ha)
+```
+
 shrub Basal Area
 ```{r}
 min(field_data$shrub_total_ba)
 max(field_data$shrub_total_ba)
+```
+
+shrub Basal Area
+```{r}
+min(field_data$shrub_ba_ha)
+max(field_data$shrub_ba_ha)
 ```
