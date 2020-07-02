@@ -1385,15 +1385,15 @@ ggsave("../figures/2020-06-07_Biomass-live-woody-ndvi-gcc.jpeg", plot = fig1, wi
 
 fig2 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
   theme(plot.margin = margin(0, 0, 0, 0)) +
-  draw_label("*", x = .30, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .30, y = .84, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .835, size = 36, fontface = "bold") +
   draw_label("*", x = .63, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .63, y = .84, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .835, size = 36, fontface = "bold") +
   draw_label("*", x = .96, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .96, y = .84, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .835, size = 36, fontface = "bold") +
   
-  draw_label("*", x = .30, y = .34, size = 36, fontface = "bold") +
-  draw_label("*", x = .30, y = .09, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .34, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .09, size = 36, fontface = "bold") +
   draw_label("*", x = .63, y = .34, size = 36, fontface = "bold") +
   draw_label("*", x = .63, y = .09, size = 36, fontface = "bold") +
   draw_label("*", x = .96, y = .34, size = 36, fontface = "bold") +
@@ -1404,6 +1404,6 @@ fig2
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-06-07_Biomass-live-woody-ndvi-gcc_sig.jpeg", plot = fig2, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-07-02_Biomass-live-woody-ndvi-gcc_sig.jpeg", plot = fig2, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
