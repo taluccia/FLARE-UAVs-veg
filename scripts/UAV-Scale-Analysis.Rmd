@@ -133,6 +133,10 @@ Assess spatial scale...
 mod1 = glm(mean_ndvi_25cm ~ mean_gcc_25cm, data = field_gcc_ndvi, family = gaussian)
 ```
 
+```{r}
+fit1 = lm(mean_ndvi_25cm ~ mean_gcc_25cm, data = field_gcc_ndvi)
+```
+
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod1.res = simulateResiduals(fittedModel = mod1, n = 500)
@@ -156,6 +160,12 @@ summary(mod1)
 
 
 ```{r}
+summary(fit1)
+AIC(fit1)
+RMSE(fit1)
+```
+
+```{r}
 coef(mod1)
 
 ```
@@ -174,7 +184,18 @@ mod1_df3 = mod1_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% dplyr::select(model:response, coefficent:rmse)
 mod1_df3
 ```
-
+#### lm summary
+```{r}
+fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1), extractAIC(fit1))
+fit1_df
+fit1_df2 = tibble::rownames_to_column(fit1_df, "coefficent")
+fit1_df3 = fit1_df2 %>% 
+  mutate(model = "fit1") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit1)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit1.) %>% dplyr::select(model:response, coefficent:rmse)
+fit1_df3
+```
 
 ### Data for graph
 ```{r}
@@ -193,6 +214,18 @@ field_gcc_ndvi1 = mutate(field_gcc_ndvi, pred_mod1 = pred_mod1$fit,
 ```
 
 ### Graph 
+```{r}
+p1 = ggplot(data = field_gcc_ndvi, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm)) + 
+    geom_point(size = 2) +  
+    stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI (25cm)") +
+    xlab("Mean GCC (25cm)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks = c(0.32, 0.37, 0.42, 0.47))
+p1
+```
+
 
 ```{r fig.height=3, fig.width=3}
 plot_mod1 = ggplot(data = field_gcc_ndvi1, aes(x = mean_gcc_25cm, y = mean_ndvi_25cm)) + 
@@ -214,6 +247,10 @@ plot_mod1
 ## 2. Model: NDVIas  function of GCC
 ```{r}
 mod2 = glm(mean_ndvi_50cm ~ mean_gcc_50cm, data = field_gcc_ndvi, family = gaussian)
+```
+
+```{r}
+fit2 = lm(mean_ndvi_50cm ~ mean_gcc_50cm, data = field_gcc_ndvi)
 ```
 
 ### Residuals with DHARMa
@@ -260,6 +297,20 @@ mod2_df3 = mod2_df2 %>%
 mod2_df3
 ```
 
+#### lm summary
+```{r}
+fit2_df = data.frame(summary(fit2)$coefficients[,], confint(fit2), extractAIC(fit2))
+fit2_df
+fit2_df2 = tibble::rownames_to_column(fit2_df, "coefficent")
+fit2_df3 = fit2_df2 %>% 
+  mutate(model = "fit2") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit2)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit2.) %>% dplyr::select(model:response, coefficent:rmse)
+fit2_df3
+```
+
+
 ### Data for graph
 ```{r}
 preddat_mod2 = data.frame(mean_gcc_50cm = field_gcc_ndvi$mean_gcc_50cm)
@@ -277,6 +328,19 @@ field_gcc_ndvi2 = mutate(field_gcc_ndvi, pred_mod2 = pred_mod2$fit,
 ```
 
 ### Graph 
+```{r}
+p2 = ggplot(data = field_gcc_ndvi, aes(x = mean_gcc_50cm, y = mean_ndvi_50cm)) + 
+    geom_point(size = 2) + 
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI (50cm)") +
+    xlab("Mean GCC (50cm)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+
+p2
+
+```
+
 
 ```{r fig.height=3, fig.width=3}
 plot_mod2 = ggplot(data = field_gcc_ndvi2, aes(x = mean_gcc_50cm, y = mean_ndvi_50cm)) + 
@@ -298,6 +362,9 @@ plot_mod2
 mod3 = glm(mean_ndvi_1m ~ mean_gcc_1m, data = field_gcc_ndvi, family = gaussian)
 ```
 
+```{r}
+fit3 = lm(mean_ndvi_1m ~ mean_gcc_1m, data = field_gcc_ndvi)
+```
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod3.res = simulateResiduals(fittedModel = mod3, n = 500)
@@ -340,7 +407,18 @@ mod3_df3 = mod3_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod3., null_deviance= summary.mod3..null.deviance, AIC = extractAIC.mod3.) %>% dplyr::select(model:response, coefficent:rmse)
 mod3_df3
 ```
-
+#### lm summary
+```{r}
+fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
+fit3_df
+fit3_df2 = tibble::rownames_to_column(fit3_df, "coefficent")
+fit3_df3 = fit3_df2 %>% 
+  mutate(model = "fit3") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit3)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
+fit3_df3
+```
 
 ```{r}
 data.frame(summary(lsmeans(mod3, ~ mean_gcc_1m), type = "response"))
@@ -364,6 +442,19 @@ field_gcc_ndvi3 = mutate(field_gcc_ndvi, pred_mod3 = pred_mod3$fit,
 
 ### Graph 
 
+```{r}
+p3 = ggplot(data = field_gcc_ndvi, aes(x = mean_gcc_1m, y = mean_ndvi_1m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI (1m)") +
+    xlab("Mean GCC  (1m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
+p3
+
+```
+
+
 ```{r fig.height=3, fig.width=3}
 plot_mod3 = ggplot(data = field_gcc_ndvi3, aes(x = mean_gcc_1m, y = mean_ndvi_1m)) + 
     geom_point(size = 2) +  
@@ -384,6 +475,9 @@ plot_mod3
 mod4 = glm(mean_ndvi_3m ~ mean_gcc_3m, data = field_gcc_ndvi, family = gaussian)
 ```
 
+```{r}
+fit4 = lm(mean_ndvi_3m ~ mean_gcc_3m, data = field_gcc_ndvi)
+```
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod4.res = simulateResiduals(fittedModel = mod4, n = 500)
@@ -419,7 +513,18 @@ mod4_df3 = mod4_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod4., null_deviance= summary.mod4..null.deviance, AIC = extractAIC.mod4.) %>% dplyr::select(model:response, coefficent:rmse)
 mod4_df3
 ```
-
+#### lm summary
+```{r}
+fit4_df = data.frame(summary(fit4)$coefficients[,], confint(fit4), extractAIC(fit4))
+fit4_df
+fit4_df2 = tibble::rownames_to_column(fit4_df, "coefficent")
+fit4_df3 = fit4_df2 %>% 
+  mutate(model = "fit4") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit4)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit4.) %>% dplyr::select(model:response, coefficent:rmse)
+fit4_df3
+```
 
 ### Data for graph
 ```{r}
@@ -438,6 +543,20 @@ field_gcc_ndvi4 = mutate(field_gcc_ndvi, pred_mod4 = pred_mod4$fit,
 ```
 
 ### Graph 
+
+```{r}
+p4 = ggplot(data = field_gcc_ndvi4, aes(x = mean_gcc_3m, y = mean_ndvi_3m)) + 
+    geom_point(size = 2) +  
+  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI (3m)") +
+    xlab("Mean GCC (3m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+  scale_y_continuous(breaks = seq(0.6, 0.9, by = .05), labels = c("0.6", "", "0.7", "", "0.8", "", ""))
+p4
+```
 
 ```{r fig.height=3, fig.width=3}
 plot_mod4 = ggplot(data = field_gcc_ndvi4, aes(x = mean_gcc_3m, y = mean_ndvi_3m)) + 
@@ -461,6 +580,9 @@ plot_mod4
 mod5 = glm(mean_ndvi_5m ~ mean_gcc_5m, data = field_gcc_ndvi, family = gaussian)
 ```
 
+```{r}
+fit5 = lm(mean_ndvi_5m ~ mean_gcc_5m, data = field_gcc_ndvi)
+```
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod5.res = simulateResiduals(fittedModel = mod5, n = 500)
@@ -497,6 +619,18 @@ mod5_df3 = mod5_df2 %>%
 mod5_df3
 ```
 
+#### lm summary
+```{r}
+fit5_df = data.frame(summary(fit5)$coefficients[,], confint(fit5), extractAIC(fit5))
+fit5_df
+fit5_df2 = tibble::rownames_to_column(fit5_df, "coefficent")
+fit5_df3 = fit5_df2 %>% 
+  mutate(model = "fit5") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit5)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit5.) %>% dplyr::select(model:response, coefficent:rmse)
+fit5_df3
+```
 
 ### Data for graph
 ```{r}
@@ -515,6 +649,21 @@ field_gcc_ndvi5 = mutate(field_gcc_ndvi, pred_mod5 = pred_mod5$fit,
 ```
 
 ### Graph 
+
+```{r}
+p5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI (5m)") +
+    xlab("Mean GCC (5m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+    scale_y_continuous(breaks = seq(0.6, 0.8, by = .05), labels = c("0.6", "", "0.7", "", "0.8"))
+
+p5
+  
+```
 
 ```{r fig.height=3, fig.width=3}
 plot_mod5 = ggplot(data = field_gcc_ndvi5, aes(x = mean_gcc_5m, y = mean_ndvi_5m)) + 
@@ -538,6 +687,9 @@ plot_mod5
 mod6 = glm(mean_ndvi_10m ~ mean_gcc_10m, data = field_gcc_ndvi, family = gaussian)
 ```
 
+```{r}
+fit6 = lm(mean_ndvi_10m ~ mean_gcc_10m, data = field_gcc_ndvi)
+```
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod6.res = simulateResiduals(fittedModel = mod6, n = 500)
@@ -582,7 +734,18 @@ mod6_df3 = mod6_df2 %>%
 
 mod6_df3
 ```
-
+#### lm summary
+```{r}
+fit6_df = data.frame(summary(fit6)$coefficients[,], confint(fit6), extractAIC(fit6))
+fit6_df
+fit6_df2 = tibble::rownames_to_column(fit6_df, "coefficent")
+fit6_df3 = fit6_df2 %>% 
+  mutate(model = "fit6") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit6)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit6.) %>% dplyr::select(model:response, coefficent:rmse)
+fit6_df3
+```
 
 ### Data for graph
 ```{r}
@@ -601,6 +764,21 @@ field_gcc_ndvi6 = mutate(field_gcc_ndvi, pred_mod6 = pred_mod6$fit,
 ```
 
 ### Graph 
+
+```{r}
+p6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+   stat_smooth(method = "lm", col = "black", alpha = .25) +
+    
+    ylab("Mean NDVI  (10m)") +
+    xlab("Mean GCC (10m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks=c(0.35, 0.38, 0.41)) +
+  scale_y_continuous(breaks = seq(0.6, 0.8, by = .05), labels = c("0.6", "", "0.7", "", "0.8"))
+
+p6
+ 
+```
 
 ```{r fig.height=3, fig.width=3}
 plot_mod6 = ggplot(data = field_gcc_ndvi6, aes(x = mean_gcc_10m, y = mean_ndvi_10m)) + 
@@ -658,6 +836,36 @@ write.csv(model_sum5_data, '../outputs/model_summary/2020-06-02_spatial-res-gcc-
 ```
 
 
+```{r}
+model_fit1 = rbind(fit1_df3, fit2_df3)
+model_fit2 = rbind(fit3_df3, fit4_df3)
+model_fit3 = rbind(fit5_df3, fit6_df3)
+model_fit4 = rbind(model_fit1, model_fit2)
+model_fit5 = rbind(model_fit4, model_fit3)
+model_fit5
+```
+
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+
+```{r}
+model_fit5_data = model_fit5 %>%
+  mutate(min_AIC = -197.9457) %>%
+  mutate(dAIC = round((AIC-min_AIC), 4))
+
+model_fit5_data
+```
+
+Model  |  Delta_AIC   |
+-------|--------------|
+1      |    50.72     |
+2      |    45.10     |
+3      |    32.48     |
+4      |     8.45     |
+5      |     5.31     |
+6      |     0.00     |
+
+
 # Manuscript Figures 
 
 ## Part 1: Vegetation Indices
@@ -673,7 +881,12 @@ grid_plot_vi
 ggsave("../figures/2020-05-20_VI-gcc-ndvi.jpeg", plot = grid_plot_vi, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
+```{r fig.height=7, fig.width=6}
 
+grid_plot_lm = cowplot::plot_grid(p1, p2, p3, p4, p5, p6,   labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
+grid_plot_lm
+
+```
 expression(beta)
 labs(x=expression(C~mass~(g~C~m^-2))) +
 
@@ -708,4 +921,33 @@ grid_plot1
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-06-02_VI-gcc-ndvi-dAIC.jpeg", plot = grid_plot1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+### lm models
+
+Model  |  Delta_AIC   |
+-------|--------------|
+1      |    50.72     |
+2      |    45.10     |
+3      |    32.48     |
+4      |     8.45     |
+5      |     5.31     |
+6      |     0.00     |
+
+```{r fig.height=7, fig.width=6}
+
+grid_lm = cowplot::plot_grid(p1, p2, p3, p4, p5, p6,   labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2)  +
+  draw_label(label = (expression(paste(Delta~AIC, "=50.7"))), x = .4, y = .77, size = 12, fontface = "plain") + #model 1 
+  draw_label(label = (expression(paste(Delta~AIC, "=45.1"))), x = .9, y = .77, size = 12, fontface = "plain") + # model2
+draw_label(label = (expression(paste(Delta~AIC, "=32.5"))), x = .4, y = .45, size = 12, fontface = "plain") + #model 3 
+  draw_label(label = (expression(paste(Delta~AIC, "=8.5"))), x = .9, y = .45, size = 12, fontface = "plain") + # model4
+
+draw_label(label = (expression(paste(Delta~AIC, "=5.3"))), x = .4, y = .1, size = 12, fontface = "plain") + #model 5 
+  draw_label(label = (expression(paste(Delta~AIC, "=0.0"))), x = .9, y = .1, size = 12, fontface = "plain")  # model6
+
+grid_lm
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-07-12_lm-gcc-ndvi-dAIC.jpeg", plot = grid_lm, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
