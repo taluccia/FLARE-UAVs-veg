@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 # Overview
 
-Analysis of field data (proportion of live trees, shrub basal area, and tree basal area)
+Analysis of field data (shrub basal area, and tree basal area)
 
 # Pakcages
 ```{r}
