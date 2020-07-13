@@ -356,7 +356,7 @@ mod16 = glm(mean_ndvi_10m ~ live_tree_ba_ha, data = field_gcc_ndvi, family = gau
 ```
 
 ```{r}
-fit3 = glm(mean_ndvi_10m ~ live_tree_ba_ha, data = field_gcc_ndvi)
+fit3 = lm(mean_ndvi_10m ~ live_tree_ba_ha, data = field_gcc_ndvi)
 ```
 
 #### Residuals with DHARMa
@@ -457,7 +457,7 @@ mod17 = glm(mean_ndvi_10m ~ shrub_ba_ha, data = field_gcc_ndvi, family = gaussia
 ```
 
 ```{r}
-fit4 = glm(mean_ndvi_10m ~ shrub_ba_ha, data = field_gcc_ndvi)
+fit4 = lm(mean_ndvi_10m ~ shrub_ba_ha, data = field_gcc_ndvi)
 ```
 
 #### Residuals with DHARMa
