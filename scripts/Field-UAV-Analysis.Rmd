@@ -222,6 +222,10 @@ mean_gcc_tree ~ live_tree_ba
 mod14 = glm(mean_gcc_10m ~ live_tree_ba_ha, data = field_gcc, family = gaussian)
 ```
 
+```{r}
+fit14 = lm(mean_gcc_10m ~ live_tree_ba_ha, data = field_gcc)
+```
+
 #### Residuals with DHARMa
 ```{r, include=FALSE}
 mod14.res = simulateResiduals(fittedModel = mod14, n = 500)
@@ -241,6 +245,9 @@ testDispersion(mod14.res)
 #### Summary
 ```{r}
 summary(mod14)
+```
+```{r}
+summary(fit14)
 ```
 
 ##### Summary Dataframe
