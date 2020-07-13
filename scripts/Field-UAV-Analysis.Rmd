@@ -132,88 +132,6 @@ head(field_gcc_ndvi)
 
 ## GCC Models
 
-### 13. Model: GCC proportion of Live trees
-
-```{r}
-mod13 = glm(mean_gcc_tree ~ prop_live, data = field_gcc, family = gaussian)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod13.res = simulateResiduals(fittedModel = mod13, n = 500)
-mod13.res$scaledResiduals
-mod13.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod13.res)
-```
-
-```{r}
-testDispersion(mod13.res)
-```
-
-#### Summary
-```{r}
-summary(mod13)
-```
-##### Summary Dataframe
-
-```{r}
-mod13_df = data.frame(summary(mod13)$coefficients[,], confint(mod13), deviance(mod13), summary(mod13)$null.deviance, extractAIC(mod13))
-mod13_df
-mod13_df2 = tibble::rownames_to_column(mod13_df, "coefficent")
-mod13_df3 = mod13_df2 %>% 
-  mutate(model = "mod13_prop_live") %>% 
-  mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod13., null_deviance= summary.mod13..null.deviance, AIC = extractAIC.mod13.) %>% dplyr::select(model:response, coefficent:AIC)
-mod13_df3
-```
-
-#### Data for graph
-
-```{r}
-preddat13 = data.frame(prop_live = field_gcc$prop_live)
-
-head(preddat13)
-
-pred13 = predict(mod13, newdata = preddat13, se.fit = TRUE)
-
-UL13 = with(pred13, fit + 2*se.fit)
-LL13 = with(pred13, fit - 2*se.fit)
-
-field_gcc13 = mutate(field_gcc, pred13 = pred13$fit, 
-               ucl_mod13 = UL13, 
-               lcl_mod13 = LL13)
-```
-
-```{r}
-min(field_gcc$mean_gcc_tree)
-mean(field_gcc$tree_area_sampled_m2)
-min(field_gcc$tree_area_sampled_m2)
-median(field_gcc$tree_area_sampled_m2)
-max(field_gcc$tree_area_sampled_m2)
-```
-#### Graph
-
-```{r}
-plot_mod13 = ggplot(data = field_gcc13, aes(x = prop_live, y = mean_gcc_tree)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred13), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod13, ymax = ucl_mod13, color = NULL), alpha = .15) +
-    geom_line(aes(y= lcl_mod13), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod13), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    xlab("Percent of live trees")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod13
-```
-
-```{r}
-head(field_gcc)
-```
 
 ### 14. Model: GCC tree  BA
 live_tree_ba_ha
@@ -262,7 +180,18 @@ mod14_df3 = mod14_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod14., null_deviance= summary.mod14..null.deviance, AIC = extractAIC.mod14.) %>% dplyr::select(model:response, coefficent:AIC)
 mod14_df3
 ```
-
+#### lm summary
+```{r}
+fit14_df = data.frame(summary(fit14)$coefficients[,], confint(fit14), extractAIC(fit14))
+fit14_df
+fit14_df2 = tibble::rownames_to_column(fit14_df, "coefficent")
+fit14_df3 = fit14_df2 %>% 
+  mutate(model = "fit14_tree_ba") %>% 
+  mutate(response = "NDVI" ) %>%  
+  mutate(rmse = RMSE(fit14)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit14.) %>% dplyr::select(model:response, coefficent:rmse)
+fit14_df3
+```
 #### Data for graph
 
 ```{r}
@@ -294,80 +223,6 @@ plot_mod14 = ggplot(data = field_gcc14, aes(x = live_tree_ba_ha, y = mean_gcc_10
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod14
-```
-
-### 19. Model: GCC tree  BA
-live_tree_ba_ha
-mean_gcc_tree ~ live_tree_ba
-```{r}
-mod19 = glm(mean_gcc_10m ~ dead_tree_ba_ha, data = field_gcc, family = gaussian)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod19.res = simulateResiduals(fittedModel = mod19, n = 500)
-mod19.res$scaledResiduals
-mod19.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod19.res)
-```
-
-```{r}
-testDispersion(mod19.res)
-```
-
-#### Summary
-```{r}
-summary(mod19)
-```
-
-##### Summary Dataframe
-
-```{r}
-mod19_df = data.frame(summary(mod19)$coefficients[,], confint(mod19), deviance(mod19), summary(mod19)$null.deviance, extractAIC(mod19))
-mod19_df
-mod19_df2 = tibble::rownames_to_column(mod19_df, "coefficent")
-mod19_df3 = mod19_df2 %>% 
-  mutate(model = "mod19_tree_ba") %>% 
-  mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod19., null_deviance= summary.mod19..null.deviance, AIC = extractAIC.mod19.) %>% dplyr::select(model:response, coefficent:AIC)
-mod19_df3
-```
-
-#### Data for graph
-
-```{r}
-preddat_mod19 = data.frame(dead_tree_ba_ha = field_gcc$dead_tree_ba_ha)
-
-head(preddat_mod19)
-
-pred_mod19 = predict(mod19, newdata = preddat_mod19, se.fit = TRUE)
-
-UL_mod19 = with(pred_mod19, fit + 2*se.fit)
-LL_mod19 = with(pred_mod19, fit - 2*se.fit)
-
-field_gcc19 = mutate(field_gcc, pred_mod19 = pred_mod19$fit, 
-               ucl_mod19 = UL_mod19, 
-               lcl_mod19 = LL_mod19)
-```
-
-#### Graph
-
-```{r}
-plot_mod19 = ggplot(data = field_gcc19, aes(x = dead_tree_ba_ha, y = mean_gcc_10m)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod19), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod19, ymax = ucl_mod19, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod19), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod19), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    labs(x=expression(Dead~tree~BA~(m^2/ha))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod19
 ```
 
 
@@ -592,81 +447,6 @@ plot_mod17 = ggplot(data = field_gcc_ndvi17, aes(x = shrub_ba_ha, y = mean_ndvi_
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 plot_mod17
-```
-
-
-### 18. Model: NDVI proportion of Live trees
-
-```{r}
-mod18 = glm(mean_ndvi_tree ~ prop_live, data = field_gcc_ndvi, family = gaussian)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod18.res = simulateResiduals(fittedModel = mod18, n = 500)
-mod18.res$scaledResiduals
-mod18.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod18.res)
-```
-
-```{r}
-testDispersion(mod18.res)
-```
-
-#### Summary
-```{r}
-summary(mod18)
-```
-
-##### Summary Dataframe
-
-```{r}
-mod18_df = data.frame(summary(mod18)$coefficients[,], confint(mod18), deviance(mod18), summary(mod18)$null.deviance, extractAIC(mod18))
-mod18_df
-mod18_df2 = tibble::rownames_to_column(mod18_df, "coefficent")
-mod18_df3 = mod18_df2 %>% 
-  mutate(model = "mod18_prop_live") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod18., null_deviance= summary.mod18..null.deviance, AIC = extractAIC.mod18.) %>% dplyr::select(model:response, coefficent:AIC)
-mod18_df3
-```
-
-#### Data for graph
-
-```{r}
-preddat18 = data.frame(prop_live = field_gcc_ndvi$prop_live)
-
-head(preddat18)
-
-pred18 = predict(mod18, newdata = preddat18, se.fit = TRUE)
-
-UL18 = with(pred18, fit + 2*se.fit)
-LL18 = with(pred18, fit - 2*se.fit)
-
-field_gcc_ndvi18 = mutate(field_gcc_ndvi, pred18 = pred18$fit, 
-               ucl_mod18 = UL18, 
-               lcl_mod18 = LL18)
-```
-
-
-#### Graph
-
-```{r}
-plot_mod18 = ggplot(data = field_gcc_ndvi18, aes(x = prop_live, y = mean_ndvi_tree)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred18), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod18, ymax = ucl_mod18, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod18), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod18), linetype='longdash', size = 1) +
-    ylab("Mean NDVI") +
-    xlab("Percent of live trees")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod18
 ```
 
 
