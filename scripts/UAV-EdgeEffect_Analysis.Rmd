@@ -25,7 +25,9 @@ library(lsmeans)
 library(DHARMa)
 library(multcomp)
 library(car)
-
+library(grid)
+library(gtable)
+library(gridExtra)
 ```
 
 
@@ -134,6 +136,247 @@ field_gcc_ndvi %>% group_by(burn_unburn) %>% summarise(mean=mean(mean_ndvi_10m),
 
 # Part 2:  Post-fire
 
+## 1. Model: GCC burn/unburned
+```{r}
+fit1 = lm(mean_gcc_10m ~ burn_unburn, data = field_gcc)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_gcc$fit1 = fitted(fit1)
+# Get the residuals of the model
+field_gcc$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = field_gcc,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = burn_unburn, y = res1, data = field_gcc,
+xlab = "Burn v unburn group",
+ylab = "Residuals",
+main = "Residuals vs burn/unburn")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = field_gcc, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_gcc$res1, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+#### Summary
+```{r}
+summary(fit1)
+```
+```{r}
+# All the coefficients
+coef(fit1)
+```
+
+```{r}
+# All the confidence intervals for the coefficients
+confint(fit1)
+```
+```{r}
+data.frame(summary(lsmeans(fit1, pairwise ~ burn_unburn),type = "response"))
+```
+
+#### t-test
+```{r}
+( fit1_t = t.test(mean_gcc_10m ~ burn_unburn, data = field_gcc) )
+```
+##### Table
+Difference in means
+```{r}
+0.3486187-0.3816558
+```
+
+```{r}
+# Write out the results from the two-sample t-test with unequal variances
+# A title for the test
+titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
+# This is the t stat with df and p-value
+ttestres1 = as.character(expression(t[-2.6]==23.2*","~italic(p)==0.02))
+# The estimated difference in group means (I calculated from the test results)
+diff1 = as.character(expression(Delta==-0.033))
+# The 95% CI of the difference
+ci1 = as.character(expression(95*"%"~CI*":"~-0.041~to~-0.005))
+# Put these into a single column of a data.frame
+d1 = data.frame(col = rbind(ttestres1, diff1, ci1) )
+```
+
+```{r}
+t1 = tableGrob(d1, rows = NULL, cols = NULL,
+theme = ttheme_default(core = list(bg_params = list(fill = "white"),
+fg_params = list(parse = TRUE),
+padding = unit(c(2.5, 2.5), "mm"))))
+```
+
+```{r}
+t1 = gtable_add_grob(t1, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
+t = 1, b = nrow(t1), r = ncol(t1), l = 1)
+```
+
+#### Boxplot
+```{r}
+g1 = ggplot(data=field_gcc, aes(x = burn_unburn, y = mean_gcc_10m, color=burn_unburn) ) + # define plot axes
+  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
+  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
+stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
+  scale_shape_manual(values = c(23, 24)) +
+  labs(x=(NULL), y= "Mean GCC") +
+  
+  scale_color_manual(values = c("#E69F00", "#009E73")) +
+  
+  scale_x_discrete(labels= c("Burned", "Unburned")) +
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+
+
+g1
+```
+
+## 2. Model:NDVI burn/unburned
+```{r}
+fit2 = lm(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_gcc_ndvi$fit2 = fitted(fit2)
+# Get the residuals of the model
+field_gcc_ndvi$res2 = residuals(fit2)
+```
+
+```{r}
+qplot(x = fit2, y = res2, data = field_gcc_ndvi,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = burn_unburn, y = res2, data = field_gcc_ndvi,
+xlab = "Burn v unburn group",
+ylab = "Residuals",
+main = "Residuals vs burn/unburn")
+```
+```{r}
+qplot(x = factor(1), y = res2, data = field_gcc_ndvi, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_gcc_ndvi$res2, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc_ndvi$res2) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit2, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit2, which = 2) # qqnorm plot of residuals
+```
+
+#### Summary
+```{r}
+summary(fit2)
+```
+```{r}
+# All the coefficients
+coef(fit2)
+```
+
+```{r}
+# All the confidence intervals for the coefficients
+confint(fit2)
+```
+```{r}
+data.frame(summary(lsmeans(fit2, pairwise ~ burn_unburn),type = "response"))
+```
+
+#### t-test
+```{r}
+( fit2_t = t.test(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi) )
+```
+
+
+
+##### Table
+Difference in means
+```{r}
+0.6391836-0.728424
+```
+
+```{r}
+# Write out the results from the two-sample t-test with unequal variances
+# A title for the test
+titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
+# This is the t stat with df and p-value
+ttestres2 = as.character(expression(italic(p)<0.001))
+# The estimated difference in group means (I calculated from the test results)
+diff2 = as.character(expression(Delta==-0.089))
+# The 95% CI of the difference
+ci2 = as.character(expression(CI*":"~-0.121~to~-0.058))
+# Put these into a single column of a data.frame
+d2 = data.frame(col = rbind(ttestres2, diff2, ci2) )
+ 
+```
+
+```{r}
+t2 = tableGrob(d2, rows = NULL, cols = NULL,
+theme = ttheme_default(core = list(bg_params = list(fill = "white"),
+fg_params = list(parse = TRUE),
+padding = unit(c(2.5, 2.5), "mm"))))
+```
+
+```{r}
+t2 = gtable_add_grob(t2, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
+t = 1, b = nrow(t2), r = ncol(t2), l = 1)
+```
+
+#### Boxplot
+```{r}
+g2 = ggplot(data=field_gcc_ndvi, aes(x = burn_unburn, y = mean_ndvi_10m, color=burn_unburn) ) + # define plot axes
+  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
+  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
+stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
+  scale_shape_manual(values = c(23, 24)) +
+  labs(x=(NULL), y= "Mean NDVI") +
+  
+  scale_color_manual(values = c("#E69F00", "#009E73")) +
+  
+  scale_x_discrete(labels= c("Burned", "Unburned")) +
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+
+
+g2
+```
+
+  
 ## 7. Model: GCC burn/unburned
 ```{r}
 mod7 = glm(mean_gcc_10m ~ burn_unburn, data = field_gcc, family = gaussian)
@@ -334,6 +577,10 @@ boxplot_mod8
 mod11 = glm(mean_gcc_10m ~ plot_dis, data = field_gcc, family = gaussian)
 ```
 
+```{r}
+fit3 = lm(mean_gcc_10m ~ plot_dis, data = field_gcc)
+```
+
 ### Residuals with DHARMa
 ```{r, include=FALSE}
 mod11.res = simulateResiduals(fittedModel = mod11, n = 500)
@@ -366,6 +613,18 @@ mod11_df3 = mod11_df2 %>%
   mutate(response = "GCC" ) %>%  
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% dplyr::select(model:response, coefficent:AIC)
 mod11_df3
+```
+#### lm summary
+```{r}
+fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
+fit3_df
+fit3_df2 = tibble::rownames_to_column(fit3_df, "coefficent")
+fit3_df3 = fit3_df2 %>% 
+  mutate(model = "fit3") %>% 
+  mutate(response = "GCC" ) %>%  
+  mutate(rmse = RMSE(fit3)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
+fit3_df3
 ```
 
 ### Predicted data for for graph
@@ -403,11 +662,31 @@ plot_mod11 = ggplot(data = field_gcc11, aes(x = plot_dis, y = mean_gcc_10m)) +
 
 plot_mod11
 ```
+#### Graph lm
 
+```{r}
+p3 = ggplot(data = field_gcc, aes(x = plot_dis, y = mean_gcc_10m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
+    ylab("Mean GCC") +
+    xlab("Distance from the unburned edge \n(m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
+
+
+p3
+  
+```
 
 ## 12.  Model: NDVI distance from edge
 ```{r}
 mod12 = glm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi, family = gaussian)
+```
+
+```{r}
+fit4 = lm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi)
 ```
 
 ### Residuals with DHARMa
@@ -443,8 +722,18 @@ mod12_df3 = mod12_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% dplyr::select(model:response, coefficent:AIC)
 mod12_df3
 ```
-
-
+### lm summary
+```{r}
+fit4_df = data.frame(summary(fit4)$coefficients[,], confint(fit4), extractAIC(fit4))
+fit4_df
+fit4_df2 = tibble::rownames_to_column(fit4_df, "coefficent")
+fit4_df3 = fit4_df2 %>% 
+  mutate(model = "fit4") %>% 
+  mutate(response = "GCC" ) %>%  
+  mutate(rmse = RMSE(fit4)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit4.) %>% dplyr::select(model:response, coefficent:rmse)
+fit4_df3
+```
 
 ```{r}
 preddat_mod12 = data.frame(plot_dis = field_gcc_ndvi$plot_dis)
@@ -477,6 +766,22 @@ plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = plot_dis, y = mean_ndvi_10m
     scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
 
 plot_mod12
+```
+#### Graph lm
+
+```{r}
+p4 = ggplot(data = field_gcc_ndvi, aes(x = plot_dis, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
+    ylab("Mean NDVI") +
+    xlab("Distance from the unburned edge \n(m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
+
+
+p4
+  
 ```
 
 # Summary output Combine
@@ -516,80 +821,27 @@ write.csv(edge_sum, '../outputs/model_summary/2020-05-27_distance-edge-summary.c
 
 # Manuscript figures
 
-## Part 2: Post-fire
-
-### Burned vs. Unburned + Burn Year
-```{r fig.height=6, fig.width=6}
-
-grid_plot_burn = cowplot::plot_grid(plot_mod7, plot_mod8, plot_mod9, plot_mod10, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
-grid_plot_burn
-
+## lm models burn/unburn
+```{r fig.height=3, fig.width=6}
+p1 = cowplot::plot_grid(g1, g2, labels = c("A", "B"), ncol = 2) +
+  draw_label("p=0.02", x = .42, y = .15, size = 12, fontface = "plain") +
+  draw_label("p<0.001", x = .91, y = .15, size = 12, fontface = "plain") 
+p1
 ```
-
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-20_burn-unburn-year.jpeg", plot = grid_plot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
+ggsave("../figures/2020-07-13_burn-unburn_t-test.jpeg", plot = p1, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
-## Burn and unburned only
+### Distance for unburned lm
 ```{r fig.height=3, fig.width=6}
 
-grid_plot_burn_un = cowplot::plot_grid(plot_mod7, plot_mod8, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
-grid_plot_burn_un
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-27_burn-unburn-only.jpeg", plot = grid_plot_burn_un, width = 6, height = 3, units = c("in"), dpi=600 )
-```
-
-
-### Boxplots burn/unburn
-```{r fig.height=6, fig.width=6}
-
-grid_boxplot_burn = cowplot::plot_grid(boxplot_mod7, boxplot_mod8, boxplot_mod9, boxplot_mod10, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
-grid_boxplot_burn
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-20_BOX-burn-unburn-year.jpeg", plot = grid_boxplot_burn, width = 6, height = 6, units = c("in"), dpi=600 )
-```
-
-### Boxplots burn/unburn
-```{r fig.height=3, fig.width=6}
-
-grid_boxplot_burn_un = cowplot::plot_grid(boxplot_mod7, boxplot_mod8, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
-grid_boxplot_burn_un
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-27_BOX-burn-unburn-only.jpeg", plot = grid_boxplot_burn_un, width = 6, height = 3, units = c("in"), dpi=600 )
-```
-
-### Distance from unburned edge
-
-```{r fig.height=3, fig.width=6}
-
-grid_plot_edge = cowplot::plot_grid(plot_mod11, plot_mod12, labels = c("A", "B"), align = "hv", ncol= 2) 
-grid_plot_edge
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-20_distance_edge_pts.jpeg", plot = grid_plot_edge, width = 6, height = 3, units = c("in"), dpi=600 )
-```
-
-
-```{r fig.height=3, fig.width=6}
-
-grid_plot_edge1 = cowplot::plot_grid(plot_mod11, plot_mod12, labels = c("A", "B"), align = "hv", ncol= 2) +
+lm_grid_edge1 = cowplot::plot_grid(p3, p4, labels = c("A", "B"), align = "hv", ncol= 2) +
   draw_label("*", x = .95, y = .87, size = 36, fontface = "bold") +
   draw_label("*", x = .45, y = .87, size = 36, fontface = "bold") 
-grid_plot_edge1
+lm_grid_edge1
 
 ```
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-05-29_distance_edge_pts_sig.jpeg", plot = grid_plot_edge1, width = 6, height = 3, units = c("in"), dpi=600 )
+ggsave("../figures/2020-07-13_distance_edge_pts_lm.jpeg", plot = lm_grid_edge1, width = 6, height = 3, units = c("in"), dpi=600 )
 ```

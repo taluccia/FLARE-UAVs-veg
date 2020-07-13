@@ -192,8 +192,45 @@ head(field_gcc)
 woody_biomass_C_g_m
 live_woody_biomass_C_g_m
 ```{r}
+fit1 = lm(mean_gcc_25cm ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+#### lm summary
+```{r}
+summary(fit1)
+```
+
+```{r}
+fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1), extractAIC(fit1))
+fit1_df
+fit1_df2 = tibble::rownames_to_column(fit1_df, "coefficent")
+fit1_df3 = fit1_df2 %>% 
+  mutate(model = "fit1") %>% 
+  mutate(response = "GCC_25cm" ) %>%  
+  mutate(rmse = RMSE(fit1)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit1.) %>% dplyr::select(model:response, coefficent:rmse)
+fit1_df3
+```
+
+#### lm Graph
+
+```{r}
+p1 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_25cm)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")
+p1
+  
+```
+
+### glm
+
+```{r}
 mod1 = glm(mean_gcc_25cm ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
+
 
 #### Residuals with DHARMa
 ```{r, include=FALSE}
@@ -282,8 +319,45 @@ plot1
 
 ### 2. Model: GCC Biomass 50cm
 ```{r}
+fit2 = lm(mean_gcc_50cm ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+#### lm summary
+```{r}
+summary(fit2)
+```
+
+```{r}
+fit2_df = data.frame(summary(fit2)$coefficients[,], confint(fit2), extractAIC(fit2))
+fit2_df
+fit2_df2 = tibble::rownames_to_column(fit2_df, "coefficent")
+fit2_df3 = fit2_df2 %>% 
+  mutate(model = "fit2") %>% 
+  mutate(response = "GCC_50cm" ) %>%  
+  mutate(rmse = RMSE(fit2)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit2.) %>% dplyr::select(model:response, coefficent:rmse)
+fit2_df3
+```
+
+#### lm Graph
+
+```{r}
+p2 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_50cm)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name  = "GCC (50cm)")
+p2
+  
+```
+
+### glm
+
+```{r}
 mod2 = glm(mean_gcc_50cm ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
+
 
 #### Residuals with DHARMa
 ```{r, include=FALSE}
@@ -382,6 +456,43 @@ fig2
 ```
 
 ### 3. Model: GCC Biomass 1m
+
+```{r}
+fit3 = lm(mean_gcc_1m ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+#### lm summary
+```{r}
+summary(fit3)
+```
+
+```{r}
+fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
+fit3_df
+fit3_df2 = tibble::rownames_to_column(fit3_df, "coefficent")
+fit3_df3 = fit3_df2 %>% 
+  mutate(model = "fit3") %>% 
+  mutate(response = "GCC_1m" ) %>%  
+  mutate(rmse = RMSE(fit3)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
+fit3_df3
+```
+
+#### lm Graph
+
+```{r}
+p3 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_1m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (1m)")
+p3
+  
+```
+
+
+### glm
 ```{r}
 mod3 = glm(mean_gcc_1m ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
@@ -470,8 +581,45 @@ plot3
 
 ### 4. Model: GCC Biomass 3m
 ```{r}
+fit4 = lm(mean_gcc_3m ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+#### lm summary
+```{r}
+summary(fit4)
+```
+
+```{r}
+fit4_df = data.frame(summary(fit4)$coefficients[,], confint(fit4), extractAIC(fit4))
+fit4_df
+fit4_df2 = tibble::rownames_to_column(fit4_df, "coefficent")
+fit4_df3 = fit4_df2 %>% 
+  mutate(model = "fit4") %>% 
+  mutate(response = "GCC_3m" ) %>%  
+  mutate(rmse = RMSE(fit4)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit4.) %>% dplyr::select(model:response, coefficent:rmse)
+fit4_df3
+```
+
+#### lm Graph
+
+```{r}
+p4 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_3m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1),name = "GCC (3m)")
+p4
+  
+```
+
+### glm
+```{r}
 mod4 = glm(mean_gcc_3m ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
+
+
 
 #### Residuals with DHARMa
 ```{r, include=FALSE}
@@ -556,6 +704,43 @@ plot4
 ```
 
 ### 5. Model: GCC Biomass 5m
+```{r}
+fit5 = lm(mean_gcc_5m ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+
+#### lm summary
+```{r}
+summary(fit5)
+```
+
+```{r}
+fit5_df = data.frame(summary(fit5)$coefficients[,], confint(fit5), extractAIC(fit5))
+fit5_df
+fit5_df2 = tibble::rownames_to_column(fit5_df, "coefficent")
+fit5_df3 = fit5_df2 %>% 
+  mutate(model = "fit5") %>% 
+  mutate(response = "GCC_5m" ) %>%  
+  mutate(rmse = RMSE(fit5)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit5.) %>% dplyr::select(model:response, coefficent:rmse)
+fit5_df3
+```
+
+#### lm Graph
+
+```{r}
+p5 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_5m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05),  name = "GCC (5m)")
+p5
+  
+```
+
+###glm
+
 ```{r}
 mod5 = glm(mean_gcc_5m ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
@@ -644,6 +829,41 @@ plot5
 ```
 
 ### 6. Model: GCC Biomass 10m
+```{r}
+fit6 = lm(mean_gcc_10m ~ live_woody_biomass_C_g_m, data = field_gcc)
+```
+
+#### lm summary
+```{r}
+summary(fit6)
+```
+
+```{r}
+fit6_df = data.frame(summary(fit6)$coefficients[,], confint(fit6), extractAIC(fit6))
+fit6_df
+fit6_df2 = tibble::rownames_to_column(fit6_df, "coefficent")
+fit6_df3 = fit6_df2 %>% 
+  mutate(model = "fit6") %>% 
+  mutate(response = "GCC_10m" ) %>%  
+  mutate(rmse = RMSE(fit6)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit6.) %>% dplyr::select(model:response, coefficent:rmse)
+fit6_df3
+```
+
+#### lm Graph
+
+```{r}
+p6 = ggplot(data = field_gcc, aes(x = live_woody_biomass_C_g_m, y = mean_gcc_10m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (10m)")
+p6
+  
+```
+
+### glm
 ```{r}
 mod6 = glm(mean_gcc_10m ~ live_woody_biomass_C_g_m, data = field_gcc, family = gaussian)
 ```
@@ -742,9 +962,43 @@ compareGLM(mod1, mod2, mod3, mod4, mod5, mod6)
 
 ### 7. Model: NDVI Biomass 25cm
 ```{r}
-mod7 = glm(mean_ndvi_25cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
+fit7 = lm(mean_ndvi_25cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
 ```
 
+#### lm summary
+```{r}
+summary(fit7)
+```
+
+```{r}
+fit7_df = data.frame(summary(fit7)$coefficients[,], confint(fit7), extractAIC(fit7))
+fit7_df
+fit7_df2 = tibble::rownames_to_column(fit7_df, "coefficent")
+fit7_df3 = fit7_df2 %>% 
+  mutate(model = "fit7") %>% 
+  mutate(response = "NDVI_25cm" ) %>%  
+  mutate(rmse = RMSE(fit7)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit7.) %>% dplyr::select(model:response, coefficent:rmse)
+fit7_df3
+```
+
+#### lm Graph
+
+```{r}
+p7 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_25cm)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (25cm)")
+p7
+  
+```
+
+### glm
+```{r}
+mod7 = glm(mean_ndvi_25cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
+```
 
 #### Residuals with DHARMa
 ```{r, include=FALSE}
@@ -834,6 +1088,42 @@ plot7
 
 ### 8. Model: NDVI Biomass 50cm
 ```{r}
+fit8 = lm(mean_ndvi_50cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+```
+
+#### lm summary
+```{r}
+summary(fit8)
+```
+
+```{r}
+fit8_df = data.frame(summary(fit8)$coefficients[,], confint(fit8), extractAIC(fit8))
+fit8_df
+fit8_df2 = tibble::rownames_to_column(fit8_df, "coefficent")
+fit8_df3 = fit8_df2 %>% 
+  mutate(model = "fit8") %>% 
+  mutate(response = "NDVI_50cm" ) %>%  
+  mutate(rmse = RMSE(fit8)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit8.) %>% dplyr::select(model:response, coefficent:rmse)
+fit8_df3
+```
+
+#### lm Graph
+
+```{r}
+p8 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_50cm)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (50cm)")
+p8
+  
+```
+
+### glm
+
+```{r}
 mod8 = glm(mean_ndvi_50cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
 
@@ -921,6 +1211,41 @@ plot8
 ```
 
 ### 9. Model: NDVI Biomass 1m
+```{r}
+fit9 = lm(mean_ndvi_1m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+```
+
+#### lm summary
+```{r}
+summary(fit9)
+```
+
+```{r}
+fit9_df = data.frame(summary(fit9)$coefficients[,], confint(fit9), extractAIC(fit9))
+fit9_df
+fit9_df2 = tibble::rownames_to_column(fit9_df, "coefficent")
+fit9_df3 = fit9_df2 %>% 
+  mutate(model = "fit9") %>% 
+  mutate(response = "NDVI_1m" ) %>%  
+  mutate(rmse = RMSE(fit9)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit9.) %>% dplyr::select(model:response, coefficent:rmse)
+fit9_df3
+```
+
+#### lm Graph
+
+```{r}
+p9 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_1m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (1m)")
+p9
+  
+```
+
+### glm
 ```{r}
 mod9 = glm(mean_ndvi_1m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
@@ -1010,6 +1335,41 @@ plot9
 ```
 
 ### 10. Model: NDVI Biomass 3m
+```{r}
+fit10 = lm(mean_ndvi_3m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+```
+
+#### lm summary
+```{r}
+summary(fit10)
+```
+
+```{r}
+fit10_df = data.frame(summary(fit10)$coefficients[,], confint(fit10), extractAIC(fit10))
+fit10_df
+fit10_df2 = tibble::rownames_to_column(fit10_df, "coefficent")
+fit10_df3 = fit10_df2 %>% 
+  mutate(model = "fit10") %>% 
+  mutate(response = "NDVI_3m" ) %>%  
+  mutate(rmse = RMSE(fit10)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit10.) %>% dplyr::select(model:response, coefficent:rmse)
+fit10_df3
+```
+
+#### lm Graph
+
+```{r}
+p10 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_3m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1),name = "NDVI (3m)")
+p10
+  
+```
+
+### glm
 ```{r}
 mod10 = glm(mean_ndvi_3m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
@@ -1101,6 +1461,42 @@ plot10
 ```
 
 ### 11. Model: NDVI Biomass 5m
+
+```{r}
+fit11 = lm(mean_ndvi_5m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+```
+
+#### lm summary
+```{r}
+summary(fit11)
+```
+
+```{r}
+fit11_df = data.frame(summary(fit11)$coefficients[,], confint(fit11), extractAIC(fit11))
+fit11_df
+fit11_df2 = tibble::rownames_to_column(fit11_df, "coefficent")
+fit11_df3 = fit11_df2 %>% 
+  mutate(model = "fit11") %>% 
+  mutate(response = "NDVI_5m" ) %>%  
+  mutate(rmse = RMSE(fit11)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit11.) %>% dplyr::select(model:response, coefficent:rmse)
+fit11_df3
+```
+
+#### lm Graph
+
+```{r}
+p11 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_5m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (5m)")
+p11
+  
+```
+
+### Glm
 ```{r}
 mod11 = glm(mean_ndvi_5m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
@@ -1190,8 +1586,46 @@ plot11
 
 ### 12. Model: NDVI Biomass 10m
 ```{r}
+fit12 = lm(mean_ndvi_10m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+```
+
+
+#### lm summary
+```{r}
+summary(fit12)
+```
+
+```{r}
+fit12_df = data.frame(summary(fit12)$coefficients[,], confint(fit12), extractAIC(fit12))
+fit12_df
+fit12_df2 = tibble::rownames_to_column(fit12_df, "coefficent")
+fit12_df3 = fit12_df2 %>% 
+  mutate(model = "fit12") %>% 
+  mutate(response = "NDVI_10m" ) %>%  
+  mutate(rmse = RMSE(fit12)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit12.) %>% dplyr::select(model:response, coefficent:rmse)
+fit12_df3
+```
+
+#### lm Graph
+
+```{r}
+p12 = ggplot(data = field_gcc_ndvi, aes(x = live_woody_biomass_C_g_m, y = mean_ndvi_10m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    labs(x=expression(C~mass~(g~C~m^-2))) +
+    reg_theme + 
+  scale_y_continuous(breaks = seq(0.4, 0.8, by = .1), name = "NDVI (10m)")
+p12
+  
+```
+
+
+
+```{r}
 mod12 = glm(mean_ndvi_10m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi, family = gaussian)
 ```
+
 
 #### Residuals with DHARMa
 ```{r, include=FALSE}
@@ -1341,6 +1775,67 @@ gcc_ndvi_data
 write.csv(gcc_ndvi_data, '../outputs/model_summary/2020-06-07_all-woody-biomass-gcc-ndvi-dAIC.csv', row.names = F)
 ```
 
+
+# lm Combine Summary output 
+
+## lm GCC models
+```{r}
+gcc_fit1 = rbind(fit1_df3, fit2_df3)
+gcc_fit2 = rbind(fit3_df3, fit4_df3)
+gcc_fit3 = rbind(fit5_df3, fit6_df3)
+
+gcc_fit4 = rbind(gcc_fit1, gcc_fit2)
+gcc_fit5 = rbind(gcc_fit4, gcc_fit3)
+
+gcc_fit5
+
+```
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+
+```{r}
+gcc_fit5_data = gcc_fit5 %>%
+  mutate(min_AIC = -404.0711) %>%
+  mutate(dAIC = round((AIC-min_AIC), 4))
+
+gcc_fit5_data
+```
+
+## NDVI models
+
+```{r}
+ndvi_fit4 = rbind(fit7_df3, fit8_df3)
+ndvi_fit5 = rbind(fit9_df3, fit10_df3)
+ndvi_fit6 = rbind(fit11_df3, fit12_df3)
+
+ndvi_fit7 = rbind(ndvi_fit4, ndvi_fit5)
+ndvi_fit8 = rbind(ndvi_fit7, ndvi_fit6)
+ndvi_fit8 
+
+```
+Calculate delta AIC
+https://stats.stackexchange.com/questions/232465/how-to-compare-models-on-the-basis-of-aic
+```{r}
+ndvi_fit8_data = ndvi_fit8  %>%
+  mutate(min_AIC = -202.2936) %>%
+  mutate(dAIC = round((AIC-min_AIC), 4))
+
+ndvi_fit8_data
+```
+
+### Combine NDVI and GCC
+
+```{r}
+gcc_ndvi_data2 = rbind(gcc_fit5_data, ndvi_fit8_data)
+gcc_ndvi_data2
+```
+
+
+### Save to  csv
+```{r eval=FALSE, include=FALSE}
+write.csv(gcc_ndvi_data2, '../outputs/model_summary/2020-07-13_all-woody-biomass-gcc-ndvi-dAIC-lm.csv', row.names = F)
+```
+
 # Manuscript Figures 
 ## GCC only
 ```{r fig.height=7, fig.width=6}
@@ -1405,5 +1900,33 @@ fig2
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-07-02_Biomass-live-woody-ndvi-gcc_sig.jpeg", plot = fig2, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+## lm fig
+
+```{r fig.height=7, fig.width=6}
+
+lm_fig1 = cowplot::plot_grid(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
+  theme(plot.margin = margin(0, 0, 0, 0)) +
+  draw_label("*", x = .285, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .835, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .835, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .59, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .835, size = 36, fontface = "bold") +
+  
+  draw_label("*", x = .285, y = .34, size = 36, fontface = "bold") +
+  draw_label("*", x = .285, y = .09, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .34, size = 36, fontface = "bold") +
+  draw_label("*", x = .63, y = .09, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .34, size = 36, fontface = "bold") +
+  draw_label("*", x = .96, y = .09, size = 36, fontface = "bold") 
+  
+
+lm_fig1
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-07-13_Biomass-live-woody-ndvi-gcc-lm.jpeg", plot = lm_fig1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 

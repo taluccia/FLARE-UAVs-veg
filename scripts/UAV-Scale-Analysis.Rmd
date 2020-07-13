@@ -855,7 +855,10 @@ model_fit5_data = model_fit5 %>%
 
 model_fit5_data
 ```
+```{r}
+write.csv(model_fit5_data, '../outputs/model_summary/2020-07-13_spatial-res-gcc-ndvi-lm.csv', row.names = F)
 
+```
 Model  |  Delta_AIC   |
 -------|--------------|
 1      |    50.72     |
