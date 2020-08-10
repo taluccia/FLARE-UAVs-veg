@@ -1,0 +1,103 @@
+---
+title: "UAV-GCC-NDVI-Correlations"
+author: "Anna Talucci"
+date: "8/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(ggcorrplot)
+library(cowplot)
+
+library(qpcR)
+```
+
+
+# Field Data
+```{r}
+field_data = read.csv("../data/field_subset/field_data_all.csv")
+```
+
+```{r}
+head(field_data)
+```
+
+## field Plot sizes
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(shrub_plot_area))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(min(tree_radius))
+```
+
+```{r}
+field_data %>% group_by(site, transect) %>% 
+  summarise(max(tree_radius))
+```
+
+# UAV Data
+
+```{r}
+gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-08-10_ndvi_all_pix4D.csv", strip.white = TRUE)
+```
+
+```{r}
+head(gcc_all)
+head(ndvi_all)
+```
+
+# Combine GCC and NDVI data
+
+```{r}
+gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
+gcc_ndvi
+
+```
+
+```{r}
+gcc_ndvi1 = gcc_ndvi %>% dplyr::select(-ID, -mean_gcc_tree, -mean_gcc_shrub, -mean_ndvi_tree, -mean_ndvi_shrub)
+```
+
+
+# Correlations
+```{r}
+gcc_ndvi_corr <- data.frame(round(cor(gcc_ndvi1), 2))
+gcc_ndvi_corr
+```
+
+```{r}
+write.csv(gcc_ndvi_corr,"../outputs/gcc_ndvi_correlations.csv")
+```
+
+
+```{r}
+corr1 <- round(cor(gcc_ndvi1), 1)
+head(corr1)
+```
+```{r}
+ggcorrplot(corr1, hc.order = TRUE, type = "lower",
+   lab = TRUE)
+```
+
