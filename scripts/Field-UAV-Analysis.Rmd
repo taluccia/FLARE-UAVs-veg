@@ -61,7 +61,7 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-08-10_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}

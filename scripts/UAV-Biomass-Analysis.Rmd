@@ -29,6 +29,14 @@ library(rcompanion)
 library(qpcR)
 ```
 
+# Functions
+
+```{r}
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+```
 
 # Field Data
 ```{r}
@@ -65,12 +73,31 @@ field_data %>% group_by(site, transect) %>%
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
-ndvi_all = read.csv("../data/extracted_data/2020-05-20_ndvi_all_pix4D.csv", strip.white = TRUE)
+ndvi_all = read.csv("../data/extracted_data/2020-08-10_ndvi_all_pix4D.csv", strip.white = TRUE)
 ```
 
 ```{r}
 head(gcc_all)
 head(ndvi_all)
+```
+# Pull out GCC and NDVI by buffer size
+
+```{r}
+gcc_long = gcc_all %>% 
+  dplyr::select(ID:mean_gcc_10m) %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "gcc") %>%
+  mutate(buf_res = numextract(buffer))
+
+gcc_long
+```
+
+```{r}
+ndvi_long = ndvi_all %>% 
+  dplyr::select(ID:mean_ndvi_10m) %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "ndvi") %>%
+  mutate(buf_res = numextract(buffer))
+
+ndvi_long
 ```
 
 # Combine Field and UAV data
@@ -83,8 +110,20 @@ field_gcc
 field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
 field_gcc_ndvi
 ```
+# Field data +  long data
+```{r}
+field_gcc_long = merge(field_data, gcc_long, by="ID")
 
-# burn_year as factor
+field_gcc_long
+```
+
+```{r}
+field_ndvi_long = merge(field_data, ndvi_long, by="ID")
+
+field_ndvi_long
+```
+
+# Variables as factor
 
 ```{r}
 field_gcc$burn_year = as.factor(field_gcc$burn_year)
@@ -92,6 +131,13 @@ field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
 
 str(field_gcc)
 str(field_gcc_ndvi)
+```
+
+```{r}
+field_gcc_long$burn_year = as.factor(field_gcc_long$burn_year)
+field_ndvi_long$burn_year= as.factor(field_ndvi_long$burn_year)
+field_gcc_long$buf_res = as.factor(field_gcc_long$buf_res)
+field_ndvi_long$buf_res = as.factor(field_ndvi_long$buf_res)
 ```
 
 
@@ -183,8 +229,20 @@ max(field_gcc$live_woody_biomass_C_g_m)
 ```{r}
 head(field_gcc)
 ```
-
+```{r}
+head(field_gcc_long)
+```
 # Part 4: Biomass as it relates to GCC and NDVI
+
+#Model GCC
+
+```{r}
+model1 = lm(live_woody_biomass_C_g_m ~ gcc:buf_res, data = field_gcc_long)
+```
+
+```{r}
+summary(model1)
+```
 
 ## GCC
 

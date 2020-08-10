@@ -68,12 +68,19 @@ head(gcc_all)
 head(ndvi_all)
 ```
 
+
+
+
 # Combine GCC and NDVI data
 
 ```{r}
 gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
 gcc_ndvi
 
+field_gcc = merge(field_data, gcc_all, by="ID") 
+field_gcc
+field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
+field_gcc_ndvi
 ```
 
 ```{r}
@@ -81,7 +88,7 @@ gcc_ndvi1 = gcc_ndvi %>% dplyr::select(-ID, -mean_gcc_tree, -mean_gcc_shrub, -me
 ```
 
 
-# Correlations
+# Correlations GCC and NDVI
 ```{r}
 gcc_ndvi_corr <- data.frame(round(cor(gcc_ndvi1), 2))
 gcc_ndvi_corr
@@ -101,3 +108,18 @@ ggcorrplot(corr1, hc.order = TRUE, type = "lower",
    lab = TRUE)
 ```
 
+# Corrlations Biomass
+```{r}
+head(field_gcc)
+```
+
+
+
+```{r}
+field_gcc1 = field_gcc %>% dplyr::select(live_woody_biomass_C_g_m, mean_gcc_25cm:mean_gcc_10m)
+```
+
+```{r}
+field_gcc_corr <- data.frame(round(cor(field_gcc1), 2))
+field_gcc_corr
+```
