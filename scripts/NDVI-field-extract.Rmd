@@ -39,10 +39,10 @@ cn_tr1_f20
 # NDVI rasters (Pix4D calcualted)
 
 ```{r}
-alnus_tr1_f08_ndvi = raster("../data/pix4d_ndvi_May19/RU_ALN_TR1_FL008M_index_ndvi.tif")
-bp_tr2_f13_ndvi = raster("../data/pix4d_ndvi_May19/RU_BP_TR2_FL013M_index_ndvi.tif")
-cn_tr2_f17_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR2_FL017B_index_ndvi.tif")
-cn_tr1_f20_ndvi = raster("../data/pix4d_ndvi_May19/RU_CYN_TR1_FL020M_index_ndvi.tif")
+alnus_tr1_f08_ndvi = raster("../data/pix4d_ndvi_Aug10/RU_ALN_TR1_FL008M_ndvi.tif")
+bp_tr2_f13_ndvi = raster("../data/pix4d_ndvi_Aug10/RU_BP_TR2_FL013M_ndvi.tif")
+cn_tr2_f17_ndvi = raster("../data/pix4d_ndvi_Aug10/RU_CYN_TR2_FL017M_ndvi.tif")
+cn_tr1_f20_ndvi = raster("../data/pix4d_ndvi_Aug10/RU_CYN_TR1_FL020M_ndvi.tif")
 ```
 
 view raster meta data
@@ -426,7 +426,7 @@ ndvi_all
 
 
 ```{r}
-write.csv(ndvi_all,"../outputs/extracted_data/2020-05-20_ndvi_all_pix4D.csv", row.names = FALSE)
+write.csv(ndvi_all,"../outputs/extracted_data/2020-08-10_ndvi_all_pix4D.csv", row.names = FALSE)
 ```
 
 
