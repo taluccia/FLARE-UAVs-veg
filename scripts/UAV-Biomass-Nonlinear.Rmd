@@ -129,10 +129,13 @@ field_ndvi_long
 ```{r}
 field_gcc$burn_year = as.factor(field_gcc$burn_year)
 field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
+```
 
+```{r eval=FALSE, include=FALSE}
 str(field_gcc)
 str(field_gcc_ndvi)
 ```
+
 
 ```{r}
 field_gcc_long$burn_year = as.factor(field_gcc_long$burn_year)
@@ -213,6 +216,8 @@ blank_y_theme = theme_bw() + theme(legend.position = "none") +
 ```{r}
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
+# Min max biomass
+
 
 ```{r}
 min(field_gcc$woody_biomass_C_g_m)
@@ -231,16 +236,41 @@ max(field_gcc$live_woody_biomass_C_g_m)
 ```{r}
 head(field_gcc_long)
 ```
+```{r}
+fd_gcc_sub = field_gcc_long %>% 
+  dplyr::select(ID:burn_unburn, live_woody_biomass_C_g_m, gcc:buf_res) 
+
+head(fd_gcc_sub)
+```
+
+ filter outliers
+```{r}
+fd_gcc_sub %>% filter(live_woody_biomass_C_g_m > 1500)
+```
+
+```{r}
+fd_gcc_sub %>% filter(burn_unburn == "unburned")
+```
+
+Data outliers removed 
+```{r}
+gcc_bio_out = fd_gcc_sub %>% filter(live_woody_biomass_C_g_m < 3000)
+```
+
+```{r}
+gcc_bio_out1 = fd_gcc_sub %>% filter(burn_unburn == "unburned")
+```
+
 ***
 ```{r}
 #fit first degree polynomial equation:
-fit  <- lm(live_woody_biomass_C_g_m ~ gcc + buf_res, data = field_gcc_long)
+fit  <- lm(live_woody_biomass_C_g_m ~ gcc + buf_res, data = gcc_bio_out1)
 #second degree
-fit2 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,2,raw=TRUE) + buf_res, data = field_gcc_long)
+fit2 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,2,raw=TRUE) + buf_res, data = gcc_bio_out1)
 #third degree
-fit3 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,3,raw=TRUE) + buf_res, data = field_gcc_long)
+fit3 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,3,raw=TRUE) + buf_res, data = gcc_bio_out1)
 #fourth degree
-fit4 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,4,raw=TRUE) + buf_res, data = field_gcc_long)
+fit4 <- lm(live_woody_biomass_C_g_m ~ poly(gcc,4,raw=TRUE) + buf_res, data = gcc_bio_out1)
 
 ```
 
@@ -251,37 +281,65 @@ summary(fit3)
 summary(fit4)
 ```
 ```{r}
-p <- ggplot(field_gcc_long, aes(x = gcc, y = live_woody_biomass_C_g_m, color = buf_res)) + geom_point()
+p <- ggplot(gcc_bio_out1, aes(x = gcc, y = live_woody_biomass_C_g_m, color = buf_res)) + 
+  geom_point()
 
 p
 ```
-
+ggplot(mtcars, aes(x = hp, y = mpg, colour = factor(vs))) + geom_point() +
+    stat_smooth(aes(group = 1), method = "lm", formula = y ~ x, se = FALSE)
 ```{r}
-p + stat_smooth(method = "lm", formula = y ~ x, size = 1, se = FALSE,
-    colour = "black") + stat_smooth(method = "lm", formula = y ~ x + I(x^2),
-    size = 1, se = FALSE, colour = "blue") + stat_smooth(method = "loess", formula = y ~
-    x, size = 1, se = FALSE, colour = "red") + stat_smooth(method = "gam", formula = y ~
-    s(x), size = 1, se = FALSE, colour = "green") + stat_smooth(method = "gam",
+p + 
+  stat_smooth(method = "lm", formula = y ~ x, size = 1, se = FALSE,
+    colour = "black") + 
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2),
+    size = 1, se = FALSE, colour = "blue") + 
+  stat_smooth(method = "loess", formula = y ~
+    x, size = 1, se = FALSE, colour = "red") + 
+  stat_smooth(method = "gam", formula = y ~
+    s(x), size = 1, se = FALSE, colour = "green") + 
+  stat_smooth(method = "gam",
     formula = y ~ s(x, k = 3), size = 1, se = FALSE, colour = "violet")
 ```
 
 
-```{r}
-#generate range of 50 numbers starting from 30 and ending at 160
-xx <- seq(30,160, length=50)
-plot(x,y,pch=19,ylim=c(0,150))
-lines(xx, predict(fit, data.frame(x=xx)), col="red")
-lines(xx, predict(fit2, data.frame(x=xx)), col="green")
-lines(xx, predict(fit3, data.frame(x=xx)), col="blue")
-lines(xx, predict(fit4, data.frame(x=xx)), col="purple")
 
+```{r}
+ggplot(gcc_bio_out, aes(x = gcc, y = live_woody_biomass_C_g_m, color = factor(buf_res))) + 
+  geom_point() +
+   stat_smooth(method = "lm", formula = y ~ x, size = 1, se = FALSE) 
+ 
+```
+
+```{r}
+ggplot(gcc_bio_out, aes(x = gcc, y = live_woody_biomass_C_g_m, color = factor(buf_res))) + 
+  geom_point() +
+   
+  stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se = FALSE) 
 ```
 
 
 
 
+```{r}
+ggplot(gcc_bio_out, aes(x = gcc, y = live_woody_biomass_C_g_m, color = factor(buf_res))) + 
+  geom_point() + 
+  stat_smooth(method = "loess", formula = y ~ x, size = 1, se = FALSE) 
+```
 
 
+```{r}
+ggplot(gcc_bio_out, aes(x = gcc, y = live_woody_biomass_C_g_m, color = factor(buf_res))) + 
+  geom_point() + 
+  stat_smooth(method = "gam", formula = y ~ s(x), size = 1, se = FALSE) 
+```
+
+
+```{r}
+ggplot(gcc_bio_out, aes(x = gcc, y = live_woody_biomass_C_g_m, color = factor(buf_res))) + 
+  geom_point() + 
+  stat_smooth(method = "gam", formula = y ~ s(x, k = 3), size = 1, se = FALSE)
+```
 
 
 
@@ -339,7 +397,7 @@ summary(model)
 #Model GCC
 
 ```{r}
-model1 = lm(live_woody_biomass_C_g_m ~ gcc:buf_res, data = field_gcc_long)
+model1 = lm(live_woody_biomass_C_g_m ~ gcc:buf_res, data = gcc_bio_out)
 ```
 
 ```{r}

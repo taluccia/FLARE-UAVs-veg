@@ -250,7 +250,7 @@ summary(model1)
 woody_biomass_C_g_m
 live_woody_biomass_C_g_m
 ```{r}
-fit1 = lm(mean_gcc_25cm ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit1 = lm(live_woody_biomass_C_g_m ~ mean_gcc_25cm, data = field_gcc)
 ```
 
 #### lm summary
@@ -377,7 +377,7 @@ plot1
 
 ### 2. Model: GCC Biomass 50cm
 ```{r}
-fit2 = lm(mean_gcc_50cm ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit2 = lm(live_woody_biomass_C_g_m ~ mean_gcc_50cm, data = field_gcc)
 ```
 
 #### lm summary
@@ -516,7 +516,7 @@ fig2
 ### 3. Model: GCC Biomass 1m
 
 ```{r}
-fit3 = lm(mean_gcc_1m ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit3 = lm(live_woody_biomass_C_g_m ~ mean_gcc_1m, data = field_gcc)
 ```
 
 #### lm summary
@@ -639,7 +639,7 @@ plot3
 
 ### 4. Model: GCC Biomass 3m
 ```{r}
-fit4 = lm(mean_gcc_3m ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit4 = lm(live_woody_biomass_C_g_m ~ mean_gcc_3m, data = field_gcc)
 ```
 
 #### lm summary
@@ -763,7 +763,7 @@ plot4
 
 ### 5. Model: GCC Biomass 5m
 ```{r}
-fit5 = lm(mean_gcc_5m ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit5 = lm(live_woody_biomass_C_g_m ~ mean_gcc_5m, data = field_gcc)
 ```
 
 
@@ -888,7 +888,7 @@ plot5
 
 ### 6. Model: GCC Biomass 10m
 ```{r}
-fit6 = lm(mean_gcc_10m ~ live_woody_biomass_C_g_m, data = field_gcc)
+fit6 = lm(live_woody_biomass_C_g_m ~ mean_gcc_10m, data = field_gcc)
 ```
 
 #### lm summary
@@ -1020,7 +1020,7 @@ compareGLM(mod1, mod2, mod3, mod4, mod5, mod6)
 
 ### 7. Model: NDVI Biomass 25cm
 ```{r}
-fit7 = lm(mean_ndvi_25cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit7 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_25cm, data = field_gcc_ndvi)
 ```
 
 #### lm summary
@@ -1146,7 +1146,7 @@ plot7
 
 ### 8. Model: NDVI Biomass 50cm
 ```{r}
-fit8 = lm(mean_ndvi_50cm ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit8 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_50cm, data = field_gcc_ndvi)
 ```
 
 #### lm summary
@@ -1270,7 +1270,7 @@ plot8
 
 ### 9. Model: NDVI Biomass 1m
 ```{r}
-fit9 = lm(mean_ndvi_1m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit9 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_1m, data = field_gcc_ndvi)
 ```
 
 #### lm summary
@@ -1394,7 +1394,7 @@ plot9
 
 ### 10. Model: NDVI Biomass 3m
 ```{r}
-fit10 = lm(mean_ndvi_3m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit10 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_3m, data = field_gcc_ndvi)
 ```
 
 #### lm summary
@@ -1521,7 +1521,7 @@ plot10
 ### 11. Model: NDVI Biomass 5m
 
 ```{r}
-fit11 = lm(mean_ndvi_5m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit11 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_5m, data = field_gcc_ndvi)
 ```
 
 #### lm summary
@@ -1644,7 +1644,7 @@ plot11
 
 ### 12. Model: NDVI Biomass 10m
 ```{r}
-fit12 = lm(mean_ndvi_10m ~ live_woody_biomass_C_g_m, data = field_gcc_ndvi)
+fit12 = lm(live_woody_biomass_C_g_m ~ mean_ndvi_10m, data = field_gcc_ndvi)
 ```
 
 
