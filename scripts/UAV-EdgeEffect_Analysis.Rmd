@@ -134,7 +134,7 @@ field_gcc %>% group_by(burn_unburn) %>% summarise(mean=mean(mean_gcc_10m), sd=sd
 field_gcc_ndvi %>% group_by(burn_unburn) %>% summarise(mean=mean(mean_ndvi_10m), sd=sd(mean_ndvi_10m), min=min(mean_ndvi_10m), max=max(mean_ndvi_10m))
 ```
 
-# Part 2:  Post-fire
+# Burned vs Unburned
 
 ## 1. Model: GCC burn/unburned
 ```{r}
@@ -181,6 +181,11 @@ plot(fit1, which = 2) # qqnorm plot of residuals
 ```{r}
 summary(fit1)
 ```
+```{r}
+str(summary(fit1)) 
+```
+
+
 ```{r}
 # All the coefficients
 coef(fit1)
@@ -376,202 +381,255 @@ theme(panel.grid.major = element_blank()) +
 g2
 ```
 
+# Burned vs Unburned Plus fire year
+
+## 3. Model: GCC burn/unburned
+```{r}
+fit3 = lm(mean_gcc_10m ~ burn_unburn + burn_year, data = field_gcc)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_gcc$fit3 = fitted(fit3)
+# Get the residuals of the model
+field_gcc$res3 = residuals(fit3)
+```
+
+```{r}
+qplot(x = fit3, y = res3, data = field_gcc,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = burn_unburn, y = res3, data = field_gcc,
+xlab = "Burn v unburn group",
+ylab = "Residuals",
+main = "Residuals vs burn/unburn")
+```
+```{r}
+qplot(x = factor(1), y = res3, data = field_gcc, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_gcc$res3, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc$res3) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit3, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit3, which = 2) # qqnorm plot of residuals
+```
+
+#### Summary
+```{r}
+summary(fit3)
+```
+```{r}
+str(summary(fit3)) 
+```
+
+
+```{r}
+# All the coefficients
+coef(fit3)
+```
+
+```{r}
+# All the confidence intervals for the coefficients
+confint(fit3)
+```
+```{r}
+data.frame(summary(lsmeans(fit3, pairwise ~ burn_unburn + burn_year),type = "response"))
+```
+
+#### t-test
+```{r}
+( fit3_t = t.test(mean_gcc_10m ~ burn_unburn + burn_year, data = field_gcc) )
+```
+##### Table
+Difference in means
+```{r}
+0.3486187-0.3816558
+```
+
+```{r eval=FALSE, include=FALSE}
+# Write out the results from the two-sample t-test with unequal variances
+# A title for the test
+titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
+# This is the t stat with df and p-value
+ttestres1 = as.character(expression(t[-2.6]==23.2*","~italic(p)==0.02))
+# The estimated difference in group means (I calculated from the test results)
+diff1 = as.character(expression(Delta==-0.033))
+# The 95% CI of the difference
+ci1 = as.character(expression(95*"%"~CI*":"~-0.041~to~-0.005))
+# Put these into a single column of a data.frame
+d1 = data.frame(col = rbind(ttestres1, diff1, ci1) )
+```
+
+```{r eval=FALSE, include=FALSE}
+t1 = tableGrob(d1, rows = NULL, cols = NULL,
+theme = ttheme_default(core = list(bg_params = list(fill = "white"),
+fg_params = list(parse = TRUE),
+padding = unit(c(2.5, 2.5), "mm"))))
+```
+
+```{r eval=FALSE, include=FALSE}
+t1 = gtable_add_grob(t1, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
+t = 1, b = nrow(t1), r = ncol(t1), l = 1)
+```
+
+#### Boxplot
+```{r}
+g3 = ggplot(data=field_gcc, aes(x = burn_unburn, y = mean_gcc_10m, color=burn_year) ) + # define plot axes
+  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
+  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
+stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
+  scale_shape_manual(values = c(23, 24)) +
+  labs(x=(NULL), y= "Mean GCC") +
   
-## 7. Model: GCC burn/unburned
-```{r}
-mod7 = glm(mean_gcc_10m ~ burn_unburn, data = field_gcc, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod7.res = simulateResiduals(fittedModel = mod7, n = 500)
-mod7.res$scaledResiduals
-mod7.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod7.res)
-```
-
-```{r}
-testDispersion(mod7.res)
-```
-
-### Summary
-```{r}
-summary(mod7)
-```
-#### Summary Data Frame
-
-```{r}
-
-mod7_df = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn, type = "response", infer = TRUE)))
-mod7_df 
-mod7_df1 = mod7_df %>% 
-  mutate(model="mod7") %>% 
-  mutate(response = "GCC") %>% 
-  rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
+  scale_color_manual(values = c("#E69F00", "#009E73")) +
   
-  
-  dplyr::select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
-mod7_df1
+  scale_x_discrete(labels= c("Burned", "Unburned")) +
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+
+
+g3
+```
+
+## 4. Model:NDVI burn/unburned
+```{r}
+fit2 = lm(mean_ndvi_10m ~ burn_unburn +burn_year, data = field_gcc_ndvi)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_gcc_ndvi$fit4 = fitted(fit4)
+# Get the residuals of the model
+field_gcc_ndvi$res4 = residuals(fit4)
 ```
 
 ```{r}
-( mod7_contrast = data.frame(summary(lsmeans(mod7, revpairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
+qplot(x = fit4, y = res4, data = field_gcc_ndvi,
+main = "Residuals vs Fitted Values")
+```
 
-mod7_contrast1 = mod7_contrast %>%  mutate(response = "GCC")  
+```{r}
+qplot(x = burn_unburn, y = res4, data = field_gcc_ndvi,
+xlab = "Burn v unburn group",
+ylab = "Residuals",
+main = "Residuals vs burn/unburn")
+```
+```{r}
+qplot(x = factor(1), y = res4, data = field_gcc_ndvi, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_gcc_ndvi$res4, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc_ndvi$res4) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit4, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit4, which = 2) # qqnorm plot of residuals
+```
+
+#### Summary
+```{r}
+summary(fit4)
+```
+```{r}
+# All the coefficients
+coef(fit4)
+```
+
+```{r}
+# All the confidence intervals for the coefficients
+confint(fit4)
+```
+```{r}
+data.frame(summary(lsmeans(fit4, pairwise ~ burn_unburn),type = "response"))
+```
+
+#### t-test
+```{r}
+( fit4_t = t.test(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi) )
+```
+
+
+
+##### Table
+Difference in means
+```{r eval=FALSE, include=FALSE}
+0.6391836-0.728424
+```
+
+```{r eval=FALSE, include=FALSE}
+# Write out the results from the two-sample t-test with unequal variances
+# A title for the test
+titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
+# This is the t stat with df and p-value
+ttestres2 = as.character(expression(italic(p)<0.001))
+# The estimated difference in group means (I calculated from the test results)
+diff2 = as.character(expression(Delta==-0.089))
+# The 95% CI of the difference
+ci2 = as.character(expression(CI*":"~-0.121~to~-0.058))
+# Put these into a single column of a data.frame
+d2 = data.frame(col = rbind(ttestres2, diff2, ci2) )
  
 ```
 
-### Data for graph
-
-```{r}
-(mod7_graph = data.frame(summary(lsmeans(mod7, pairwise ~ burn_unburn),type = "response")))
+```{r eval=FALSE, include=FALSE}
+t2 = tableGrob(d2, rows = NULL, cols = NULL,
+theme = ttheme_default(core = list(bg_params = list(fill = "white"),
+fg_params = list(parse = TRUE),
+padding = unit(c(2.5, 2.5), "mm"))))
 ```
 
-
-```{r}
-levels(mod7_graph$lsmeans.burn_unburn)[levels(mod7_graph$lsmeans.burn_unburn)=="burned"] = "Burned"
-levels(mod7_graph$lsmeans.burn_unburn)[levels(mod7_graph$lsmeans.burn_unburn)=="unburned"] = "Unburned"
-
-( mod7_graph1 = dplyr::select(mod7_graph, lsmeans.burn_unburn:lsmeans.asymp.UCL))
-
-
-
-names(mod7_graph1)[1:6] = c("burn_unburn", "response", "se", "df", "lcl", "ucl")
-mod7_graph1 = data.frame(mod7_graph1)
-mod7_graph1
-
+```{r eval=FALSE, include=FALSE}
+t2 = gtable_add_grob(t2, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
+t = 1, b = nrow(t2), r = ncol(t2), l = 1)
 ```
 
-### Graph
-
+#### Boxplot
 ```{r}
-plot_mod7 = ggplot(data = mod7_graph1, aes(x = burn_unburn, y = response, color = burn_unburn) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
-  labs(x=(NULL), y= "Mean GCC") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  comp_theme
-
-plot_mod7 
-```
-
-#### Box plot
-
-```{r}
-boxplot_mod7 = ggplot(field_gcc, aes(x=burn_unburn, y=mean_gcc_10m, color = burn_unburn, fill=burn_unburn) ) + # define plot axes
-geom_boxplot(fill = "white") +
-  geom_dotplot(binaxis = "y", stackdir = "center", dotsize = .5) + 
-stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + 
-labs(x=(NULL), y= "Mean GCC") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  comp_theme
-
-boxplot_mod7
-
-```
-
-
-
-## 8. Model: NDVI burn/unburned
-```{r}
-mod8 = glm(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi, family = gaussian)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod8.res = simulateResiduals(fittedModel = mod8, n = 500)
-mod8.res$scaledResiduals
-mod8.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod8.res)
-```
-
-```{r}
-testDispersion(mod8.res)
-```
-
-### Summary
-```{r}
-summary(mod8)
-```
-
-#### Summary Dataframe
-```{r}
-mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
-mod8_df
-mod8_df1 = mod8_df %>% 
-  mutate(model="mod8") %>% 
-  mutate(response = "NDVI") %>% 
-  rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% 
-  dplyr::select(model:response, explanatory:se, lcl:contrasts.SE, contrasts.z.ratio:contrasts.p.value)
-mod8_df1
-```
-
-```{r}
-( mod8_contrast = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn),type = "response", infer = TRUE)$contrasts))
-mod8_contrast1 = mod8_contrast %>%  mutate(response = "NDVI") 
-```
-
-### Data for graph
-
-```{r}
-(mod8_graph = data.frame(summary(lsmeans(mod8, pairwise ~ burn_unburn),type = "response")))
-```
-```{r}
-mod8_df = data.frame(summary(lsmeans(mod8, revpairwise ~ burn_unburn, type = "response", infer = TRUE, adjust = "tukey")))
-mod8_df = mod8_df %>% mutate(model="mod8") %>% mutate(response = "NDVI") %>% rename(explanatory = lsmeans.burn_unburn, estimate = lsmeans.lsmean, se = lsmeans.SE, lcl = lsmeans.asymp.LCL, ucl = lsmeans.asymp.UCL, contrast = contrasts.contrast) %>% dplyr::select(model:response, explanatory:se, lcl:contrasts.SE)
-mod8_df
-```
-
-```{r}
-levels(mod8_graph$lsmeans.burn_unburn)[levels(mod8_graph$lsmeans.burn_unburn)=="burned"] = "Burned"
-levels(mod8_graph$lsmeans.burn_unburn)[levels(mod8_graph$lsmeans.burn_unburn)=="unburned"] = "Unburned"
-
-( mod8_graph1 = dplyr::select(mod8_graph, lsmeans.burn_unburn:lsmeans.asymp.UCL))
-
-
-
-names(mod8_graph1)[1:6] = c("burn_unburn", "response", "se", "df", "lcl", "ucl")
-mod8_graph1 = data.frame(mod8_graph1)
-mod8_graph1
-
-```
-
-### Graph
-
-```{r}
-plot_mod8 = ggplot(data = mod8_graph1, aes(x = burn_unburn, y = response, color = burn_unburn) ) + 
-   geom_errorbar(width = .2, lwd = .75, aes(ymin = lcl, ymax = ucl), position = position_dodge(width = .75)) + 
-geom_point(size = 3, position = position_dodge(width = .75)) + 
+g4 = ggplot(data=field_gcc_ndvi, aes(x = burn_unburn, y = mean_ndvi_10m, color=burn_unburn) ) + # define plot axes
+  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
+  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
+stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
+  scale_shape_manual(values = c(23, 24)) +
   labs(x=(NULL), y= "Mean NDVI") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  comp_theme
+  
+  scale_color_manual(values = c("#E69F00", "#009E73")) +
+  
+  scale_x_discrete(labels= c("Burned", "Unburned")) +
+  theme_bw() + 
+  theme(legend.position = "none") +  
+theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
 
-plot_mod8 
+
+g4
 ```
 
-```{r}
-boxplot_mod8 = ggplot(field_gcc_ndvi, aes(x=burn_unburn, y=mean_ndvi_10m, color = burn_unburn, fill = burn_unburn) ) + # define plot axes
-geom_boxplot(fill = "white") +
-  geom_dotplot(binaxis = "y", stackdir = "center",
-dotsize = .5) + # Dotplot by group
-stat_summary(fun.y = mean, geom= "point", shape = 18, size = 5) + # Add means to the plot
-labs(x=(NULL), y= "Mean NDVI") +
-  scale_color_manual(values = c("#E69F00", "#009E73")) + 
-  comp_theme
-
-boxplot_mod8
-
-```
-
-
+  
+# Distance from Unburned Edge
 ## 11. Model: GCC distance from unburned edge 
 ```{r}
 mod11 = glm(mean_gcc_10m ~ plot_dis, data = field_gcc, family = gaussian)
