@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-- Extract NDVI values
+- Extract mean NDVI values with buffers
 
 
 
@@ -32,9 +32,10 @@ library(ggplot2)
 
 # NVDI DATA
 
-alnus_tr1_f08
-cn_tr2_f17
-cn_tr1_f20 
+- alnus_tr1_f08
+- bp_tr2_f1
+- cn_tr2_f17
+- cn_tr1_f20 
 
 # NDVI rasters (Pix4D calcualted)
 
@@ -53,21 +54,6 @@ cn_tr2_f17_ndvi
 cn_tr1_f20_ndvi
 ```
 
-
-# NDVI rasters (R calculated)
-
-```{r}
-alnus_tr1_f08 = raster("../data/ndvi/alnus_f08_NDVI.tif")
-cn_tr2_f17 = raster("../data/ndvi/cn_f17_NDVI.tif")
-cn_tr1_f20 = raster("../data/ndvi/cn_f20_NDVI.tif")
-```
-
-view raster meta data
-```{r}
-alnus_tr1_f08
-cn_tr2_f17
-cn_tr1_f20
-```
 
 # Field point data
 
@@ -429,6 +415,131 @@ ndvi_all
 write.csv(ndvi_all,"../outputs/extracted_data/2020-08-10_ndvi_all_pix4D.csv", row.names = FALSE)
 ```
 
+# Extract all values within buffer
+
+## 10m - extract mean pixel values
+
+```{r}
+extract_alnus_tr1_10m_all = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=10, df=TRUE)
+```
+
+```{r}
+extract_bp_tr2_10m_all = raster::extract(bp_tr2_f13_ndvi, bp_tr2_pt, buffer=10, df=TRUE)
+
+extract_cn_tr1_10m_all = raster::extract(cn_tr1_f20_ndvi, cn_tr1_pt, buffer=10, df=TRUE)
+
+extract_cn_tr2_10m_all = raster::extract(cn_tr2_f17_ndvi, cn_tr2_pt, buffer=10, df=TRUE)
+```
+
+```{r}
+head(extract_alnus_tr1_10m_all)
+tail(extract_alnus_tr1_10m_all)
+```
+### alnus add plot id
+```{r}
+alnus_tr1_pt@data
+```
+```{r}
+df_extract_alnus_tr1_10m_all = data.frame(extract_alnus_tr1_10m_all)
+```
+
+
+```{r}
+alnus_ndvi = df_extract_alnus_tr1_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "Alnus_1984_1_-25",
+                    ifelse(ID == "2", "Alnus_1984_1_-50",
+                    ifelse(ID == "3", "Alnus_1984_1_100",
+                    ifelse(ID == "4", "Alnus_1984_1_150", 
+                    ifelse(ID == "5", "Alnus_1984_1_200",
+                    ifelse(ID == "6", "Alnus_1984_1_25",
+                    ifelse(ID == "7", "Alnus_1984_1_50", "Alnus_1984_1_75")))))))) %>%
+  rename(ndvi = RU_ALN_TR1_FL008M_ndvi)
+```
+
+
+### bp tr2 add plot id
+```{r}
+bp_tr2_pt@data
+```
+```{r}
+df_extract_bp_tr2_10m_all = data.frame(extract_bp_tr2_10m_all)
+head(df_extract_bp_tr2_10m_all)
+```
+
+
+```{r}
+bptr2_ndvi = df_extract_bp_tr2_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "BP_1983_2_-25a",
+                    ifelse(ID == "2", "BP_1983_2_-25b",
+                    ifelse(ID == "3", "BP_1983_2_100",
+                    ifelse(ID == "4", "BP_1983_2_150", 
+                    ifelse(ID == "5", "BP_1983_2_200",
+                    ifelse(ID == "6", "BP_1983_2_25",
+                    ifelse(ID == "7", "BP_1983_2_50", "BP_1983_2_75")))))))) %>%
+  rename(ndvi = RU_BP_TR2_FL013M_ndvi)
+
+head(bptr2_ndvi)
+```
 
 
 
+### CN tr1 add plot id
+```{r}
+cn_tr1_pt@data
+```
+```{r}
+df_extract_cn_tr1_10m_all = data.frame(extract_cn_tr1_10m_all)
+head(df_extract_cn_tr1_10m_all)
+```
+
+
+```{r}
+cntr1_ndvi = df_extract_cn_tr1_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "CN_2001_1_-25",
+                    ifelse(ID == "2", "CN_2001_1_-50",
+                    ifelse(ID == "3", "CN_2001_1_100",
+                    ifelse(ID == "4", "CN_2001_1_150", 
+                    ifelse(ID == "5", "CN_2001_1_200",
+                    ifelse(ID == "6", "CN_2001_1_25",
+                    ifelse(ID == "7", "CN_2001_1_50", "CN_2001_1_75")))))))) %>%
+  rename(ndvi = RU_CYN_TR1_FL020M_ndvi)
+
+head(cntr1_ndvi)
+```
+
+
+
+### CN tr2 add plot id
+```{r}
+cn_tr2_pt@data
+```
+```{r}
+df_extract_cn_tr2_10m_all = data.frame(extract_cn_tr2_10m_all)
+head(df_extract_cn_tr2_10m_all)
+```
+
+
+```{r}
+cntr2_ndvi = df_extract_cn_tr2_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "CN_2001_2_-25",
+                    ifelse(ID == "2", "CN_2001_2_-50",
+                    ifelse(ID == "3", "CN_2001_2_100",
+                    ifelse(ID == "4", "CN_2001_2_150", 
+                    ifelse(ID == "5", "CN_2001_2_200",
+                    ifelse(ID == "6", "CN_2001_2_25",
+                    ifelse(ID == "7", "CN_2001_2_50", "CN_2001_2_75")))))))) %>%
+  rename(ndvi = RU_CYN_TR2_FL017M_ndvi)
+
+head(cntr2_ndvi)
+```
+
+## Combine in to single data frame
+
+```{r}
+ndvi_10m_all =  bind_rows(alnus_ndvi, bptr2_ndvi, cntr1_ndvi, cntr2_ndvi) 
+summary(ndvi_10m_all)
+```
+
+```{r}
+write.csv(ndvi_10m_all,"../outputs/extracted_data/2020-08-13_ndvi_all_pixels.csv", row.names = FALSE)
+```
