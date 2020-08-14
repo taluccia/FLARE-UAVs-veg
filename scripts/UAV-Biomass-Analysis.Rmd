@@ -257,7 +257,9 @@ fit1 = lm(live_woody_biomass_C_g_m ~ mean_gcc_25cm, data = field_gcc)
 ```{r}
 summary(fit1)
 ```
-
+```{r}
+str(summary(fit1)) 
+```
 ```{r}
 fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1), extractAIC(fit1))
 fit1_df
