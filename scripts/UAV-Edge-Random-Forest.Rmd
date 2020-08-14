@@ -1,0 +1,294 @@
+---
+title: "UAV-Edge-RandomForest"
+author: "Anna Talucci"
+date: "8/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+```{r eval=FALSE, include=FALSE}
+
+install.packages(c('rsample', "randomForest", "ranger", "caret", "h2o"), lib='C:/Users/atalucci/Documents/R/win-library/3.6')
+
+
+install.packages(c('pdp', "vip"), lib='C:/Users/atalucci/Documents/R/win-library/3.6')
+
+install.packages(c('ROCR'), lib='C:/Users/atalucci/Documents/R/win-library/3.6')
+
+```
+reprtree
+# Packages
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(cowplot)
+library(rsample)      # data splitting 
+library(randomForest) # basic implementation
+library(ranger)       # a faster implementation of randomForest
+library(caret)        # an aggregator package for performing many machine learning models
+library(h2o)          # an extremely fast java-based platform
+library(pdp)
+library(vip)
+library(gbm)
+library(dismo)
+library(purrr) # for looping
+library(scales)
+library(ROCR)
+```
+
+
+# Field Data
+```{r}
+field_data = read.csv("../data/field_subset/field_data_all.csv")
+```
+
+```{r}
+head(field_data)
+```
+
+```{r}
+fd1 = field_data %>% dplyr::select(ID:aspect)
+```
+
+
+# UAV Data
+
+```{r}
+ndvi = read.csv("../data/extracted_data/2020-08-13_ndvi_all_pixels.csv", strip.white = TRUE)
+```
+
+```{r}
+head(ndvi)
+```
+```{r}
+ndvi1 = ndvi %>% dplyr::select(ndvi:plot_id) %>% rename(ID=plot_id)
+```
+
+# Combine NDVI and field data
+```{r}
+ndvi_fd = merge(fd1, ndvi1, by="ID")
+head(ndvi_fd)
+tail(ndvi_fd)
+```
+
+# Subset for edge analysis
+
+```{r}
+edge_data = ndvi_fd %>% filter(ID %in% c("CN_2001_2_-25", "CN_2001_1_-25", "BP_1983_2_-25a", "Alnus_1984_1_-25", "CN_2001_2_25", "CN_2001_1_25", "BP_1983_2_25", "Alnus_1984_1_25"))
+```
+
+
+# RF Edge
+
+```{r}
+head(mtcars)
+set.seed(1353)
+car_split <- initial_split(mtcars, prop = .7, strata = cyl, breaks=3)
+train_data <- training(car_split)
+test_data <- testing(car_split)
+
+train_data
+test_data
+```
+
+
+
+```{r}
+set.seed(123)
+edge_split <- initial_split(edge_data, prop = .7, strata = burn_unburn, breaks = 2)
+edge_train <- training(edge_split)
+edge_test  <- testing(edge_split)
+```
+
+```{r}
+summary(edge_train)
+summary(edge_test)
+```
+
+RandomForest(formula, ntree=n, mtry=FALSE, maxnodes = NULL)
+
+```{r}
+head(edge_train)
+```
+
+
+```{r}
+edge_train_rf = randomForest::randomForest(as.factor(burn_unburn) ~ ndvi + up_flood + slope + burn_year, 
+  data=edge_train,
+  importance=TRUE)
+```
+
+```{r}
+edge_predictions_rf <- predict(edge_train_rf, newdata = edge_test[,c("ndvi", "up_flood", "slope", "burn_year")])
+confusionMatrix(edge_predictions_rf, edge_test$burn_unburn)
+```
+
+# Fit RF model
+https://www.listendata.com/2014/11/random-forest-with-r.html
+
+```{r}
+rf1 = randomForest::randomForest(as.factor(burn_unburn) ~ ndvi + up_flood + slope + burn_year, 
+  data=edge_data,
+  importance=TRUE)
+```
+
+```{r}
+rf1
+```
+
+
+```{r}
+plot(rf1, main = "Error rate of random forest")
+```
+
+```{r}
+varImpPlot(rf1, pch = 20, main = "Importance of Variables")
+```
+
+```{r}
+# Variable importance plot (compare to randomForest::varImpPlot(boston_rf))
+vip(rf1, bar = TRUE, horizontal = TRUE, size = 1.5) 
+```
+
+```{r}
+partialPlot(rf1, pred.data = edge_data, x.var = "ndvi")
+```
+
+```{r}
+pred1=predict(rf1,type = "prob")
+
+perf = prediction(pred1[,2], edge_data$burn_unburn)
+# 1. Area under curve
+auc = performance(perf, "auc")
+auc
+
+# Calculate the AUC and print it to screen
+auc.perf <- performance(perf, measure = "auc")
+print(auc.perf@y.values)
+# 2. True Positive and Negative Rate
+pred3 = performance(perf, "tpr","fpr")
+# 3. Plot the ROC curve
+plot(pred3,main="ROC Curve for Random Forest",col=2,lwd=2)
+abline(a=0,b=1,lwd=2,lty=2,col="gray")
+```
+
+
+
+
+***
+## Four Variable Model
+Make list of models and variables
+Hi_3var = brt.model3, Mod_3var = brt.model4, Full_3var = brt.model5,
+```{r}
+mods4 = list(edge = edge_train_rf)
+vars4 = c("ndvi", "up_flood", "slope", "burn_year")
+names(vars4) = vars4
+vars4
+```
+
+Nicer variable names for x axis labels Must be in same order as vars
+```{r}
+x_names4 = c("ndvi", "up_flood", "slope", "burn_year")
+```
+
+### Predicted dataset 
+Use nested loops for each variable and then each model within each variable
+
+ For outer loop use map() or lapply()
+ For the inner loop use imap_dfr() to use models and model names and bind together
+
+ Work out approach with a single variable
+ Goal is to get a dataset with predictions from all models stacked together for one x variable
+
+### Loop throughy single varible
+partialPlot
+```{r}
+pred_test4 = map(vars4[[1]], function(variable) {
+     imap_dfr(mods4, function(Model, mod.name) {
+          preddat = partialPlot(Model, i.var = variable, return.grid = TRUE)
+          preddat$center_y = scale(preddat$y, scale = FALSE)
+          preddat$x = preddat[, 1]
+          preddat$Model = mod.name
+          preddat
+     })
+})
+
+pred_test4
+```
+
+### Loop through all Varaibles 
+If that worked, loop through all variables
+```{r}
+pred_mods4 = map(vars4, function(variable) {
+     imap_dfr(mods4, function(model, mod.name) {
+          preddat = plot.gbm(model, i.var = variable, return.grid = TRUE)
+          preddat$center_y = scale(preddat$y, scale = FALSE)
+          preddat$x = preddat[, 1]
+          preddat$model = mod.name
+          preddat
+     })
+})
+```
+
+Figure out plot limits (if want all the same) by binding all groups together and calculating min and max center_y
+```{r}
+range(bind_rows(pred_mods4)$center_y)
+```
+
+### Plot with improved x axis names ----
+```{r}
+model_id <- ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        labs(y = "Fitted Function",
+             x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14)) +
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)+
+        scale_y_continuous(limits=c(-1.5,1.5), breaks=c(-1.5,-1,-0.75,0,0.5,1,1.5))
+model_id
+```
+Leaving legend to indicate multiple models plotted.
+
+### Legends 
+Assemble ledgend for final figure
+```{r}
+legend.manuscript <- ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Burning conditions model", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=TRUE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "dotdash"), name = "Burning conditions model", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=TRUE), guides(linetype = guide_legend(override.aes = list(size = 2)))) +
+        labs(y = "Fitted Function",
+             x = x_names4[[1]]) +
+        theme_bw(base_size = 14) +
+        theme(axis.text.x = element_text(size = 11, color = "black"),
+              axis.text.y = element_text(size = 11, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "right",
+              legend.title = element_text(size = 11, color = "black"),
+              legend.text = element_text(size = 11, color = "black")) +
+        
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)
+legend.manuscript
+```
+
