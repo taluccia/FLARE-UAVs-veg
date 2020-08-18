@@ -417,7 +417,7 @@ write.csv(ndvi_all,"../outputs/extracted_data/2020-08-10_ndvi_all_pix4D.csv", ro
 
 # Extract all values within buffer
 
-## 10m - extract mean pixel values
+## 10m - extract all pixel values
 
 ```{r}
 extract_alnus_tr1_10m_all = raster::extract(alnus_tr1_f08_ndvi, alnus_tr1_pt, buffer=10, df=TRUE)
@@ -521,8 +521,8 @@ head(df_extract_cn_tr2_10m_all)
 
 ```{r}
 cntr2_ndvi = df_extract_cn_tr2_10m_all %>%
-  mutate(plot_id = ifelse(ID == "1", "CN_2001_2_-25",
-                    ifelse(ID == "2", "CN_2001_2_-50",
+  mutate(plot_id = ifelse(ID == "1", "CN_2001_2_-35",
+                    ifelse(ID == "2", "CN_2001_2_-60",
                     ifelse(ID == "3", "CN_2001_2_100",
                     ifelse(ID == "4", "CN_2001_2_150", 
                     ifelse(ID == "5", "CN_2001_2_200",

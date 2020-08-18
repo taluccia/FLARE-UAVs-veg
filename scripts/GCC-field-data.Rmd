@@ -690,3 +690,134 @@ gcc_all
 ```{r}
 write.csv(gcc_all,"../outputs/extracted_data/gcc_all.csv", row.names = FALSE)
 ```
+
+
+# Extract all pixel values in 10m
+## 10m - extract all pixel values
+Extract a mean pixel value based on a 10m  radius for each plot point location. 
+```{r}
+extract_alnus_tr1_10m_all = raster::extract(alnus_tr1_f07, alnus_tr1_pt, buffer=10, df=TRUE )
+
+extract_brp_tr2_10m_all = raster::extract(brp_tr2_f12, brp_tr2_pt, buffer=10,  df=TRUE )
+extract_cn_tr1_10m_all = raster::extract(cn_tr1_f15, cn_tr1_pt, buffer=10,  df=TRUE )
+extract_cn_tr2_10m_all = raster::extract(cn_tr2_f17, cn_tr2_pt, buffer=10,  df=TRUE )
+```
+
+### alnus add plot id
+```{r}
+alnus_tr1_pt@data
+```
+```{r}
+df_extract_alnus_tr1_10m_all = data.frame(extract_alnus_tr1_10m_all)
+```
+
+```{r}
+head(df_extract_alnus_tr1_10m_all)
+tail(df_extract_alnus_tr1_10m_all)
+```
+
+
+```{r}
+alnus_gcc = df_extract_alnus_tr1_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "Alnus_1984_1_-25",
+                    ifelse(ID == "2", "Alnus_1984_1_-50",
+                    ifelse(ID == "3", "Alnus_1984_1_100",
+                    ifelse(ID == "4", "Alnus_1984_1_150", 
+                    ifelse(ID == "5", "Alnus_1984_1_200",
+                    ifelse(ID == "6", "Alnus_1984_1_25",
+                    ifelse(ID == "7", "Alnus_1984_1_50", "Alnus_1984_1_75")))))))) %>%
+  dplyr::rename(gcc = alnus_tr1_f07_gcc)
+```
+
+```{r}
+head(alnus_gcc)
+```
+
+
+
+### bp tr2 add plot id
+```{r}
+brp_tr2_pt@data
+```
+```{r}
+df_extract_bp_tr2_10m_all = data.frame(extract_brp_tr2_10m_all)
+head(extract_brp_tr2_10m_all)
+```
+
+
+```{r}
+bptr2_gcc = df_extract_bp_tr2_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "BP_1983_2_-25a",
+                    ifelse(ID == "2", "BP_1983_2_-25b",
+                    ifelse(ID == "3", "BP_1983_2_100",
+                    ifelse(ID == "4", "BP_1983_2_150", 
+                    ifelse(ID == "5", "BP_1983_2_200",
+                    ifelse(ID == "6", "BP_1983_2_25",
+                    ifelse(ID == "7", "BP_1983_2_50", "BP_1983_2_75")))))))) %>%
+  dplyr::rename(gcc = brp_tr2_f12_gcc)
+
+head(bptr2_gcc)
+```
+
+
+
+### CN tr1 add plot id
+```{r}
+cn_tr1_pt@data
+```
+```{r}
+df_extract_cn_tr1_10m_all = data.frame(extract_cn_tr1_10m_all)
+head(df_extract_cn_tr1_10m_all)
+```
+
+
+```{r}
+cntr1_gcc = df_extract_cn_tr1_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "CN_2001_1_-25",
+                    ifelse(ID == "2", "CN_2001_1_-50",
+                    ifelse(ID == "3", "CN_2001_1_100",
+                    ifelse(ID == "4", "CN_2001_1_150", 
+                    ifelse(ID == "5", "CN_2001_1_200",
+                    ifelse(ID == "6", "CN_2001_1_25",
+                    ifelse(ID == "7", "CN_2001_1_50", "CN_2001_1_75")))))))) %>%
+  dplyr::rename(gcc = cn_tr1_f15_gcc)
+
+head(cntr1_gcc)
+```
+
+
+
+### CN tr2 add plot id
+```{r}
+cn_tr2_pt@data
+```
+```{r}
+df_extract_cn_tr2_10m_all = data.frame(extract_cn_tr2_10m_all)
+head(df_extract_cn_tr2_10m_all)
+```
+
+
+```{r}
+cntr2_gcc = df_extract_cn_tr2_10m_all %>%
+  mutate(plot_id = ifelse(ID == "1", "CN_2001_2_-35",
+                    ifelse(ID == "2", "CN_2001_2_-60",
+                    ifelse(ID == "3", "CN_2001_2_100",
+                    ifelse(ID == "4", "CN_2001_2_150", 
+                    ifelse(ID == "5", "CN_2001_2_200",
+                    ifelse(ID == "6", "CN_2001_2_25",
+                    ifelse(ID == "7", "CN_2001_2_50", "CN_2001_2_75")))))))) %>%
+  dplyr::rename(gcc = cn_tr2_f17_gcc)
+
+head(cntr2_gcc)
+```
+
+## Combine in to single data frame
+
+```{r}
+gcc_10m_all =  bind_rows(alnus_gcc, bptr2_gcc, cntr1_gcc, cntr2_gcc) 
+summary(gcc_10m_all)
+```
+
+```{r}
+write.csv(gcc_10m_all,"../outputs/extracted_data/2020-08-17_gcc_all_pixels.csv", row.names = FALSE)
+```
