@@ -8,6 +8,17 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r eval=FALSE, include=FALSE}
+install.packages(c('aomisc'),
+lib='C:/Users/atalucci/Documents/R/win-library/3.6')
+
+install.packages("remotes")
+remotes::install_github("OnofriAndreaPG/aomisc")
+
+```
+
+
+
 # Pakcages
 ```{r}
 library(tidyr)
@@ -22,6 +33,7 @@ library(DHARMa)
 library(rcompanion)
 library(qpcR)
 library(tidyverse)
+library(aomisc)
 ```
 
 # Functions
@@ -146,6 +158,7 @@ field_gcc1 = field_gcc %>% dplyr::select(ID:aspect, live_woody_biomass_C_g_m, me
 head(field_gcc1)
 ```
 
+### gcc and biomass
 ```{r}
 
 set.seed(16)
@@ -200,5 +213,123 @@ cowplot::plot_grid(plotlist = all_plots[[1]])
 
 response_plots = map(all_plots, ~cowplot::plot_grid(plotlist = .x))
 response_plots
+```
+
+### ndvi and biomass
+```{r}
+field_gcc_ndvi1 = field_gcc_ndvi %>% dplyr::select(ID:aspect, live_woody_biomass_C_g_m, mean_gcc_25cm:mean_gcc_10m, mean_ndvi_25cm:mean_ndvi_10m)
+
+head(field_gcc_ndvi1)
+```
+
+```{r}
+
+set.seed(16)
+
+
+response = names(field_gcc_ndvi1)[12]
+expl = names(field_gcc_ndvi1)[13:24]
+
+response = purrr::set_names(response)
+response
+
+expl = purrr::set_names(expl)
+expl
+
+scatter_fun = function(x, y) {
+     ggplot(field_gcc_ndvi1, aes(x = .data[[x]], y = .data[[y]]) ) +
+          geom_point() +
+          geom_smooth(method = "loess", se = FALSE, color = "grey74") +
+          theme_bw() +
+          labs(x = x,
+               y = y)
+}
+
+scatter_fun = function(x, y) {
+     ggplot(field_gcc_ndvi1, aes_string(x = x, y = y ) ) +
+          geom_point() +
+          geom_smooth(method = "loess", se = FALSE, color = "grey74") +
+          theme_bw() 
+}
+
+
+
+all_plots = map(response,
+                ~map(expl, scatter_fun, y = .x) )
+
+pdf("../figures/2020-08-17_explore-biomass.pdf")
+all_plots
+dev.off()
+
+
+cowplot::plot_grid(plotlist = all_plots[[1]])
+
+response_plots2 = map(all_plots, ~cowplot::plot_grid(plotlist = .x))
+response_plots2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-08-17_explore-biomass.jpeg", plot = response_plots2, width = 12, height = 12, units = c("in"), dpi=600 )
+```
+
+
+### NDVI biomass bunr only
+```{r}
+field_gcc_ndvi2 = field_gcc_ndvi %>% dplyr::select(ID:aspect, live_woody_biomass_C_g_m, mean_ndvi_25cm:mean_ndvi_10m) %>% filter(burn_unburn == "burned")
+
+head(field_gcc_ndvi2)
+```
+
+```{r}
+
+set.seed(16)
+
+
+response = names(field_gcc_ndvi1)[12]
+expl = names(field_gcc_ndvi1)[13:18]
+
+response = purrr::set_names(response)
+response
+
+expl = purrr::set_names(expl)
+expl
+
+scatter_fun = function(x, y) {
+     ggplot(field_gcc_ndvi2, aes(x = .data[[x]], y = .data[[y]]) ) +
+          geom_point() +
+          geom_smooth(method = "loess", se = FALSE, color = "grey74") +
+          theme_bw() +
+          labs(x = x,
+               y = y)
+}
+
+scatter_fun = function(x, y) {
+     ggplot(field_gcc_ndvi2, aes_string(x = x, y = y ) ) +
+          geom_point() +
+          geom_smooth(method = "loess", se = FALSE, color = "grey74") +
+          theme_bw() 
+}
+
+
+
+all_plots = map(response,
+                ~map(expl, scatter_fun, y = .x) )
+
+
+cowplot::plot_grid(plotlist = all_plots[[1]])
+
+response_plots = map(all_plots, ~cowplot::plot_grid(plotlist = .x))
+response_plots
+```
+
+# Logistic regression
+
+```{r}
+model <- drm(live_woody_biomass_C_g_m ~ mean_ndvi_10m, fct = L.3(), data = field_gcc_ndvi1)
+summary(model)
+```
+
+```{r}
+plot(model, log="", main = "Logistic function")
 ```
 
