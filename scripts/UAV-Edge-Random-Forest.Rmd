@@ -53,7 +53,6 @@ library(dismo)
 library(purrr) # for looping
 library(scales)
 library(ROCR)
-library(edarf)
 library(magrittr)
 ```
 
@@ -64,7 +63,7 @@ field_data = read.csv("../data/field_subset/field_data_all.csv")
 ```
 
 ```{r}
-head(field_data)
+field_data
 ```
 
 ```{r}
@@ -74,6 +73,7 @@ fd1 = field_data %>% dplyr::select(ID:aspect)
 
 # UAV Data
 
+## NDVI
 ```{r}
 ndvi = read.csv("../data/extracted_data/2020-08-13_ndvi_all_pixels.csv", strip.white = TRUE)
 ```
@@ -82,57 +82,191 @@ ndvi = read.csv("../data/extracted_data/2020-08-13_ndvi_all_pixels.csv", strip.w
 head(ndvi)
 ```
 ```{r}
-ndvi1 = ndvi %>% dplyr::select(ndvi:plot_id) %>% rename(ID=plot_id)
+ndvi1 = ndvi %>% dplyr::select(ndvi:plot_id) %>% dplyr::rename(ID=plot_id)
+head(ndvi1)
 ```
-
-# Combine NDVI and field data
 ```{r}
 ndvi_fd = merge(fd1, ndvi1, by="ID")
 head(ndvi_fd)
 tail(ndvi_fd)
 ```
-
-# Subset for edge analysis
+### Subset for edge analysis
 
 ```{r}
-edge_data = ndvi_fd %>% filter(ID %in% c("CN_2001_2_-25", "CN_2001_1_-25", "BP_1983_2_-25a", "Alnus_1984_1_-25", "CN_2001_2_25", "CN_2001_1_25", "BP_1983_2_25", "Alnus_1984_1_25"))
+edge_data_ndvi = ndvi_fd %>% filter(ID %in% c("CN_2001_2_-35", "CN_2001_1_-25", "BP_1983_2_-25b", "Alnus_1984_1_-25", "CN_2001_2_25", "CN_2001_1_25", "BP_1983_2_25", "Alnus_1984_1_25"))
+
+summary(edge_data_ndvi)
 ```
+
+## GCC
+```{r}
+gcc = read.csv("../data/extracted_data/2020-08-17_gcc_all_pixels.csv", strip.white = TRUE)
+```
+
+```{r}
+head(gcc)
+```
+```{r}
+gcc1 = gcc %>% dplyr::select(gcc:plot_id) %>% dplyr::rename(ID=plot_id)
+
+head(gcc1)
+```
+
+
+```{r}
+gcc_fd = merge(fd1, gcc1, by="ID")
+head(gcc_fd)
+tail(gcc_fd)
+```
+
+### Subset for edge analysis
+
+```{r}
+edge_data_gcc = gcc_fd %>% filter(ID %in% c("CN_2001_2_-35", "CN_2001_1_-25", "BP_1983_2_-25b", "Alnus_1984_1_-25", "CN_2001_2_25", "CN_2001_1_25", "BP_1983_2_25", "Alnus_1984_1_25"))
+
+summary(edge_data_gcc)
+```
+
+
 
 
 # RF Edge
-
-```{r}
-head(mtcars)
-set.seed(1353)
-car_split <- initial_split(mtcars, prop = .7, strata = cyl, breaks=3)
-train_data <- training(car_split)
-test_data <- testing(car_split)
-
-train_data
-test_data
-```
-
-
-
+## NDVI
 ```{r}
 set.seed(123)
-edge_split <- initial_split(edge_data, prop = .7, strata = burn_unburn, breaks = 2)
-edge_train <- training(edge_split)
-edge_test  <- testing(edge_split)
+edge_split_ndvi <- initial_split(edge_data_ndvi, prop = .7, strata = burn_unburn, breaks = 2)
+edge_train_ndvi <- training(edge_split_ndvi)
+edge_test_ndvi  <- testing(edge_split_ndvi)
 ```
 
 ```{r}
-summary(edge_train)
-summary(edge_test)
+summary(edge_train_ndvi)
+summary(edge_test_ndvi)
 ```
 
 RandomForest(formula, ntree=n, mtry=FALSE, maxnodes = NULL)
 
 ```{r}
-head(edge_train)
+head(edge_train_ndvi)
+```
+
+```{r}
+set.seed(123)
+df_rf1 <- edge_train_ndvi %>% na.omit()
+
+rf1 = randomForest::randomForest(as.factor(burn_unburn) ~ ndvi + up_flood + slope + burn_year, 
+  data=df_rf1,
+  ntree = 500,
+  importance=TRUE)
+```
+
+```{r}
+rf1
+```
+
+```{r}
+df_rf1 <- df_rf1 %>% 
+  mutate(predicted = predict(rf1))
+
+# Get performance measures
+confusionMatrix(df_rf1$predicted, df_rf1$burn_unburn)
 ```
 
 
+```{r}
+plot(rf1, main = "Error rate of random forest")
+```
+
+```{r}
+varImpPlot(rf1, pch = 20, main = "Importance of Variables")
+```
+
+```{r}
+# Variable importance plot (compare to randomForest::varImpPlot(boston_rf))
+vip(rf1, bar = TRUE, horizontal = TRUE, size = 1.5) 
+```
+
+
+
+```{r}
+partialPlot(rf1, pred.data = edge_train_ndvi, x.var = "ndvi")
+```
+
+
+## GCC
+```{r}
+set.seed(123)
+edge_split_gcc <- initial_split(edge_data_gcc, prop = .9, strata = burn_unburn, breaks = 2)
+edge_train_gcc <- training(edge_split_gcc)
+edge_test_gcc  <- testing(edge_split_gcc)
+```
+
+```{r}
+summary(edge_train_gcc)
+summary(edge_test_gcc)
+```
+
+RandomForest(formula, ntree=n, mtry=FALSE, maxnodes = NULL)
+
+```{r}
+head(edge_train_gcc)
+```
+
+```{r}
+set.seed(123)
+df_rf2 <- edge_test_gcc %>% na.omit()
+
+rf2 = randomForest::randomForest(as.factor(burn_unburn) ~ gcc + up_flood + slope + burn_year, 
+  data=df_rf2,
+  ntree = 500,
+  importance=TRUE)
+```
+
+```{r}
+rf2
+```
+
+```{r}
+df_rf2 <- df_rf2 %>% 
+  mutate(predicted = predict(rf2))
+
+# Get performance measures
+confusionMatrix(df_rf2$predicted, df_rf2$burn_unburn)
+```
+
+
+```{r}
+plot(rf2, main = "Error rate of random forest")
+```
+
+```{r}
+varImpPlot(rf2, pch = 20, main = "Importance of Variables")
+```
+
+```{r}
+# Variable importance plot (compare to randomForest::varImpPlot(boston_rf))
+vip(rf2, bar = TRUE, horizontal = TRUE, size = 1.5) 
+```
+
+
+
+```{r}
+partialPlot(rf2, pred.data = edge_train_gcc, x.var = "gcc")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+# OTHER CODE
+***
 ```{r}
 edge_train_rf = randomForest::randomForest(as.factor(burn_unburn) ~ ndvi + up_flood + slope + burn_year, 
   data=edge_train,
@@ -150,7 +284,7 @@ https://www.listendata.com/2014/11/random-forest-with-r.html
 
 ```{r}
 set.seed(123)
-df_rf <- edge_data %>% na.omit()
+df_rf <- edge_data_ndvi %>% na.omit()
 
 rf1 = randomForest::randomForest(as.factor(burn_unburn) ~ ndvi + up_flood + slope + burn_year, 
   data=df_rf,
