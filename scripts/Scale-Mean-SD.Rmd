@@ -1,0 +1,128 @@
+---
+title: "Scale Mean and SD"
+author: "Anna Talucci"
+date: "8/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Pakcages
+```{r}
+library(tidyr)
+library(dplyr)
+library(stringr)
+```
+
+# Functions
+
+```{r}
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+```
+
+# Data
+```{r}
+gcc = read.csv("../data/extracted_data/gcc_all_sd.csv")
+```
+
+
+```{r}
+head(gcc)
+```
+```{r}
+gcc1 = gcc %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "sd") %>%
+  mutate(buf_res = numextract(buffer))
+head (gcc1)
+```
+
+
+```{r}
+ndvi = read.csv("../data/extracted_data/2020-08-18_ndvi_all_sd.csv")
+```
+
+
+```{r}
+head(ndvi)
+```
+
+```{r}
+ndvi1 = ndvi %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "sd") %>%
+  mutate(buf_res = numextract(buffer))
+head (ndvi1)
+```
+
+
+# Define graph Theme and color Palette 
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+ 
+```{r}
+
+reg_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+
+
+# Data visualization
+
+
+Boxplot with points
+```{r}
+ggplot(data = gcc1, aes(x = buffer , y = sd, color = factor(buffer))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("sd gcc") +
+          xlab("")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "GCC"))
+```
+
+```{r}
+ggplot(data = ndvi1, aes(x = buffer , y = sd, color = factor(buffer))) +
+  geom_boxplot() +       
+  geom_point() +
+         scale_color_manual(values=cbbPalette) +
+          ylab("sd NDVI") +
+          xlab("")  +
+           theme_bw() + theme(legend.position = "bottom") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "NDVI"))
+```
