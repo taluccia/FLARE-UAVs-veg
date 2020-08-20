@@ -188,48 +188,6 @@ reg_theme = theme_bw() + theme(legend.position = "none") +
 ```
 
 ```{r}
-
-blank_xy_theme = theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.1, r = 0.1, b = 0.6, l = 0.6), "cm")) +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black"))
-
-
-```
-
- 
-```{r}
-
-blank_x_theme = theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_blank(),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black"))
-
-```
-
- 
-```{r}
-
-blank_y_theme = theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_blank(),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_blank(),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black"))
-
-```
-
-```{r}
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
@@ -318,18 +276,29 @@ field_gcc_long1 = mutate(field_gcc_long1, predbiomass = preddat.biomass$fit)
 
 ### Plot
 
-  stat_smooth(method = "lm", col = "black", alpha = .25) +
-  + 
-  scale_y_continuous(breaks = seq(0.3, 0.45, by = .05), name = "GCC (25cm)")
-
 ```{r fig.height=5, fig.width=6}
-plot_fit1 = ggplot(data = field_gcc_long1, aes(x = gcc, y = biomass_log, color = factor(res_meters))) + 
-    geom_point(size = 1) +  
-  geom_smooth(method="lm") +
-    labs(y=expression(C~mass~(g~C~m^-2))) +
-  theme_bw() + theme(legend.position = "bottom") 
+plot_fit1 = ggplot(data = field_gcc_long1, aes(x = gcc, y = biomass_log, color = res_meters)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "GCC", color = "Buffer resolution") +
+  theme_bw() + 
+  theme(legend.position = "bottom") +
+  guides(colour = guide_legend(nrow = 1))
 
 plot_fit1
+  
+```
+
+```{r}
+plot_fit1.1 = ggplot(data = field_gcc_long1, aes(x = gcc, y = biomass_log, color = res_meters)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "GCC", color = "Buffer resolution") +
+  reg_theme
+
+plot_fit1.1
   
 ```
 
@@ -396,13 +365,28 @@ plot(fit2, which = 2) # qqnorm plot of residuals
 ### Plot
 
 ```{r fig.height=5, fig.width=6}
-plot_fit2 = ggplot(data = field_ndvi_long1, aes(x = ndvi, y = biomass_log, color = factor(res_meters))) + 
-    geom_point(size = 1) +  
-  geom_smooth(method="lm") +
-    labs(y=expression(C~mass~(g~C~m^-2))) +
-  theme_bw() + theme(legend.position = "bottom") 
+plot_fit2 = ggplot(data = field_ndvi_long1, aes(x = ndvi, y = biomass_log, color = res_meters)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "NDVI", color = "Buffer resolution") +
+  theme_bw() + 
+  theme(legend.position = "bottom") +
+  guides(colour = guide_legend(nrow = 1))
 
 plot_fit2
+  
+```
+
+```{r}
+plot_fit2.1 = ggplot(data = field_ndvi_long1, aes(x = ndvi, y = biomass_log, color = res_meters)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "NDVI", color = "Buffer resolution") +
+  reg_theme
+
+plot_fit2.1
   
 ```
 
@@ -446,45 +430,29 @@ write.csv(gcc_ndvi_data, '../outputs/model_summary/2020-06-07_all-woody-biomass-
 
 
 # Manuscript Figures 
-
+```{r}
+legend_res <- get_legend(plot_fit1) 
+```
 ## GCC and NDVI
 
-### Axis labels 3 columns
+
 ```{r fig.height=7, fig.width=6}
 
-fig1 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
-  theme(plot.margin = margin(0, 0, 0, 0)) 
+fig1 = cowplot::plot_grid(plot_fit1.1, plot_fit2.1, labels = "AUTO", align = "hv", label_size = 12, ncol= 1)  
   
-
 fig1
 ```
 
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-06-07_Biomass-live-woody-ndvi-gcc.jpeg", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
-```
+
+
 
 ```{r fig.height=7, fig.width=6}
+fig1.1 = cowplot::plot_grid(fig1, legend_res, ncol=1, rel_heights = c(1, 0.04))  
 
-fig2 = cowplot::plot_grid(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8, plot9, plot10, plot11, plot12, labels = "AUTO", align = "hv", label_size = 12, ncol= 3) + 
-  theme(plot.margin = margin(0, 0, 0, 0)) +
-  draw_label("*", x = .285, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .285, y = .835, size = 36, fontface = "bold") +
-  draw_label("*", x = .63, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .63, y = .835, size = 36, fontface = "bold") +
-  draw_label("*", x = .96, y = .59, size = 36, fontface = "bold") +
-  draw_label("*", x = .96, y = .835, size = 36, fontface = "bold") +
-  
-  draw_label("*", x = .285, y = .34, size = 36, fontface = "bold") +
-  draw_label("*", x = .285, y = .09, size = 36, fontface = "bold") +
-  draw_label("*", x = .63, y = .34, size = 36, fontface = "bold") +
-  draw_label("*", x = .63, y = .09, size = 36, fontface = "bold") +
-  draw_label("*", x = .96, y = .34, size = 36, fontface = "bold") +
-  draw_label("*", x = .96, y = .09, size = 36, fontface = "bold") 
-  
-
-fig2
+fig1.1
 ```
 
+
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-07-02_Biomass-live-woody-ndvi-gcc_sig.jpeg", plot = fig2, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/2020-08-20_Biomass-ndvi-gcc.jpeg", plot = fig1.1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
