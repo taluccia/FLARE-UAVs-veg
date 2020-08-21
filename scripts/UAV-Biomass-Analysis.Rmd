@@ -215,11 +215,83 @@ head(field_gcc_long1)
 fit1 = lm(biomass_log ~ gcc + res_meters + gcc:res_meters, data = field_gcc_long1)
 ```
 
+### Summary
+
 ```{r}
 summary(fit1)
 ```
 ```{r}
 summary(fit1)$r.squared 
+```
+
+
+```{r}
+int_25cm = coef(fit1)[1]
+int_50cm = coef(fit1)[1] + coef(fit1)[3]
+int_1m = coef(fit1)[1] + coef(fit1)[4]
+int_3m = coef(fit1)[1] + coef(fit1)[5]
+int_5m = coef(fit1)[1] + coef(fit1)[6]
+int_10m = coef(fit1)[1] + coef(fit1)[7]
+
+int_25cm
+int_50cm
+int_1m
+int_3m
+int_5m
+int_10m
+
+slope_25cm = coef(fit1)[2]
+slope_50cm = coef(fit1)[2] + coef(fit1)[8]
+slope_1m = coef(fit1)[2] + coef(fit1)[9]
+slope_3m = coef(fit1)[2] + coef(fit1)[10]
+slope_5m = coef(fit1)[2] + coef(fit1)[11]
+slope_10m = coef(fit1)[2] + coef(fit1)[12]
+slope_25cm
+slope_50cm
+slope_1m
+slope_3m
+slope_5m
+slope_10m
+
+```
+
+```{r}
+# Calculate race-specific intercepts
+intercepts <- c(coef(fit1)["(Intercept)"],
+                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters50cm"],
+                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters1m"],  
+                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters3m"], 
+                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters5m"], 
+                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters10m"])
+intercepts
+
+lines.df <- data.frame(intercepts = intercepts,
+                       slopes = rep(coef(fit1)["gcc"], 6),
+                       resolution = levels(field_gcc_long$res_meters))
+
+lines.df
+
+```
+```{r}
+rep(coef(fit1)["gcc"])
+```
+
+
+##### Summary Dataframe
+
+```{r}
+fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1))
+fit1_df
+fit1_df2 = tibble::rownames_to_column(fit1_df, "coefficent")
+fit1_df2
+fit1_df3 = fit1_df2 %>% 
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>% 
+  dplyr::select(coefficent:ucl)
+fit1_df3
+```
+#### Save to  csv
+```{r eval=FALSE, include=FALSE}
+write.csv(fit1_df3, '../outputs/model_summary/2020-08-21_Biomass-gcc.csv', row.names = F)
 ```
 
 #### Residuals
@@ -257,23 +329,6 @@ plot(fit1, which = 1) # residual vs fitted values
 ```{r}
 plot(fit1, which = 2) # qqnorm plot of residuals
 ```
-#Predicted Values for Figures
-We want to generate figure that shows the relationship between fire severity and Beetle outbreak severity. We will generate scatter plots of the raw data and then calculate predicted values from the models to graph a line showing the relationship between the response, surface fire effect, and the explanatory, proportion of beetle killed trees. There will be two lines each representing moderate and extreme burning conditions. 
-
-## predic data
-
-```{r}
-preddat.biomass = data.frame(gcc = field_gcc_long1$gcc, res_meters = field_gcc_long1$res_meters)
-head(preddat.biomass)
-
-predbiomass = predict(fit1, newdata = preddat.biomass, se.fit = TRUE)
-
-ucl = with(predbiomass, fit + 2*se.fit)
-lcl = with(predbiomass, fit - 2*se.fit)
-
-field_gcc_long1 = mutate(field_gcc_long1, predbiomass = preddat.biomass$fit)
-```
-
 ### Plot
 
 ```{r fig.height=5, fig.width=6}
@@ -318,11 +373,60 @@ head(field_ndvi_long1)
 fit2 = lm(biomass_log ~ ndvi + res_meters + ndvi:res_meters, data = field_ndvi_long1)
 ```
 
+### Summary
 ```{r}
 summary(fit2)
 ```
 ```{r}
 summary(fit2)$r.squared 
+```
+```{r}
+int_25cm = coef(fit2)[1]
+int_50cm = coef(fit2)[1] + coef(fit2)[3]
+int_1m = coef(fit2)[1] + coef(fit2)[4]
+int_3m = coef(fit2)[1] + coef(fit2)[5]
+int_5m = coef(fit2)[1] + coef(fit2)[6]
+int_10m = coef(fit2)[1] + coef(fit2)[7]
+
+int_25cm
+int_50cm
+int_1m
+int_3m
+int_5m
+int_10m
+
+slope_25cm = coef(fit2)[2]
+slope_50cm = coef(fit2)[2] + coef(fit2)[8]
+slope_1m = coef(fit2)[2] + coef(fit2)[9]
+slope_3m = coef(fit2)[2] + coef(fit2)[10]
+slope_5m = coef(fit2)[2] + coef(fit2)[11]
+slope_10m = coef(fit2)[2] + coef(fit2)[12]
+slope_25cm
+slope_50cm
+slope_1m
+slope_3m
+slope_5m
+slope_10m
+
+```
+
+
+##### Summary Dataframe
+
+```{r}
+fit2_df = data.frame(summary(fit2)$coefficients[,], confint(fit2))
+fit2_df
+fit2_df2 = tibble::rownames_to_column(fit2_df, "coefficent")
+fit2_df2
+fit2_df3 = fit2_df2 %>% 
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>% 
+  dplyr::select(coefficent:ucl)
+fit2_df3
+```
+
+#### Save to  csv
+```{r eval=FALSE, include=FALSE}
+write.csv(fit2_df3, '../outputs/model_summary/2020-08-21_Biomass-ndvi.csv', row.names = F)
 ```
 
 #### Residuals
@@ -396,23 +500,6 @@ ggsave("../figures/2020-08-19_ndvi-biomass-resolution.jpeg", plot = plot_fit2, w
 
 
 
-
-##### Summary Dataframe
-
-```{r}
-mod1_df = data.frame(summary(mod1)$coefficients[,], confint(mod1), deviance(mod1), summary(mod1)$null.deviance, extractAIC(mod1))
-mod1_df
-mod1_df2 = tibble::rownames_to_column(mod1_df, "coefficent")
-mod1_df2
-mod1_df3 = mod1_df2 %>% 
-  mutate(model = "mod1") %>% 
-  mutate(response = "GCC" ) %>% 
-  mutate(resolution = "25cm" ) %>% 
-  mutate(rmse = RMSE(mod1)) %>%
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod1., null_deviance= summary.mod1..null.deviance, AIC = extractAIC.mod1.) %>% 
-  dplyr::select(model, response, resolution, coefficent:rmse)
-mod1_df3
-```
 
 
 ### Combine NDVI and GCC
