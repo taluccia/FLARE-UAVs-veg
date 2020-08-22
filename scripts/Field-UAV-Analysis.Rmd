@@ -26,7 +26,17 @@ library(DHARMa)
 ```
 
 
-# Field Data
+# Functions
+
+```{r}
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+} 
+
+```
+# Data
+
+## Field Data
 ```{r}
 field_data = read.csv("../data/field_subset/field_data_all.csv")
 ```
@@ -35,29 +45,7 @@ field_data = read.csv("../data/field_subset/field_data_all.csv")
 head(field_data)
 ```
 
-## field Plot sizes
-
-```{r}
-field_data %>% group_by(site, transect) %>% 
-  summarise(min(shrub_plot_area))
-```
-
-```{r}
-field_data %>% group_by(site, transect) %>% 
-  summarise(max(shrub_plot_area))
-```
-
-```{r}
-field_data %>% group_by(site, transect) %>% 
-  summarise(min(tree_radius))
-```
-
-```{r}
-field_data %>% group_by(site, transect) %>% 
-  summarise(max(tree_radius))
-```
-
-# UAV Data
+## UAV Data
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
@@ -68,8 +56,27 @@ ndvi_all = read.csv("../data/extracted_data/2020-08-10_ndvi_all_pix4D.csv", stri
 head(gcc_all)
 head(ndvi_all)
 ```
+### Pull out GCC and NDVI by buffer size
 
-# Combine Field and UAV data
+```{r}
+gcc_long = gcc_all %>% 
+  dplyr::select(ID:mean_gcc_10m) %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "gcc") %>%
+  mutate(buf_res = numextract(buffer))
+
+gcc_long
+```
+
+```{r}
+ndvi_long = ndvi_all %>% 
+  dplyr::select(ID:mean_ndvi_10m) %>%
+  pivot_longer(-ID, names_to = "buffer", values_to = "ndvi") %>%
+  mutate(buf_res = numextract(buffer))
+
+ndvi_long
+```
+
+### Combine Field and UAV data
 
 ```{r}
 gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
@@ -79,18 +86,75 @@ field_gcc
 field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
 field_gcc_ndvi
 ```
+### Field data +  long data
+```{r}
+field_gcc_long = merge(field_data, gcc_long, by="ID")
 
-# burn_year as factor
+field_gcc_long1 = field_gcc_long %>% 
+  dplyr::select(ID:burn_year, live_woody_biomass_C_g_m, buffer:buf_res) %>%
+  mutate(res_meters = ifelse(buf_res %in% 25, "25cm",
+                                    ifelse(buf_res %in% 50, "50cm",
+                                    ifelse(buf_res %in% 1, "1m",
+                                    ifelse(buf_res %in% 3, "3m",
+                                    ifelse(buf_res %in% 5, "5m", "10m")))))) %>%
+  mutate(res_meters = factor(res_meters, levels = c("25cm", "50cm", "1m", "3m", "5m", "10m"))) %>%
+  mutate(biomass_log = log(live_woody_biomass_C_g_m))
+
+head(field_gcc_long1)
+```
+
+```{r}
+field_ndvi_long = merge(field_data, ndvi_long, by="ID")
+
+field_ndvi_long1 = field_ndvi_long %>% 
+  dplyr::select(ID:burn_year, live_woody_biomass_C_g_m, buffer:buf_res) %>%
+  mutate(res_meters = ifelse(buf_res %in% 25, "25cm",
+                                    ifelse(buf_res %in% 50, "50cm",
+                                    ifelse(buf_res %in% 1, "1m",
+                                    ifelse(buf_res %in% 3, "3m",
+                                    ifelse(buf_res %in% 5, "5m", "10m")))))) %>%
+  mutate(res_meters = factor(res_meters, levels = c("25cm", "50cm", "1m", "3m", "5m", "10m"))) %>%
+  mutate(biomass_log = log(live_woody_biomass_C_g_m))
+
+head(field_ndvi_long1)
+```
+
+### Variables as factor
 
 ```{r}
 field_gcc$burn_year = as.factor(field_gcc$burn_year)
 field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
 
-str(field_gcc)
-str(field_gcc_ndvi)
 ```
 
+```{r}
+field_gcc_long$burn_year = as.factor(field_gcc_long$burn_year)
+field_ndvi_long$burn_year= as.factor(field_ndvi_long$burn_year)
+field_gcc_long$buf_res = as.factor(field_gcc_long$buf_res)
+field_ndvi_long$buf_res = as.factor(field_ndvi_long$buf_res)
+```
 
+# Subset data
+```{r}
+head(field_gcc)
+```
+
+```{r}
+field_gcc1 = field_gcc %>% 
+  dplyr::select(ID:burn_year, live_tree_ba_ha, shrub_ba_ha, mean_gcc_10m) %>%
+  mutate(tree_ba_ha_log = log(live_tree_ba_ha)) %>%
+  mutate(shrub_ba_ha_log = log(shrub_ba_ha))
+
+head(field_gcc1)
+```
+```{r}
+field_ndvi1 = field_gcc_ndvi %>% 
+  dplyr::select(ID:burn_year, live_tree_ba_ha, shrub_ba_ha, mean_ndvi_10m) %>%
+  mutate(tree_ba_ha_log = log(live_tree_ba_ha)) %>%
+  mutate(shrub_ba_ha_log = log(shrub_ba_ha))
+
+field_ndvi1
+```
 
 # Define graph Theme and color Palette 
 
@@ -120,13 +184,11 @@ reg_theme = theme_bw() + theme(legend.position = "none") +
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
-# Analysis: 
-
-# Part 3: Vegetation cover
+# Analysis: Vegetation cover
 
 ```{r}
-head(field_gcc)
-head(field_gcc_ndvi)
+head(field_gcc1)
+head(field_ndvi1)
 ```
 
 
@@ -134,53 +196,55 @@ head(field_gcc_ndvi)
 
 
 ### 1. Model: tree  BA
-live_tree_ba_ha
-mean_gcc_tree ~ live_tree_ba
+
 ```{r}
-mod14 = glm(mean_gcc_10m ~ live_tree_ba_ha, data = field_gcc, family = gaussian)
+fit1 = lm(live_tree_ba_ha ~ mean_gcc_10m, data = field_gcc1)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_gcc1$fit1 = fitted(fit1)
+# Get the residuals of the model
+field_gcc1$res1 = residuals(fit1)
 ```
 
 ```{r}
-fit1 = lm(mean_gcc_10m ~ live_tree_ba_ha, data = field_gcc)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod14.res = simulateResiduals(fittedModel = mod14, n = 500)
-mod14.res$scaledResiduals
-mod14.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod14.res)
+qplot(x = fit1, y = res1, data = field_gcc1,
+main = "Residuals vs Fitted Values")
 ```
 
 ```{r}
-testDispersion(mod14.res)
+qplot(x = mean_gcc_10m, y = res1, data = field_gcc1,
+xlab = "gcc",
+ylab = "Residuals",
+main = "Residuals vsgcc")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = field_gcc1, geom = "boxplot")
 ```
 
-#### Summary
 ```{r}
-summary(mod14)
+qqnorm(field_gcc1$res1, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc1$res1) # add reference line to the qq plot
 ```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+
+
+####  summary
 ```{r}
 summary(fit1)
 ```
 
-##### Summary Dataframe
 
-```{r}
-mod14_df = data.frame(summary(mod14)$coefficients[,], confint(mod14), deviance(mod14), summary(mod14)$null.deviance, extractAIC(mod14))
-mod14_df
-mod14_df2 = tibble::rownames_to_column(mod14_df, "coefficent")
-mod14_df3 = mod14_df2 %>% 
-  mutate(model = "mod14_tree_ba") %>% 
-  mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod14., null_deviance= summary.mod14..null.deviance, AIC = extractAIC.mod14.) %>% dplyr::select(model:response, coefficent:AIC)
-mod14_df3
-```
-#### lm summary
 ```{r}
 fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1), extractAIC(fit1))
 fit1_df
@@ -192,98 +256,69 @@ fit1_df3 = fit1_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit1.) %>% dplyr::select(model:response, coefficent:rmse)
 fit1_df3
 ```
-#### Data for graph
-
 ```{r}
-preddat_mod14 = data.frame(live_tree_ba_ha = field_gcc$live_tree_ba_ha)
-
-head(preddat_mod14)
-
-pred_mod14 = predict(mod14, newdata = preddat_mod14, se.fit = TRUE)
-
-UL_mod14 = with(pred_mod14, fit + 2*se.fit)
-LL_mod14 = with(pred_mod14, fit - 2*se.fit)
-
-field_gcc14 = mutate(field_gcc, pred_mod14 = pred_mod14$fit, 
-               ucl_mod14 = UL_mod14, 
-               lcl_mod14 = LL_mod14)
+summary(fit1)$r.squared 
 ```
 #### Graph lm
+
 ```{r}
-p1 = ggplot(data = field_gcc, aes(x = live_tree_ba_ha, y = mean_gcc_10m)) + 
+p1 = ggplot(data = field_gcc1, aes(x = mean_gcc_10m, y = live_tree_ba_ha)) + 
     geom_point(size = 2) +  
   stat_smooth(method = "lm", col = "black", alpha = .25) +
-    
-    ylab("Mean GCC") +
-    labs(x=expression(Live~tree~BA~(m^2/ha))) +
+    labs(y=expression(atop("Tree basal area", paste((m^2/ha)))), x= "GCC") +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 p1
   
 ```
-
-
-#### Graph glm
-
-```{r}
-plot_mod14 = ggplot(data = field_gcc14, aes(x = live_tree_ba_ha, y = mean_gcc_10m)) + 
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod14), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod14, ymax = ucl_mod14, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod14), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod14), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    labs(x=expression(Live~tree~BA~(m^2/ha))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod14
-```
-
+(expression(paste(Delta~AIC, "=32.5"))
 
 ### 2. Model: shrub  BA
-
 ```{r}
-mod15 = glm(mean_gcc_10m ~ shrub_ba_ha, data = field_gcc, family = gaussian)
+fit2 = lm(shrub_ba_ha ~ mean_gcc_10m , data = field_gcc1)
 ```
 
+#### Residuals
 ```{r}
-fit2 = lm(mean_gcc_10m ~ shrub_ba_ha, data = field_gcc)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod15.res = simulateResiduals(fittedModel = mod15, n = 500)
-mod15.res$scaledResiduals
-mod15.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot tofall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod15.res)
+# Get the fitted value for each observation
+field_gcc1$fit2 = fitted(fit2)
+# Get the residuals of the model
+field_gcc1$res2 = residuals(fit2)
 ```
 
 ```{r}
-testDispersion(mod15.res)
+qplot(x = fit2, y = res2, data = field_gcc1,
+main = "Residuals vs Fitted Values")
 ```
 
+```{r}
+qplot(x = mean_gcc_10m, y = res2, data = field_gcc1,
+xlab = "gcc",
+ylab = "Residuals",
+main = "Residuals vs  gcc")
+```
+```{r}
+qplot(x = factor(1), y = res2, data = field_gcc1, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_gcc1$res2, main = "Normal QQ Plot of Residuals")
+qqline(field_gcc1$res2) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit2, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit2, which = 2) # qqnorm plot of residuals
+```
 #### Summary
 ```{r}
-summary(mod15)
+summary(fit2)
 ```
 
-##### Summary Dataframe
 
-```{r}
-mod15_df = data.frame(summary(mod15)$coefficients[,], confint(mod15), deviance(mod15), summary(mod15)$null.deviance, extractAIC(mod15))
-mod15_df
-mod15_df2 = tibble::rownames_to_column(mod15_df, "coefficent")
-mod15_df3 = mod15_df2 %>% 
-  mutate(model = "mod15_shrub_ba") %>% 
-  mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod15., null_deviance= summary.mod15..null.deviance, AIC = extractAIC.mod15.) %>% dplyr::select(model:response, coefficent:AIC)
-mod15_df3
-```
-#### lm summary
 ```{r}
 fit2_df = data.frame(summary(fit2)$coefficients[,], confint(fit2), extractAIC(fit2))
 fit2_df
@@ -295,104 +330,73 @@ fit2_df3 = fit2_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit2.) %>% dplyr::select(model:response, coefficent:rmse)
 fit2_df3
 ```
-
-#### Data for graph
-
 ```{r}
-preddat_mod15 = data.frame(shrub_ba_ha = field_gcc$shrub_ba_ha)
-
-head(preddat_mod15)
-
-pred_mod15 = predict(mod15, newdata = preddat_mod15, se.fit = TRUE)
-
-UL_mod15 = with(pred_mod15, fit + 2*se.fit)
-LL_mod15 = with(pred_mod15, fit - 2*se.fit)
-
-field_gcc15 = mutate(field_gcc, pred_mod15 = pred_mod15$fit, 
-               ucl_mod15 = UL_mod15, 
-               lcl_mod15 = LL_mod15)
+summary(fit2)$r.squared 
 ```
-
 #### Graph lm
 ```{r}
-p2 = ggplot(data = field_gcc, aes(x = shrub_ba_ha, y = mean_gcc_10m)) + 
+p2 = ggplot(data = field_gcc1, aes(x = mean_gcc_10m, y = shrub_ba_ha)) + 
     geom_point(size = 2) +  
   stat_smooth(method = "lm", col = "black", alpha = .25) +
-    
-    ylab("Mean GCC") +
-    labs(x=expression(Shrub~BA~(m^2/ha))) +
+    labs(y=expression(atop("Shrub basal area", paste((m^2/ha)))), x= "GCC") +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 p2
   
 ```
 
-#### Graph glm
-
-```{r}
-plot_mod15 = ggplot(data = field_gcc15, aes(x = shrub_ba_ha, y = mean_gcc_10m)) +
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod15), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod15, ymax = ucl_mod15, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod15), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod15), linetype='longdash', size = 1) +
-    ylab("Mean GCC") +
-    labs(x=expression(Shrub~BA~(m^2/ha))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod15
-```
-
-
-
-
 ## NDVI Models
 
 ### 3. Model: tree BA
-mean_ndvi_tree ~ live_tree_ba
 
 ```{r}
-mod16 = glm(mean_ndvi_10m ~ live_tree_ba_ha, data = field_gcc_ndvi, family = gaussian)
+fit3 = lm(live_tree_ba_ha ~ mean_ndvi_10m, data = field_ndvi1)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_ndvi1$fit3 = fitted(fit3)
+# Get the residuals of the model
+field_ndvi1$res3 = residuals(fit3)
 ```
 
 ```{r}
-fit3 = lm(mean_ndvi_10m ~ live_tree_ba_ha, data = field_gcc_ndvi)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod16.res = simulateResiduals(fittedModel = mod16, n = 500)
-mod16.res$scaledResiduals
-mod16.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod16.res)
+qplot(x = fit3, y = res3, data = field_ndvi1,
+main = "Residuals vs Fitted Values")
 ```
 
 ```{r}
-testDispersion(mod16.res)
+qplot(x = mean_ndvi_10m, y = res3, data = field_ndvi1,
+xlab = "ndvi",
+ylab = "Residuals",
+main = "Residuals vsgcc")
+```
+```{r}
+qplot(x = factor(1), y = res3, data = field_ndvi1, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_ndvi1$res3, main = "Normal QQ Plot of Residuals")
+qqline(field_ndvi1$res3) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit3, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit3, which = 2) # qqnorm plot of residuals
 ```
 
 #### Summary
 ```{r}
-summary(mod16)
+summary(fit3)
 ```
-##### Summary Dataframe
-
 ```{r}
-mod16_df = data.frame(summary(mod16)$coefficients[,], confint(mod16), deviance(mod16), summary(mod16)$null.deviance, extractAIC(mod16))
-mod16_df
-mod16_df2 = tibble::rownames_to_column(mod16_df, "coefficent")
-mod16_df3 = mod16_df2 %>% 
-  mutate(model = "mod16_tree_ba") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod16., null_deviance= summary.mod16..null.deviance, AIC = extractAIC.mod16.) %>% dplyr::select(model:response, coefficent:AIC)
-mod16_df3
+summary(fit3)$r.squared 
 ```
 
-#### lm summary
 ```{r}
 fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
 fit3_df
@@ -404,97 +408,76 @@ fit3_df3 = fit3_df2 %>%
   rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
 fit3_df3
 ```
-#### Data for graph
 
-```{r}
-preddat_mod16 = data.frame(live_tree_ba_ha = field_gcc_ndvi$live_tree_ba_ha)
-
-head(preddat_mod16)
-
-pred_mod16 = predict(mod16, newdata = preddat_mod16, se.fit = TRUE)
-
-UL_mod16 = with(pred_mod16, fit + 2*se.fit)
-LL_mod16 = with(pred_mod16, fit - 2*se.fit)
-
-field_gcc_ndvi16 = mutate(field_gcc_ndvi, pred_mod16 = pred_mod16$fit, 
-               ucl_mod16 = UL_mod16, 
-               lcl_mod16 = LL_mod16)
-```
 
 #### Graph lm
 ```{r}
-p3 = ggplot(data = field_gcc_ndvi, aes(x = live_tree_ba_ha, y = mean_ndvi_10m)) + 
+p3 = ggplot(data = field_ndvi1, aes(x = mean_ndvi_10m, y = live_tree_ba_ha)) + 
     geom_point(size = 2) +  
   stat_smooth(method = "lm", col = "black", alpha = .25) +
-    
-    ylab("Mean NDVI") +
-    labs(x=expression(Live~tree~BA~(m^2/ha))) +
+    labs(y=expression(atop("Tree basal area", paste((m^2/ha)))), x= "NDVI") +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 p3
   
 ```
 
-#### Graph glm
-```{r}
-plot_mod16 = ggplot(data = field_gcc_ndvi16, aes(x = live_tree_ba_ha, y = mean_ndvi_10m)) +
-  geom_point(size = 2) +
-    geom_line(aes(y = pred_mod16), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod16, ymax = ucl_mod16, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod16), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod16), linetype='longdash', size = 1) +
-    ylab("Mean NDVI") +
-    labs(x=expression(Live~tree~BA~(m^2/ha))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
-plot_mod16
-```
 
 ### 4. Model: shrub BA
 
+
+
 ```{r}
-mod17 = glm(mean_ndvi_10m ~ shrub_ba_ha, data = field_gcc_ndvi, family = gaussian)
+fit4 = lm(shrub_ba_ha ~ mean_ndvi_10m, data = field_ndvi1)
+```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+field_ndvi1$fit4 = fitted(fit4)
+# Get the residuals of the model
+field_ndvi1$res4 = residuals(fit4)
 ```
 
 ```{r}
-fit4 = lm(mean_ndvi_10m ~ shrub_ba_ha, data = field_gcc_ndvi)
-```
-
-#### Residuals with DHARMa
-```{r, include=FALSE}
-mod17.res = simulateResiduals(fittedModel = mod17, n = 500)
-mod17.res$scaledResiduals
-mod17.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod17.res)
+qplot(x = fit4, y = res4, data = field_ndvi1,
+main = "Residuals vs Fitted Values")
 ```
 
 ```{r}
-testDispersion(mod17.res)
+qplot(x = mean_ndvi_10m, y = res4, data = field_ndvi1,
+xlab = "ndvi",
+ylab = "Residuals",
+main = "Residuals vs  gcc")
+```
+```{r}
+qplot(x = factor(1), y = res4, data = field_ndvi1, geom = "boxplot")
+```
+
+```{r}
+qqnorm(field_ndvi1$res4, main = "Normal QQ Plot of Residuals")
+qqline(field_ndvi1$res4) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit4, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit4, which = 2) # qqnorm plot of residuals
 ```
 
 #### Summary
-```{r}
-summary(mod17)
-```
-
-##### Summary Dataframe
 
 ```{r}
-mod17_df = data.frame(summary(mod17)$coefficients[,], confint(mod17), deviance(mod17), summary(mod17)$null.deviance, extractAIC(mod17))
-mod17_df
-mod17_df2 = tibble::rownames_to_column(mod17_df, "coefficent")
-mod17_df3 = mod17_df2 %>% 
-  mutate(model = "mod17_shrub_ba") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod17., null_deviance= summary.mod17..null.deviance, AIC = extractAIC.mod17.) %>% dplyr::select(model:response, coefficent:AIC)
-mod17_df3
+summary(fit4)
 ```
 
-#### lm summary
+```{r}
+summary(fit4)$r.squared 
+```
+
 ```{r}
 fit4_df = data.frame(summary(fit4)$coefficients[,], confint(fit4), extractAIC(fit4))
 fit4_df
@@ -507,69 +490,17 @@ fit4_df3 = fit4_df2 %>%
 fit4_df3
 ```
 
-#### Data for graph
-
-
-```{r}
-preddat_mod17 = data.frame(shrub_ba_ha = field_gcc_ndvi$shrub_ba_ha)
-
-head(preddat_mod17)
-
-pred_mod17 = predict(mod17, newdata = preddat_mod17, se.fit = TRUE)
-
-UL_mod17 = with(pred_mod17, fit + 2*se.fit)
-LL_mod17 = with(pred_mod17, fit - 2*se.fit)
-
-field_gcc_ndvi17 = mutate(field_gcc_ndvi, pred_mod17 = pred_mod17$fit, 
-               ucl_mod17 = UL_mod17, 
-               lcl_mod17 = LL_mod17)
-```
-
 #### Graph lm
 
 ```{r}
-p4 = ggplot(data = field_gcc_ndvi, aes(x = shrub_ba_ha, y = mean_ndvi_10m)) + 
+p4 = ggplot(data = field_ndvi1, aes(x = mean_ndvi_10m, y = shrub_ba_ha)) + 
     geom_point(size = 2) +  
   stat_smooth(method = "lm", col = "black", alpha = .25) +
-    
-    ylab("Mean NDVI") +
-    labs(x=expression(Shrub~BA~(m^2/ha))) +
+    labs(y=expression(atop("Shrub basal area", paste((m^2/ha)))), x= "NDVI") +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
 
 p4
   
-```
-
-
-```{r}
-plot_mod17 = ggplot(data = field_gcc_ndvi17, aes(x = shrub_ba_ha, y = mean_ndvi_10m)) + geom_point(size = 2) +
-    geom_line(aes(y = pred_mod17), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod17, ymax = ucl_mod17, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod17), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod17), linetype='longdash', size = 1) +
-    ylab("Mean NDVI") +
-    labs(x=expression(Shrub~BA~(m^2/ha))) +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) 
-
-plot_mod17
-```
-
-
-
-# Combine Summary output 
-
-```{r}
-model_sum1 = rbind(mod13_df3, mod14_df3)
-model_sum2 = rbind(mod15_df3, mod16_df3)
-model_sum3 = rbind(mod17_df3, mod18_df3)
-model_sum4 = rbind(model_sum1, model_sum2)
-model_sum5 = rbind(model_sum4, model_sum3)
-model_sum5
-```
-
-```{r eval=FALSE, include=FALSE}
-write.csv(model_sum5, '../outputs/model_summary/2020-06-15_vegetation-cover-gcc-ndvi.csv', row.names = F)
-
 ```
 
 # Combine Summary output lm
@@ -583,75 +514,22 @@ fit_sum3
 ```
 
 ```{r eval=FALSE, include=FALSE}
-write.csv(fit_sum3, '../outputs/model_summary/2020-07-13_vegetation-cover-gcc-ndvi_lm.csv', row.names = F)
+write.csv(fit_sum3, '../outputs/model_summary/2020-08-21_vegetation-cover-gcc-ndvi_lm.csv', row.names = F)
 
 ```
 
 
-# Manuscript Figures 
-
-## Part 3: Vegetation  cover
-
-
-```{r fig.height=7, fig.width=6}
-
-grid_plot_veg = cowplot::plot_grid(plot_mod13, plot_mod18, plot_mod14, plot_mod16, plot_mod15, plot_mod17,    labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) 
-grid_plot_veg
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-06-07_vegcover-gcc-ndvi.jpeg", plot = grid_plot_veg, width = 6, height = 7, units = c("in"), dpi=600 )
-```
-
-
-```{r fig.height=7, fig.width=6}
-
-grid_plot_veg1 = cowplot::plot_grid(plot_mod13, plot_mod18, plot_mod14, plot_mod16, plot_mod15, plot_mod17,    labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2) +
-  draw_label("*", x = .95, y = .76, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .76, size = 36, fontface = "bold") +
-  draw_label("*", x = .95, y = .43, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .43, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .10, size = 36, fontface = "bold")
-grid_plot_veg1
-
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-06-07_vegcover-gcc-ndvi_sig.jpeg", plot = grid_plot_veg1, width = 6, height = 7, units = c("in"), dpi=600 )
-```
-
-
-
-```{r fig.height=5, fig.width=6}
-
-grid_plot_veg2 = cowplot::plot_grid(plot_mod14, plot_mod16, plot_mod15, plot_mod17,    labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) +
-  draw_label("*", x = .95, y = .66, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .66, size = 36, fontface = "bold") +
-  draw_label("*", x = .95, y = .15, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .15, size = 36, fontface = "bold")
-grid_plot_veg2
-
-```
-
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-06-15_BA-gcc-ndvi_sig.jpeg", plot = grid_plot_veg2, width = 6, height = 5, units = c("in"), dpi=600 )
-```
+# Manuscript Figures
 
 ## lm Figure
 ```{r fig.height=5, fig.width=6}
 
-lm_grid_veg1 = cowplot::plot_grid(p1, p2, p3, p4,    labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) +
-  draw_label("*", x = .95, y = .66, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .66, size = 36, fontface = "bold") +
-  draw_label("*", x = .95, y = .15, size = 36, fontface = "bold") +
-  draw_label("*", x = .45, y = .15, size = 36, fontface = "bold")
+lm_grid_veg1 = cowplot::plot_grid(p1, p2, p3, p4, labels = c("A", "B", "C", "D"), align = "hv", ncol= 2) 
 lm_grid_veg1
 
 ```
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2020-07-13_BA-gcc-ndvi_lm.jpeg", plot = lm_grid_veg1, width = 6, height = 5, units = c("in"), dpi=600 )
+ggsave("../figures/2020-08-21_BA-gcc-ndvi_lm.jpeg", plot = lm_grid_veg1, width = 6, height = 5, units = c("in"), dpi=600 )
 ```

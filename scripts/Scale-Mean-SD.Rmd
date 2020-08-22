@@ -116,16 +116,10 @@ plot_gcc = ggplot(data = gcc1, aes(x = res_meters , y = sd, color = res_meters))
   geom_boxplot() +       
   geom_point() +
          scale_color_manual(values=cbbPalette) +
-          ylab("sd gcc") +
+          ylab("Standard deviation GCC") +
           xlab("")  +
-           theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "GCC"))
+           comp_theme +
+  guides(color=guide_legend(override.aes=list(fill=NA), title = "GCC"))
 
 plot_gcc
 ```
@@ -140,18 +134,24 @@ plot_ndvi = ggplot(data = ndvi1, aes(x = res_meters , y = sd, color = res_meters
          scale_color_manual(values=cbbPalette) +
           ylab("sd NDVI") +
           xlab("")  +
-           theme_bw() + theme(legend.position = "none") +
-  theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-  theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) + guides(color=guide_legend(override.aes=list(fill=NA), title = "NDVI"))
+           ylab("Standard deviation NDVI") +
+          xlab("")  +
+           comp_theme 
 
 plot_ndvi
 ```
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-08-19_ndvi-SD-resolution.jpeg", plot = plot_ndvi, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
+```{r fig.height=7, fig.width=6}
+
+grid1 = cowplot::plot_grid(plot_gcc, plot_ndvi, labels = "AUTO", align = "hv", label_size = 12, ncol= 1)  
+  
+grid1
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-08-20_SD-ndvi-gcc.jpeg", plot = grid1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
