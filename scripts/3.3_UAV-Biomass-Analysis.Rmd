@@ -11,7 +11,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Overview
+# Objective
+Evaluate how well vegetation indices predict aboveground carbon biomass.
 
 
 # Pakcages
@@ -39,7 +40,8 @@ numextract <- function(string){
 
 ```
 
-# Field Data
+# Data
+## Field Data
 ```{r}
 field_data = read.csv("../data/field_subset/field_data_all.csv")
 ```
@@ -48,7 +50,7 @@ field_data = read.csv("../data/field_subset/field_data_all.csv")
 head(field_data)
 ```
 
-## field Plot sizes
+### field Plot sizes
 
 ```{r}
 field_data %>% group_by(site, transect) %>% 
@@ -70,7 +72,7 @@ field_data %>% group_by(site, transect) %>%
   summarise(max(tree_radius))
 ```
 
-# UAV Data
+## UAV Data
 
 ```{r}
 gcc_all = read.csv("../data/extracted_data/gcc_all.csv", strip.white = TRUE)
@@ -81,7 +83,8 @@ ndvi_all = read.csv("../data/extracted_data/2020-08-10_ndvi_all_pix4D.csv", stri
 head(gcc_all)
 head(ndvi_all)
 ```
-# Pull out GCC and NDVI by buffer size
+
+## Pull out GCC and NDVI by buffer size
 
 ```{r}
 gcc_long = gcc_all %>% 
@@ -101,7 +104,7 @@ ndvi_long = ndvi_all %>%
 ndvi_long
 ```
 
-# Combine Field and UAV data
+## Combine Field and UAV data
 
 ```{r}
 gcc_ndvi = merge(gcc_all, ndvi_all, by="ID")
@@ -111,7 +114,9 @@ field_gcc
 field_gcc_ndvi = merge(field_data, gcc_ndvi,  "ID")
 field_gcc_ndvi
 ```
-# Field data +  long data
+
+## Make DF long format
+Convert data frame of Field data, GCC nad NDVI into a long format.
 ```{r}
 field_gcc_long = merge(field_data, gcc_long, by="ID")
 
@@ -144,7 +149,7 @@ field_ndvi_long1 = field_ndvi_long %>%
 head(field_ndvi_long1)
 ```
 
-# Variables as factor
+## Variables as factor
 
 ```{r}
 field_gcc$burn_year = as.factor(field_gcc$burn_year)
@@ -170,16 +175,6 @@ field_ndvi_long$buf_res = as.factor(field_ndvi_long$buf_res)
 # Define graph Theme and color Palette 
 
 ```{r}
-comp_theme = theme_bw() + theme(legend.position = "none") +  
-  theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
-```
-theme(panel.grid = element_blank(),
-        panel.border = element_blank())
-```{r}
 
 reg_theme = theme_bw() + theme(legend.position = "none") +
   theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
@@ -196,33 +191,16 @@ reg_theme = theme_bw() + theme(legend.position = "none") +
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
-```{r}
-min(field_gcc$woody_biomass_C_g_m)
-max(field_gcc$woody_biomass_C_g_m)
-
-```
-
-```{r}
-min(field_gcc$live_woody_biomass_C_g_m)
-max(field_gcc$live_woody_biomass_C_g_m)
-
-```
 
 # Analysis: Biomass ~ GCC
-
 
 ```{r}
 head(field_gcc_long1)
 ```
-```{r}
-contrasts(field_gcc_long1$res_meters)
-```
-
-
+## Model GCC
 ```{r}
 fit1 = lm('biomass_log ~ gcc + res_meters + gcc:res_meters', data = field_gcc_long1)
 ```
-
 
 ### Summary
 
@@ -277,27 +255,8 @@ summary(fit1)$coefficients[,4]
 ```
 
 
-
-
-##### Summary Dataframe
-
-```{r}
-fit1_df = data.frame(summary(fit1)$coefficients[,], confint(fit1))
-fit1_df
-fit1_df2 = tibble::rownames_to_column(fit1_df, "coefficent")
-fit1_df2
-fit1_df3 = fit1_df2 %>% 
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>% 
-  dplyr::select(coefficent:ucl)
-fit1_df3
-```
-#### Save to  csv
-```{r eval=FALSE, include=FALSE}
-write.csv(fit1_df3, '../outputs/model_summary/2020-08-21_Biomass-gcc.csv', row.names = F)
-```
-
 ### Pulling out r-squared for each group
-reeference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
 
 
 ```{r}
@@ -393,7 +352,7 @@ ggsave("../figures/2020-08-19_gcc-biomass-resolution.jpeg", plot = plot_fit1, wi
 head(field_ndvi_long1)
 ```
 
-
+## Model NDVI
 ```{r}
 fit2 = lm(biomass_log ~ ndvi + res_meters + ndvi:res_meters, data = field_ndvi_long1)
 ```
@@ -435,24 +394,6 @@ slope_10m
 
 ```
 
-
-##### Summary Dataframe
-
-```{r}
-fit2_df = data.frame(summary(fit2)$coefficients[,], confint(fit2))
-fit2_df
-fit2_df2 = tibble::rownames_to_column(fit2_df, "coefficent")
-fit2_df2
-fit2_df3 = fit2_df2 %>% 
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5..) %>% 
-  dplyr::select(coefficent:ucl)
-fit2_df3
-```
-
-#### Save to  csv
-```{r eval=FALSE, include=FALSE}
-write.csv(fit2_df3, '../outputs/model_summary/2020-08-21_Biomass-ndvi.csv', row.names = F)
-```
 
 ### Pulling out r-squared for each group
 reeference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
@@ -515,7 +456,6 @@ plot(fit2, which = 1) # residual vs fitted values
 plot(fit2, which = 2) # qqnorm plot of residuals
 ```
 
-
 ### Plot
 
 ```{r fig.height=5, fig.width=6}
@@ -549,29 +489,12 @@ ggsave("../figures/2020-08-19_ndvi-biomass-resolution.jpeg", plot = plot_fit2, w
 ```
 
 
-
-
-
-### Combine NDVI and GCC
-
-```{r}
-gcc_ndvi_data = rbind(gcc_combo2_data ,ndvi_combo2_data)
-gcc_ndvi_data
-```
-
-
-### Save to  csv
-```{r eval=FALSE, include=FALSE}
-write.csv(gcc_ndvi_data, '../outputs/model_summary/2020-06-07_all-woody-biomass-gcc-ndvi-dAIC.csv', row.names = F)
-```
-
-
 # Manuscript Figures 
 ```{r}
 legend_res <- get_legend(plot_fit1) 
 ```
-## GCC and NDVI
 
+## GCC and NDVI
 
 ```{r fig.height=7, fig.width=6}
 
@@ -580,15 +503,11 @@ fig1 = cowplot::plot_grid(plot_fit1.1, plot_fit2.1, labels = "AUTO", align = "hv
 fig1
 ```
 
-
-
-
 ```{r fig.height=7, fig.width=6}
 fig1.1 = cowplot::plot_grid(fig1, legend_res, ncol=1, rel_heights = c(1, 0.04))  
 
 fig1.1
 ```
-
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-08-20_Biomass-ndvi-gcc.jpeg", plot = fig1.1, width = 6, height = 7, units = c("in"), dpi=600 )
