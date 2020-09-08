@@ -16,17 +16,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Pakcages
 ```{r}
-library(tidyr)
-library(dplyr)
+library(tidyverse)
+library(broom)
 library(ggplot2)
 library(stringr)
 library(lme4)
 library(cowplot)
 library(lme4)
 library(lsmeans)
-library(DHARMa)
+library(magrittr)
 library(rcompanion)
 library(qpcR)
+
 ```
 
 # Functions
@@ -149,9 +150,13 @@ head(field_ndvi_long1)
 field_gcc$burn_year = as.factor(field_gcc$burn_year)
 field_gcc_ndvi$burn_year = as.factor(field_gcc_ndvi$burn_year)
 
+
+```
+```{r eval=FALSE, include=FALSE}
 str(field_gcc)
 str(field_gcc_ndvi)
 ```
+
 
 ```{r}
 field_gcc_long$burn_year = as.factor(field_gcc_long$burn_year)
@@ -209,11 +214,15 @@ max(field_gcc$live_woody_biomass_C_g_m)
 ```{r}
 head(field_gcc_long1)
 ```
+```{r}
+contrasts(field_gcc_long1$res_meters)
+```
 
 
 ```{r}
-fit1 = lm(biomass_log ~ gcc + res_meters + gcc:res_meters, data = field_gcc_long1)
+fit1 = lm('biomass_log ~ gcc + res_meters + gcc:res_meters', data = field_gcc_long1)
 ```
+
 
 ### Summary
 
@@ -221,10 +230,15 @@ fit1 = lm(biomass_log ~ gcc + res_meters + gcc:res_meters, data = field_gcc_long
 summary(fit1)
 ```
 ```{r}
+summary(fit1)$coef
+```
+
+```{r}
 summary(fit1)$r.squared 
 ```
 
 
+####### Calculated y-intercept and slope
 ```{r}
 int_25cm = coef(fit1)[1]
 int_50cm = coef(fit1)[1] + coef(fit1)[3]
@@ -256,25 +270,13 @@ slope_10m
 ```
 
 ```{r}
-# Calculate race-specific intercepts
-intercepts <- c(coef(fit1)["(Intercept)"],
-                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters50cm"],
-                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters1m"],  
-                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters3m"], 
-                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters5m"], 
-                coef(fit1)["(Intercept)"] + coef(fit1)["res_meters10m"])
-intercepts
-
-lines.df <- data.frame(intercepts = intercepts,
-                       slopes = rep(coef(fit1)["gcc"], 6),
-                       resolution = levels(field_gcc_long$res_meters))
-
-lines.df
-
+coef(fit1)
 ```
 ```{r}
-rep(coef(fit1)["gcc"])
+summary(fit1)$coefficients[,4]  
 ```
+
+
 
 
 ##### Summary Dataframe
@@ -292,6 +294,29 @@ fit1_df3
 #### Save to  csv
 ```{r eval=FALSE, include=FALSE}
 write.csv(fit1_df3, '../outputs/model_summary/2020-08-21_Biomass-gcc.csv', row.names = F)
+```
+
+### Pulling out r-squared for each group
+reeference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+
+```{r}
+field_gcc_long1 %>% 
+  nest(-buf_res) %>% 
+  mutate(fit = map(data, ~ lm(biomass_log ~ gcc, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+field_gcc_long1 %>% 
+  nest(-buf_res) %>% 
+  mutate(fit = map(data, ~ lm(biomass_log ~ gcc, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(buf_res), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Buffer Resolution", y = expression(R^{2}))
 ```
 
 #### Residuals
@@ -428,6 +453,31 @@ fit2_df3
 ```{r eval=FALSE, include=FALSE}
 write.csv(fit2_df3, '../outputs/model_summary/2020-08-21_Biomass-ndvi.csv', row.names = F)
 ```
+
+### Pulling out r-squared for each group
+reeference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ field_ndvi_long1 %>% 
+  nest(-buf_res) %>% 
+  mutate(fit = map(data, ~ lm(biomass_log ~ ndvi, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+ field_ndvi_long1 %>% 
+  nest(-buf_res) %>% 
+  mutate(fit = map(data, ~ lm(biomass_log ~ ndvi, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(buf_res), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Buffer Resolution", y = expression(R^{2}))
+```
+
 
 #### Residuals
 ```{r}
