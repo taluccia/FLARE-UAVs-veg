@@ -9,8 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Overview
-
+# Objective
+The goal of the analysis is to assess the correlation between NDVI and GCC at comparable spatial resolutions.
 
 # Pakcages
 ```{r}
@@ -20,7 +20,6 @@ library(ggplot2)
 library(stringr)
 library(ggcorrplot)
 library(cowplot)
-
 library(qpcR)
 ```
 
@@ -68,9 +67,6 @@ head(gcc_all)
 head(ndvi_all)
 ```
 
-
-
-
 # Combine GCC and NDVI data
 
 ```{r}
@@ -89,6 +85,7 @@ gcc_ndvi1 = gcc_ndvi %>% dplyr::select(-ID, -mean_gcc_tree, -mean_gcc_shrub, -me
 
 
 # Correlations GCC and NDVI
+
 ```{r}
 gcc_ndvi_corr <- data.frame(round(cor(gcc_ndvi1), 2))
 gcc_ndvi_corr
