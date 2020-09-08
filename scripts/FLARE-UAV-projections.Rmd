@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
+Define projections for equal area for data extraction.
+
 Equal Area projection for russia
 https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 
