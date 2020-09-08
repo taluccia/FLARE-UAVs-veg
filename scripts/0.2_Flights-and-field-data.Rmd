@@ -8,8 +8,11 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Overview
 
+Initial data inspection.
 
+# Library
 ```{r, include=FALSE}
 library(sp) # spatial data
 library(rgdal) # geospatial data
@@ -461,65 +464,5 @@ fd_cn_tr3
 ```{r}
 fd_coords = cbind(fd_cn_tr3$longitude, fd_cn_tr3$latitude)
 fd_cn_tr3_pt <- SpatialPointsDataFrame(fd_coords, proj4string = CRS(wgs_proj), data = fd_cn_tr3)
-```
-
-# Notes to self for process
-
-* Resample to equal pixel size
-* Calculate GCC
-* Calculate NDVI
-* Buffer field sites to clip image
-* Buffer field sites to extract data
-
-
-# Elena's code for gcc
-```{r eval=FALSE, include=FALSE}
-########## Green Chromatic Index ###########
-
-getwd()
-setwd("Z:/geography-storage01.colgate.edu/data/data_repo/field_data/siberia_uas_2019/orthomosaics/ortho_exports")
-
-install.packages("raster")
-## use stack to get all 4 bands
-f1 <- stack("ortho_exports/CHY_RLD_FL001.tif")
-
-## projection
-projection(f1)
-# the original projection has k=0, which appears ot be wrong
-# +proj=stere +lat_0=90 +lat_ts=71 +lon_0=0 +k=0 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
-
-## defining correct projection
-projection(f1) <- CRS("+proj=stere +lat_0=90 +lat_ts=71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-
-plot(f1)
-
-## masking to elimate unwanted values 
-f1b <- mask(f1[[1:3]],f1[[4]],maskvalue=0)
-plot(f1b)
-
-## calculating gcc
-gcc <- f1b[[2]]/(f1b[[1]]+f1b[[2]]+f1b[[3]])
-plot(gcc)
-
-## list files
-l <- list.files(path="ortho_exports", pattern = glob2rx("*.tif"))
-l
-install.packages("svMisc")
-## for loop (for all images in list)
-for(i in 1:(length(l)))
-{
-  progress(i, progress.bar=TRUE)
-  f1c <- stack("ortho_exports/CHY_RLD_FL001.tif")
-  projection(f1c) <- CRS("+proj=stere +lat_0=90 +lat_ts=71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
-  f1c <- mask(f1c[[1:3]], f1c[[4]], maskvalue=0)
-  gcc <- f1c[[2]]/(f1c[[1]]+f1c[[2]]+f1c[[3]])
-  o <- gsub(".tif", "_gcc.tif","list")
-  # read raster stack
-  # fix projection
-  # mask stack
-  # calculate gcc
-  # write result to file
-}
-
 ```
 
