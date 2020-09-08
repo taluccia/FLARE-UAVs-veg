@@ -242,7 +242,7 @@ g1 = ggplot(data=field_gcc, aes(x = burn_unburn, y = mean_gcc_10m, color=burn_un
   geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
 stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
   scale_shape_manual(values = c(23, 24)) +
-  labs(x=(NULL), y= "Mean GCC") +
+  labs(x=(NULL), y= "GCC") +
   
   scale_color_manual(values = c("#E69F00", "#009E73")) +
   
@@ -364,7 +364,7 @@ g2 = ggplot(data=field_gcc_ndvi, aes(x = burn_unburn, y = mean_ndvi_10m, color=b
   geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
 stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
   scale_shape_manual(values = c(23, 24)) +
-  labs(x=(NULL), y= "Mean NDVI") +
+  labs(x=(NULL), y= "NDVI") +
   
   scale_color_manual(values = c("#E69F00", "#009E73")) +
   
@@ -381,11 +381,14 @@ theme(panel.grid.major = element_blank()) +
 g2
 ```
 
-# Burned vs Unburned Plus fire year
 
-## 3. Model: GCC burn/unburned
+  
+# Distance from Unburned Edge
+## 11. Model: GCC distance from unburned edge 
+
+
 ```{r}
-fit3 = lm(mean_gcc_10m ~ burn_unburn + burn_year, data = field_gcc)
+fit3 = lm(mean_gcc_10m ~ plot_dis, data = field_gcc)
 ```
 
 #### Residuals
@@ -402,10 +405,10 @@ main = "Residuals vs Fitted Values")
 ```
 
 ```{r}
-qplot(x = burn_unburn, y = res3, data = field_gcc,
-xlab = "Burn v unburn group",
+qplot(x = plot_dis, y = res3, data = field_gcc,
+xlab = "distance",
 ylab = "Residuals",
-main = "Residuals vs burn/unburn")
+main = "Residuals vs distance")
 ```
 ```{r}
 qplot(x = factor(1), y = res3, data = field_gcc, geom = "boxplot")
@@ -428,89 +431,51 @@ plot(fit3, which = 2) # qqnorm plot of residuals
 ```{r}
 summary(fit3)
 ```
-```{r}
-str(summary(fit3)) 
-```
-
 
 ```{r}
-# All the coefficients
-coef(fit3)
+summary(fit3)$r.squared 
 ```
+
+
+
+#### lm summary
+```{r}
+fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
+fit3_df
+fit3_df2 = tibble::rownames_to_column(fit3_df, "coefficent")
+fit3_df3 = fit3_df2 %>% 
+  mutate(model = "fit3") %>% 
+  mutate(response = "GCC" ) %>%  
+  mutate(rmse = RMSE(fit3)) %>%
+  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
+fit3_df3
+```
+```{r}
+head(field_gcc)
+```
+
+#### Graph lm
 
 ```{r}
-# All the confidence intervals for the coefficients
-confint(fit3)
-```
-```{r}
-data.frame(summary(lsmeans(fit3, pairwise ~ burn_unburn + burn_year),type = "response"))
-```
+p3 = ggplot(data = field_gcc, aes(x = plot_dis, y = mean_gcc_10m)) + 
+    geom_point(size = 2) +  
+  stat_smooth(method = "lm", col = "black", alpha = .25) +
+    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
+    ylab("GCC") +
+    xlab("Distance from the unburned edge \n(m)")  +
+    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
+    scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
+    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
 
-#### t-test
-```{r}
-( fit3_t = t.test(mean_gcc_10m ~ burn_unburn + burn_year, data = field_gcc) )
-```
-##### Table
-Difference in means
-```{r}
-0.3486187-0.3816558
-```
 
-```{r eval=FALSE, include=FALSE}
-# Write out the results from the two-sample t-test with unequal variances
-# A title for the test
-titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
-# This is the t stat with df and p-value
-ttestres1 = as.character(expression(t[-2.6]==23.2*","~italic(p)==0.02))
-# The estimated difference in group means (I calculated from the test results)
-diff1 = as.character(expression(Delta==-0.033))
-# The 95% CI of the difference
-ci1 = as.character(expression(95*"%"~CI*":"~-0.041~to~-0.005))
-# Put these into a single column of a data.frame
-d1 = data.frame(col = rbind(ttestres1, diff1, ci1) )
-```
-
-```{r eval=FALSE, include=FALSE}
-t1 = tableGrob(d1, rows = NULL, cols = NULL,
-theme = ttheme_default(core = list(bg_params = list(fill = "white"),
-fg_params = list(parse = TRUE),
-padding = unit(c(2.5, 2.5), "mm"))))
-```
-
-```{r eval=FALSE, include=FALSE}
-t1 = gtable_add_grob(t1, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
-t = 1, b = nrow(t1), r = ncol(t1), l = 1)
-```
-
-#### Boxplot
-```{r}
-g3 = ggplot(data=field_gcc, aes(x = burn_unburn, y = mean_gcc_10m, color=burn_year) ) + # define plot axes
-  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
-  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
-stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
-  scale_shape_manual(values = c(23, 24)) +
-  labs(x=(NULL), y= "Mean GCC") +
+p3
   
-  scale_color_manual(values = c("#E69F00", "#009E73")) +
-  
-  scale_x_discrete(labels= c("Burned", "Unburned")) +
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
-
-
-g3
 ```
 
-## 4. Model:NDVI burn/unburned
+## 12.  Model: NDVI distance from edge
 ```{r}
-fit2 = lm(mean_ndvi_10m ~ burn_unburn +burn_year, data = field_gcc_ndvi)
+fit4 = lm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi)
 ```
-
 #### Residuals
 ```{r}
 # Get the fitted value for each observation
@@ -525,10 +490,10 @@ main = "Residuals vs Fitted Values")
 ```
 
 ```{r}
-qplot(x = burn_unburn, y = res4, data = field_gcc_ndvi,
-xlab = "Burn v unburn group",
+qplot(x = plot_dis, y = res4, data = field_gcc_ndvi,
+xlab = "distance",
 ylab = "Residuals",
-main = "Residuals vs burn/unburn")
+main = "Residuals vs distance")
 ```
 ```{r}
 qplot(x = factor(1), y = res4, data = field_gcc_ndvi, geom = "boxplot")
@@ -552,234 +517,9 @@ plot(fit4, which = 2) # qqnorm plot of residuals
 summary(fit4)
 ```
 ```{r}
-# All the coefficients
-coef(fit4)
+summary(fit4)$r.squared 
 ```
 
-```{r}
-# All the confidence intervals for the coefficients
-confint(fit4)
-```
-```{r}
-data.frame(summary(lsmeans(fit4, pairwise ~ burn_unburn),type = "response"))
-```
-
-#### t-test
-```{r}
-( fit4_t = t.test(mean_ndvi_10m ~ burn_unburn, data = field_gcc_ndvi) )
-```
-
-
-
-##### Table
-Difference in means
-```{r eval=FALSE, include=FALSE}
-0.6391836-0.728424
-```
-
-```{r eval=FALSE, include=FALSE}
-# Write out the results from the two-sample t-test with unequal variances
-# A title for the test
-titleres = as.character(expression(bold("Welch"~t-test*~"for"~a~difference*~"in"~means)))
-# This is the t stat with df and p-value
-ttestres2 = as.character(expression(italic(p)<0.001))
-# The estimated difference in group means (I calculated from the test results)
-diff2 = as.character(expression(Delta==-0.089))
-# The 95% CI of the difference
-ci2 = as.character(expression(CI*":"~-0.121~to~-0.058))
-# Put these into a single column of a data.frame
-d2 = data.frame(col = rbind(ttestres2, diff2, ci2) )
- 
-```
-
-```{r eval=FALSE, include=FALSE}
-t2 = tableGrob(d2, rows = NULL, cols = NULL,
-theme = ttheme_default(core = list(bg_params = list(fill = "white"),
-fg_params = list(parse = TRUE),
-padding = unit(c(2.5, 2.5), "mm"))))
-```
-
-```{r eval=FALSE, include=FALSE}
-t2 = gtable_add_grob(t2, grobs = rectGrob(gp = gpar(fill = NA, lwd = NA)),
-t = 1, b = nrow(t2), r = ncol(t2), l = 1)
-```
-
-#### Boxplot
-```{r}
-g4 = ggplot(data=field_gcc_ndvi, aes(x = burn_unburn, y = mean_ndvi_10m, color=burn_unburn) ) + # define plot axes
-  geom_boxplot(outlier.shape = NA) + # Add boxplots for each group
-  geom_point(aes(color = burn_unburn, shape = burn_unburn), size = 3, position = position_jitter(w = 0.15, h = 0, seed=10)) +
-stat_summary(fun = mean, geom= "point", size = 4) + # Add means to the plot
-  scale_shape_manual(values = c(23, 24)) +
-  labs(x=(NULL), y= "Mean NDVI") +
-  
-  scale_color_manual(values = c("#E69F00", "#009E73")) +
-  
-  scale_x_discrete(labels= c("Burned", "Unburned")) +
-  theme_bw() + 
-  theme(legend.position = "none") +  
-theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 12, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
-
-
-g4
-```
-
-  
-# Distance from Unburned Edge
-## 11. Model: GCC distance from unburned edge 
-```{r}
-mod11 = glm(mean_gcc_10m ~ plot_dis, data = field_gcc, family = gaussian)
-```
-
-```{r}
-fit3 = lm(mean_gcc_10m ~ plot_dis, data = field_gcc)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod11.res = simulateResiduals(fittedModel = mod11, n = 500)
-mod11.res$scaledResiduals
-mod11.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod11.res)
-```
-
-```{r}
-testDispersion(mod11.res)
-```
-
-### Summary
-```{r}
-summary(mod11)
-```
-
-#### Summary Dataframe
-
-```{r}
-mod11_df = data.frame(summary(mod11)$coefficients[,], confint(mod11), deviance(mod11), summary(mod11)$null.deviance, extractAIC(mod11))
-mod11_df
-mod11_df2 = tibble::rownames_to_column(mod11_df, "coefficent")
-mod11_df3 = mod11_df2 %>% 
-  mutate(model = "mod11") %>% 
-  mutate(response = "GCC" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod11., null_deviance= summary.mod11..null.deviance, AIC = extractAIC.mod11.) %>% dplyr::select(model:response, coefficent:AIC)
-mod11_df3
-```
-#### lm summary
-```{r}
-fit3_df = data.frame(summary(fit3)$coefficients[,], confint(fit3), extractAIC(fit3))
-fit3_df
-fit3_df2 = tibble::rownames_to_column(fit3_df, "coefficent")
-fit3_df3 = fit3_df2 %>% 
-  mutate(model = "fit3") %>% 
-  mutate(response = "GCC" ) %>%  
-  mutate(rmse = RMSE(fit3)) %>%
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., AIC = extractAIC.fit3.) %>% dplyr::select(model:response, coefficent:rmse)
-fit3_df3
-```
-
-### Predicted data for for graph
-```{r}
-preddat_mod11 = data.frame(plot_dis = field_gcc$plot_dis)
-
-head(preddat_mod11)
-
-pred_mod11 = predict(mod11, newdata = preddat_mod11, se.fit = TRUE)
-
-UL_mod11 = with(pred_mod11, fit + 2*se.fit)
-LL_mod11 = with(pred_mod11, fit - 2*se.fit)
-
-field_gcc11 = mutate(field_gcc, pred_mod11 = (pred_mod11$fit), 
-               ucl_mod11 = (UL_mod11), 
-               lcl_mod11 = (LL_mod11))
-```
-
-
-### Graph  
-
-```{r}
-plot_mod11 = ggplot(data = field_gcc11, aes(x = plot_dis, y = mean_gcc_10m)) + 
-    geom_point(size = 2) +  
-    geom_line(aes(y = pred_mod11), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod11, ymax = ucl_mod11, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod11), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod11), linetype='longdash', size = 1) +
-    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
-    ylab("Mean GCC") +
-    xlab("Distance from the unburned edge \n(m)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
-    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
-
-plot_mod11
-```
-#### Graph lm
-
-```{r}
-p3 = ggplot(data = field_gcc, aes(x = plot_dis, y = mean_gcc_10m)) + 
-    geom_point(size = 2) +  
-  stat_smooth(method = "lm", col = "black", alpha = .25) +
-    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
-    ylab("Mean GCC") +
-    xlab("Distance from the unburned edge \n(m)")  +
-    reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_y_continuous(breaks = c(0.34, 0.36, 0.38, 0.40, 0.42)) +
-    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
-
-
-p3
-  
-```
-
-## 12.  Model: NDVI distance from edge
-```{r}
-mod12 = glm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi, family = gaussian)
-```
-
-```{r}
-fit4 = lm(mean_ndvi_10m ~ plot_dis, data = field_gcc_ndvi)
-```
-
-### Residuals with DHARMa
-```{r, include=FALSE}
-mod12.res = simulateResiduals(fittedModel = mod12, n = 500)
-mod12.res$scaledResiduals
-mod12.res$scaledResidualsNormal
-```
-
-In the plot below we are looking for the points in the QQ plot to fall along the RED linen. In the Residuals vs.predicted plot were are looking for the lines to be relatively horizontal. All looks good. 
-```{r}
-plotSimulatedResiduals(simulationOutput = mod12.res)
-```
-
-```{r}
-testDispersion(mod12.res)
-```
-
-### Summary
-```{r}
-summary(mod12)
-```
-
-#### Summary Dataframe
-
-```{r}
-mod12_df = data.frame(summary(mod12)$coefficients[,], confint(mod12), deviance(mod12), summary(mod12)$null.deviance, extractAIC(mod12))
-mod12_df
-mod12_df2 = tibble::rownames_to_column(mod12_df, "coefficent")
-mod12_df3 = mod12_df2 %>% 
-  mutate(model = "mod12") %>% 
-  mutate(response = "NDVI" ) %>%  
-  rename(estimate = Estimate, se = Std..Error, t_value = t.value,  p_value = Pr...t.., lcl = X2.5.., ucl = X97.5.., deviance=deviance.mod12., null_deviance= summary.mod12..null.deviance, AIC = extractAIC.mod12.) %>% dplyr::select(model:response, coefficent:AIC)
-mod12_df3
-```
 ### lm summary
 ```{r}
 fit4_df = data.frame(summary(fit4)$coefficients[,], confint(fit4), extractAIC(fit4))
@@ -793,38 +533,6 @@ fit4_df3 = fit4_df2 %>%
 fit4_df3
 ```
 
-```{r}
-preddat_mod12 = data.frame(plot_dis = field_gcc_ndvi$plot_dis)
-
-head(preddat_mod12)
-
-pred_mod12 = predict(mod12, newdata = preddat_mod12, se.fit = TRUE)
-
-UL_mod12 = with(pred_mod12, fit + 2*se.fit)
-LL_mod12 = with(pred_mod12, fit - 2*se.fit)
-
-field_gcc_ndvi12 = mutate(field_gcc_ndvi, pred_mod12 = (pred_mod12$fit), 
-               ucl_mod12 = (UL_mod12), 
-               lcl_mod12 = (LL_mod12))
-```
-
-### Graph  
-
-```{r}
-plot_mod12 = ggplot(data = field_gcc_ndvi12, aes(x = plot_dis, y = mean_ndvi_10m)) + 
-    geom_point(size = 2) +  
-    geom_line(aes(y = pred_mod12), linetype = 1, size = 2) + 
-    geom_ribbon( aes(ymin = lcl_mod12, ymax = ucl_mod12, color = NULL, show.legend = FALSE), alpha = .15) +
-    geom_line(aes(y= lcl_mod12), linetype = 'longdash', size = 1) + 
-    geom_line(aes(y=ucl_mod12), linetype='longdash', size = 1) +
-    geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
-    ylab("Mean NDVI") +
-    xlab("Distance from the unburned edge \n(m)")  +
-    reg_theme + guides(color=guide_legend(override.aes=list(fill=NA))) +
-    scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
-
-plot_mod12
-```
 #### Graph lm
 
 ```{r}
@@ -832,7 +540,7 @@ p4 = ggplot(data = field_gcc_ndvi, aes(x = plot_dis, y = mean_ndvi_10m)) +
     geom_point(size = 2) +  
   stat_smooth(method = "lm", col = "black", alpha = .25) +
     geom_vline(xintercept=0, linetype="dashed", color = "#9C270E", size = 1) +
-    ylab("Mean NDVI") +
+    ylab("NDVI") +
     xlab("Distance from the unburned edge \n(m)")  +
     reg_theme +  guides(color=guide_legend(override.aes=list(fill=NA))) +
     scale_x_continuous(breaks = c(-50, 0, 50, 100, 150, 200))
@@ -845,36 +553,6 @@ p4
 # Summary output Combine
 ## Burned-Unburned
 
-```{r}
-burn_unburn_sum = rbind(mod7_df1, mod8_df1)
-burn_unburn_sum
-```
-
-```{r eval=FALSE, include=FALSE}
-write.csv(burn_unburn_sum, '../outputs/model_summary/2020-05-27_burn-unburn-summary.csv', row.names = F)
-
-```
-
-
-```{r}
-burn_unburn_contrast = rbind(mod7_contrast1, mod8_contrast1)
-burn_unburn_contrast
-```
-
-```{r eval=FALSE, include=FALSE}
-write.csv(burn_unburn_contrast, '../outputs/model_summary/2020-06-01_burn-unburn-contrast.csv', row.names = F)
-
-```
-
-```{r}
-edge_sum = rbind(mod11_df3, mod12_df3)
-edge_sum
-```
-
-```{r eval=FALSE, include=FALSE}
-write.csv(edge_sum, '../outputs/model_summary/2020-05-27_distance-edge-summary.csv', row.names = F)
-
-```
 
 
 # Manuscript figures
@@ -890,6 +568,14 @@ p1
 ggsave("../figures/2020-07-13_burn-unburn_t-test.jpeg", plot = p1, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
+```{r fig.height=3, fig.width=6}
+p1.1 = cowplot::plot_grid(g1, g2, labels = c("A", "B"), ncol = 2) 
+p1.1
+```
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-08-23_burn-unburn_t-test.jpeg", plot = p1.1, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
 ### Distance for unburned lm
 ```{r fig.height=3, fig.width=6}
 
@@ -902,4 +588,16 @@ lm_grid_edge1
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-07-13_distance_edge_pts_lm.jpeg", plot = lm_grid_edge1, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
+```{r fig.height=3, fig.width=6}
+
+lm_grid_edge1.1 = cowplot::plot_grid(p3, p4, labels = c("A", "B"), align = "hv", ncol= 2) 
+
+lm_grid_edge1.1
+
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-08-23_distance_edge_pts_lm.jpeg", plot = lm_grid_edge1.1, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
