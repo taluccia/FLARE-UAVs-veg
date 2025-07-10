@@ -7,7 +7,7 @@ This repository contains code central to:
 [Link to publication](https://www.mdpi.com/2072-4292/12/18/2970)
 
 
-![A map of the study area in northeastern Siberia, Russia. Panel (A) shows the location of the
+![Figure 1. A map of the study area in northeastern Siberia, Russia. Panel (A) shows the location of the
 Figure 1. A map of the study area in northeastern Siberia, Russia. Panel A shows the location of the
 study area in Northeastern Siberia, Russia outlined by the blue box, which highlights the area of the
 study area in Northeastern Siberia, Russia outlined by the blue box, which highlights the area of the
@@ -18,15 +18,9 @@ composite Landsat image. Panel B shows the NDVI image calculated from the multis
 data for the CN transect 1. Panel (C) shows the visible spectrum (RGB) UAV data for the CN transect 1.](img/map.png)
 
 
-## Research Objectives
 
-1. Determined how GCC and NDVI relate to each other across a fine (25 cm) to coarse (10 m) spatial resolution to understand how fine-scale heterogeneity influences reflectance. 
-2. Evaluated how these vegetation indices correspond to aboveground carbon biomass and basal area of live trees and tall deciduous shrubs. 
-3. Assessed how vegetation indices distinguish burned versus unburned areas and edge effects. 
 
-### Scripts assosciated with Research Objectives
-
-Scripts are numerically ordered based on the processing steps. 
+#### Scripts are numerically ordered based on the processing steps. 
 
 **Field Data**
 
